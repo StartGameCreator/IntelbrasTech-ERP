@@ -414,6 +414,15 @@ Route::post('{id}/assistente-conteudo', [ProdutoController::class, 'assistenteCo
         // Ã¢â€â‚¬Ã¢â€â‚¬ Fiscal NF-e
 
 
+        // Central Fiscal Profissional - Fase 23
+        Route::prefix('fiscal/central')->group(function () {
+            Route::get('dashboard', [\App\Http\Controllers\Api\V1\Fiscal\CentralFiscalController::class, 'dashboard']);
+            Route::get('notas', [\App\Http\Controllers\Api\V1\Fiscal\CentralFiscalController::class, 'index']);
+            Route::get('notas/{id}/segunda-via', [\App\Http\Controllers\Api\V1\Fiscal\CentralFiscalController::class, 'segundaVia']);
+            Route::get('notas/{id}/xml', [\App\Http\Controllers\Api\V1\Fiscal\CentralFiscalController::class, 'xml']);
+            Route::post('notas/{id}/consultar-sefaz', [\App\Http\Controllers\Api\V1\Fiscal\CentralFiscalController::class, 'consultar']);
+            Route::get('notas/{id}/historico', [\App\Http\Controllers\Api\V1\Fiscal\CentralFiscalController::class, 'historico']);
+        });
         // Controle da sequÃªncia fiscal
         Route::get('fiscal/numeracao', [NumeracaoFiscalController::class, 'show']);
         Route::put('fiscal/numeracao', [NumeracaoFiscalController::class, 'update']);
@@ -589,6 +598,7 @@ Route::post('{id}/assistente-conteudo', [ProdutoController::class, 'assistenteCo
 Route::get('marketplace/mercado-livre/callback', [MercadoLivreOAuthController::class, 'callback']);
 
 require __DIR__.'/marketplace_tecnicos.php';
+
 
 
 

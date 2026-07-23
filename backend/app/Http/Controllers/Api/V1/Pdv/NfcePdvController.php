@@ -112,7 +112,7 @@ class NfcePdvController extends Controller
         ]);
     }
 
-    public function pdf(int $id)
+    public function pdf(Request $request, int $id)
     {
         $venda = $this->venda($id)->load([
             'pedido.itens',
@@ -135,17 +135,37 @@ class NfcePdvController extends Controller
 
         $empresa = auth()->user()->empresa;
         $danfeLogoDataUri = $this->danfeLogo->dataUri($empresa);
-        $danfeQrCodeDataUri = $this->danfeQrCode->dataUri($venda->notaFiscal);
+        $danfeQrCode = $this->danfeQrCode->metadata($venda->notaFiscal);
+        $danfeQrCodeDataUri = $danfeQrCode['data_uri'];
+        $danfeQrCodeUrl = $danfeQrCode['qr_code_url'];
+        $danfeConsultaUrl = $danfeQrCode['consulta_url'];
         $danfeBarcodeDataUri = $this->danfeBarcode->dataUri($venda->notaFiscal->chave_acesso);
         $danfeTributos = $this->danfeTaxTransparency->calculate($venda->notaFiscal);
         $danfeDados = $this->danfeFiscalData->extract($venda->notaFiscal);
 
+        $segundaVia = $request->boolean('segunda_via');
+        $nomeArquivo = $segundaVia
+            ? "Segunda-via-NFCe-{$venda->numero}.pdf"
+            : "NFCe-{$venda->numero}.pdf";
+
         return Pdf::loadView(
             'pdf.danfe-nfce-pdv',
-            compact('venda', 'documento', 'empresa', 'danfeLogoDataUri', 'danfeQrCodeDataUri', 'danfeBarcodeDataUri', 'danfeTributos', 'danfeDados')
+            compact(
+                'venda',
+                'documento',
+                'empresa',
+                'danfeLogoDataUri',
+                'danfeQrCodeDataUri',
+                'danfeQrCodeUrl',
+                'danfeConsultaUrl',
+                'danfeBarcodeDataUri',
+                'danfeTributos',
+                'danfeDados',
+                'segundaVia'
+            )
         )
             ->setPaper('a4', 'portrait')
-            ->download("NFCe-{$venda->numero}.pdf");
+            ->download($nomeArquivo);
     }
 
 

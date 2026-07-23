@@ -8,76 +8,55 @@ use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
-use Illuminate\Support\Facades\Log;
 
 class DanfeQrCodeService
 {
-    public function dataUri(NotaFiscal $nota): ?string
+    public function __construct(private readonly NfceXmlSupplementService $xmlSupplement) {}
+
+    public function metadata(NotaFiscal $nota): array
     {
-        $conteudo = $this->conteudo($nota);
+        $extraido = $this->xmlSupplement->extrair($nota->xml);
+        $qrUrl = $extraido['qr_code_url'] ?: $this->urlValida($nota->qr_code_url);
+        $consultaUrl = $extraido['url_chave'] ?: $this->urlValida($nota->url_chave);
 
-        if (! $conteudo) {
-            return null;
-        }
-
-        if (! class_exists(Builder::class)) {
-            Log::warning('Biblioteca endroid/qr-code não instalada; DANFE gerado sem QR Code.', [
-                'nota_fiscal_id' => $nota->id,
-            ]);
-
-            return null;
-        }
-
-        try {
-            $resultado = new Builder(
-                writer: new PngWriter(),
-                writerOptions: [],
-                validateResult: false,
-                data: $conteudo,
-                encoding: new Encoding('UTF-8'),
-                errorCorrectionLevel: ErrorCorrectionLevel::Medium,
-                size: 280,
-                margin: 8,
-                roundBlockSizeMode: RoundBlockSizeMode::Margin,
-            );
-
-            return $resultado->build()->getDataUri();
-        } catch (\Throwable $e) {
-            Log::warning('Não foi possível gerar o QR Code do DANFE.', [
-                'nota_fiscal_id' => $nota->id,
-                'erro' => $e->getMessage(),
-            ]);
-
-            return null;
-        }
+        return [
+            'qr_code_url' => $qrUrl,
+            'consulta_url' => $consultaUrl,
+            'data_uri' => $qrUrl ? $this->gerarDataUri($qrUrl) : null,
+        ];
     }
 
-    private function conteudo(NotaFiscal $nota): ?string
+    public function dataUri(NotaFiscal $nota): ?string
     {
-        $url = trim((string) $nota->qr_code_url);
-        if ($url !== '') {
-            return html_entity_decode($url, ENT_QUOTES | ENT_XML1, 'UTF-8');
-        }
+        return $this->metadata($nota)['data_uri'];
+    }
 
-        $xml = trim((string) $nota->xml);
-        if ($xml !== '') {
-            libxml_use_internal_errors(true);
-            $documento = simplexml_load_string($xml);
-            if ($documento !== false) {
-                $namespaces = $documento->getNamespaces(true);
-                $nfe = isset($namespaces['']) ? $documento->children($namespaces['']) : $documento;
-                $resultado = $nfe->xpath('//*[local-name()="qrCode"]');
-                if (! empty($resultado)) {
-                    $valor = trim((string) $resultado[0]);
-                    if ($valor !== '') {
-                        return html_entity_decode($valor, ENT_QUOTES | ENT_XML1, 'UTF-8');
-                    }
-                }
-            }
-            libxml_clear_errors();
-        }
+    private function gerarDataUri(string $url): string
+    {
+        /*
+         * endroid/qr-code 6.x:
+         * Builder::create() e os setters encadeados foram removidos.
+         * As opções agora são fornecidas ao construtor.
+         */
+        $builder = new Builder(
+            writer: new PngWriter(),
+            writerOptions: [],
+            validateResult: false,
+            data: $url,
+            encoding: new Encoding('UTF-8'),
+            errorCorrectionLevel: ErrorCorrectionLevel::Medium,
+            size: 300,
+            margin: 12,
+            roundBlockSizeMode: RoundBlockSizeMode::Margin,
+        );
 
-        $consulta = trim((string) $nota->url_chave);
-        return $consulta !== '' ? $consulta : null;
+        return $builder->build()->getDataUri();
+    }
+
+    private function urlValida(?string $url): ?string
+    {
+        $url = html_entity_decode(trim((string) $url), ENT_QUOTES | ENT_XML1, 'UTF-8');
+
+        return $url !== '' && preg_match('#^https?://#i', $url) ? $url : null;
     }
 }

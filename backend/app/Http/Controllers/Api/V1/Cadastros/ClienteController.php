@@ -116,11 +116,12 @@ class ClienteController extends Controller
     {
         $this->authorize('clientes.view');
 
+        // A base atual não possui os models ClienteEndereco e ClienteContato.
+        // Carregar essas relações fazia qualquer acesso a /clientes/{id}
+        // terminar em HTTP 500 antes mesmo de localizar o cliente.
         $cliente = Cliente::with([
             'vendedor:id,nome',
             'tabelaPreco:id,nome',
-            'enderecos',
-            'contatos',
         ])->findOrFail($id);
 
         $cliente->append(['nome', 'documento_formatado']);

@@ -1,0 +1,98 @@
+﻿DIAGNOSTICO QRCODE NFC-e
+Gerado em: 23/07/2026 02:07:19
+Projeto: D:\Skill\IntelbrasTech-ERP
+
+=== PHP / EXTENSOES ===
+C:\tools\php85\php.exe
+C:\tools\php85\php.ini
+gd=sim
+dom=sim
+simplexml=sim
+
+=== PACOTES DE QRCODE / DANFE ===
+bacon/bacon-qr-code                3.1.1   BaconQrCode is a QR code generator for PHP.
+barryvdh/laravel-dompdf            3.1.2   A DOMPDF Wrapper for Laravel
+dompdf/dompdf                      3.1.5   DOMPDF is a CSS 2.1 compliant HTML to PDF converter
+dompdf/php-font-lib                1.0.2   A library to read, parse, export and make subsets of different types of...
+dompdf/php-svg-lib                 1.0.2   A library to read, parse and export to PDF SVG files.
+nfephp-org/sped-common             5.1.17  sped-common ├® parte do projeto NFePHP.
+nfephp-org/sped-gtin               1.1.2   Classes for validation of GTIN codes.
+nfephp-org/sped-nfe                5.2.6   API para gera├º├úo e comunica├º├úo da NFe e NFCe com as SEFAZ autorizadoras.
+picqer/php-barcode-generator       3.2.4   An easy to use, non-bloated, barcode generator in PHP. Creates SVG, PNG...
+
+=== CAMPOS DA ULTIMA NOTA NFC-e ===
+   PARSE ERROR  PHP Parse error: Syntax error, unexpected T_STRING, expecting ':' in vendor\psy\psysh\src\Exception\ParseErrorException.php on line 44.
+
+=== OCORRENCIAS NO CODIGO ===
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Fiscal\ConfiguracaoFiscalController.php:9: use App\Services\Fiscal\SefazService;
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Fiscal\ConfiguracaoFiscalController.php:56: public function testar(SefazService $sefaz): JsonResponse
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Fiscal\ConfiguracaoFiscalController.php:72: $sefaz->assertDisponivel();
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Fiscal\ConfiguracaoFiscalController.php:77: $statusSefaz = null;
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Fiscal\ConfiguracaoFiscalController.php:80: $statusSefaz = $sefaz->statusServico($certificado, (int) $config->ambiente_nfe);
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Fiscal\ConfiguracaoFiscalController.php:81: if ($sefaz->modo() === 'nfephp' && $statusSefaz['cStat'] !== '107') {
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Fiscal\ConfiguracaoFiscalController.php:82: $problemas[] = "SEFAZ indisponível: [{$statusSefaz['cStat']}] {$statusSefaz['xMotivo']}";
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Fiscal\ConfiguracaoFiscalController.php:85: $problemas[] = 'Falha na conexão com a SEFAZ: '.$e->getMessage();
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Fiscal\ConfiguracaoFiscalController.php:97: 'driver' => $sefaz->modo(),
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Fiscal\ConfiguracaoFiscalController.php:98: 'status_sefaz' => $statusSefaz,
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Fiscal\NFe\NFeController.php:232: $disk = (string) config('services.sefaz.storage_disk', 'local');
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Pdv\NfcePdvController.php:10: use App\Services\Fiscal\DanfeQrCodeService;
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Pdv\NfcePdvController.php:24: private readonly DanfeQrCodeService $danfeQrCode,
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Pdv\NfcePdvController.php:81: ? 'NFC-e autorizada pela SEFAZ.'
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Pdv\NfcePdvController.php:138: $danfeQrCodeDataUri = $this->danfeQrCode->dataUri($venda->notaFiscal);
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Pdv\NfcePdvController.php:145: compact('venda', 'documento', 'empresa', 'danfeLogoDataUri', 'danfeQrCodeDataUri', 'danfeBarcodeDataUri', 'danfeTributos', 'danfeDados')
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Pdv\PdvCancelamentoController.php:59: 'message' => 'Documento fiscal cancelado na SEFAZ com sucesso.',
+D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Pdv\PdvCancelamentoController.php:96: 'message' => 'Cancele primeiro a nota fiscal autorizada na SEFAZ. Depois cancele a venda.',
+D:\Skill\IntelbrasTech-ERP\backend\app\Models\Recibo.php:18: * Nunca é enviado à SEFAZ e não deve ser confundido com o Cupom Fiscal (NFC-e),
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\DanfeQrCodeService.php:6: use Endroid\QrCode\Builder\Builder;
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\DanfeQrCodeService.php:7: use Endroid\QrCode\Encoding\Encoding;
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\DanfeQrCodeService.php:8: use Endroid\QrCode\ErrorCorrectionLevel;
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\DanfeQrCodeService.php:9: use Endroid\QrCode\RoundBlockSizeMode;
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\DanfeQrCodeService.php:10: use Endroid\QrCode\Writer\PngWriter;
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\DanfeQrCodeService.php:13: class DanfeQrCodeService
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\DanfeQrCodeService.php:69: $resultado = $nfe->xpath('//*[local-name()="qrCode"]');
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\DanfeService.php:31: 'qrCodeUrl'=> $nfe->qr_code_url,
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\DanfeService.php:36: $disk = (string) config('services.sefaz.storage_disk', 'local');
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php:13: private readonly SefazService $sefaz,
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php:90: // EMITIR — Assinar + Enviar SEFAZ
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php:105: $this->sefaz->assertDisponivel();
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php:116: $xmlAssinado = $this->sefaz->assinarXml(
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php:124: // 3. Enviar ao SEFAZ
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php:125: $retorno = $this->sefaz->enviarNFe(
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php:166: throw new Exception("SEFAZ rejeitou a NF-e: [{$retorno['cStat']}] {$retorno['xMotivo']}");
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php:195: $retorno     = $this->sefaz->cancelarNFe(
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php:213: throw new Exception("Cancelamento rejeitado pelo SEFAZ: [{$retorno['cStat']}] {$retorno['xMotivo']}");
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php:232: $retorno = $this->sefaz->cartaCorrecao(
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php:253: // CONSULTAR no SEFAZ
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php:259: return $this->sefaz->consultarNFe($chave, $certificado);
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php:342: // Aqui entra a geração do XML NFe conforme manual SEFAZ
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php:395: return (int) ($retorno['tpAmb'] ?? config('services.sefaz.ambiente', 2));
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:14: * Camada de integração com os Web Services da SEFAZ.
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:16: * IMPORTANTE: esta classe isola toda a comunicação real com a SEFAZ para que
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:30: class SefazService
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:34: return (string) config('services.sefaz.driver', 'fake');
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:41: 'Driver fiscal inválido. Use FISCAL_DRIVER=fake para testes ou FISCAL_DRIVER=nfephp para a SEFAZ.'
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:45: if ($this->modo() === 'fake' && app()->environment('production') && ! config('services.sefaz.allow_fake_in_production', false)) {
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:54: throw new \RuntimeException("Extensão PHP obrigatória para a SEFAZ ausente: {$extensao}.");
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:65: * XML-DSig (padrão exigido pela SEFAZ).
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:117: $respostaXml = $tools->sefazEnviaLote([$xmlAssinado], $lote, 1);
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:122: $respostaXml = $tools->sefazConsultaRecibo((string) $std->infRec->nRec, $ambiente);
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:130: 'xMotivo' => (string) ($std->xMotivo ?? 'Resposta da SEFAZ sem protocolo de autorização.'),
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:149: Log::info('SefazService::enviarNFe (modo simulado)', ['ambiente' => $ambiente, 'uf' => $uf]);
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:174: $xml = $this->tools($certificado, $ambiente)->sefazCancela($chave, $justificativa, $protocolo);
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:178: Log::info('SefazService::cancelarNFe (modo simulado)', ['chave' => $chave]);
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:199: $xml = $this->tools($certificado, $ambiente)->sefazCCe($chave, $descricao, $sequencia);
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:203: Log::info('SefazService::cartaCorrecao (modo simulado)', ['chave' => $chave, 'sequencia' => $sequencia]);
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:213: * Consulta a situação atual de uma NF-e na SEFAZ pela chave de acesso.
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:219: $xml = $this->tools($certificado, config('services.sefaz.ambiente', 2))->sefazConsultaChave($chave);
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:230: Log::info('SefazService::consultarNFe (modo simulado)', ['chave' => $chave]);
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:245: $xml = $this->tools($certificado, $ambiente)->sefazStatus('', $ambiente);
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:278: 'A integração direta com a SEFAZ exige certificado A1 em arquivo PFX/P12.'
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:331: 'schemes' => config('services.sefaz.schemas', 'PL_010_V1.30'),
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:337: 'proxyIp' => config('services.sefaz.proxy.ip', ''),
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:338: 'proxyPort' => config('services.sefaz.proxy.port', ''),
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:339: 'proxyUser' => config('services.sefaz.proxy.user', ''),
+D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php:340: 'proxyPass' => config('services.sefaz.proxy.password', ''),
+D:\Skill\IntelbrasTech-ERP\backend\resources\views\fiscal\danfe.blade.php:28: <div class="cell center" style="width:42%"><div class="label">Chave de acesso</div><div class="key">{{ $nfe->chave_formatada }}</div><br><div class="muted">Consulta de autenticidade no portal nacional da NF-e<br>www.nfe.fazenda.gov.br/portal</div></div>
+D:\Skill\IntelbrasTech-ERP\backend\resources\views\pdf\danfe-nfce-pdv.blade.php:124: www.nfe.fazenda.gov.br/portal<br>
+D:\Skill\IntelbrasTech-ERP\backend\resources\views\pdf\danfe-nfce-pdv.blade.php:125: ou no site da Sefaz autorizadora
+D:\Skill\IntelbrasTech-ERP\backend\resources\views\pdf\danfe-nfce-pdv.blade.php:130: @if($danfeQrCodeDataUri)<img class="qr" src="{{ $danfeQrCodeDataUri }}">@else<div class="value" style="margin-top:35px">Indisponível</div>@endif

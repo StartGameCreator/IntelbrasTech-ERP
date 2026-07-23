@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="flex h-screen overflow-hidden" :class="temaClasse">
     <aside
       :class="[
@@ -333,12 +333,12 @@ function alternarMenuSuperior(id) {
 const topMenus = computed(() => [
   {
     id: 'principal',
-    label: 'Início',
+    label: 'InÃ­cio',
     items: [
-      { to: '/dashboard', label: 'Dashboards', description: 'Visão geral e análises do ERP', icon: ChartBarIcon },
+      { to: '/dashboard', label: 'Dashboards', description: 'VisÃ£o geral e anÃ¡lises do ERP', icon: ChartBarIcon },
       { to: '/comercial', label: 'Central Comercial', description: 'Pedidos e desempenho comercial', icon: ShoppingBagIcon },
       { to: '/mapa', label: 'Mapa ONS', description: 'Mapa operacional', icon: MapIcon },
-      { to: '/mapa-aneel', label: 'Mapa ANEEL', description: 'Microgeração distribuída', icon: MapIcon },
+      { to: '/mapa-aneel', label: 'Mapa ANEEL', description: 'MicrogeraÃ§Ã£o distribuÃ­da', icon: MapIcon },
     ],
   },
   {
@@ -348,7 +348,7 @@ const topMenus = computed(() => [
       { to: '/configuracoes/empresa', label: 'Empresa', description: 'Dados da empresa e filiais', icon: BuildingStorefrontIcon },
       { to: '/clientes', label: 'Clientes', description: 'Cadastro e relacionamento', icon: UsersIcon },
       { to: '/fornecedores', label: 'Fornecedores', description: 'Parceiros e compras', icon: TruckIcon },
-      { to: '/produtos', label: 'Produtos', description: 'Catálogo completo', icon: CubeIcon },
+      { to: '/produtos', label: 'Produtos', description: 'CatÃ¡logo completo', icon: CubeIcon },
     ],
   },
   {
@@ -365,19 +365,19 @@ const topMenus = computed(() => [
     id: 'pdv',
     label: 'PDV',
     items: [
-      { to: '/pdv', label: 'Frente de Caixa', description: 'Venda rápida e recebimento', icon: CalculatorIcon },
-      { to: '/pdv/vendas', label: 'Vendas do PDV', description: 'Histórico e comprovantes', icon: DocumentTextIcon },
-      { to: '/pdv/fiscal', label: 'NFC-e do PDV', description: 'Validação e XML fiscal', icon: ReceiptPercentIcon },
+      { to: '/pdv', label: 'Frente de Caixa', description: 'Venda rÃ¡pida e recebimento', icon: CalculatorIcon },
+      { to: '/pdv/vendas', label: 'Vendas do PDV', description: 'HistÃ³rico e comprovantes', icon: DocumentTextIcon },
+      { to: '/pdv/fiscal', label: 'NFC-e do PDV', description: 'ValidaÃ§Ã£o e XML fiscal', icon: ReceiptPercentIcon },
     ],
   },
   {
     id: 'estoque',
     label: 'Estoque',
     items: [
-      { to: '/estoque', label: 'Posição de estoque', description: 'Saldos por depósito', icon: ArchiveBoxIcon },
-      { to: '/estoque/movimentacoes', label: 'Movimentações', description: 'Entradas, saídas e transferências', icon: ShoppingCartIcon },
-      { to: '/estoque/inventario', label: 'Inventário', description: 'Contagem e ajuste', icon: CubeIcon },
-      { to: '/produtos', label: 'Produtos', description: 'Cadastro e preços', icon: CubeIcon },
+      { to: '/estoque', label: 'PosiÃ§Ã£o de estoque', description: 'Saldos por depÃ³sito', icon: ArchiveBoxIcon },
+      { to: '/estoque/movimentacoes', label: 'MovimentaÃ§Ãµes', description: 'Entradas, saÃ­das e transferÃªncias', icon: ShoppingCartIcon },
+      { to: '/estoque/inventario', label: 'InventÃ¡rio', description: 'Contagem e ajuste', icon: CubeIcon },
+      { to: '/produtos', label: 'Produtos', description: 'Cadastro e preÃ§os', icon: CubeIcon },
     ],
   },
   {
@@ -386,7 +386,7 @@ const topMenus = computed(() => [
     items: [
       { to: '/compras', label: 'Pedidos de compra', description: 'Compras e recebimentos', icon: TruckIcon },
       { to: '/fornecedores', label: 'Fornecedores', description: 'Cadastro de fornecedores', icon: BuildingStorefrontIcon },
-      { to: '/estoque', label: 'Conferir estoque', description: 'Necessidades de reposição', icon: ArchiveBoxIcon },
+      { to: '/estoque', label: 'Conferir estoque', description: 'Necessidades de reposiÃ§Ã£o', icon: ArchiveBoxIcon },
     ],
   },
   {
@@ -395,7 +395,7 @@ const topMenus = computed(() => [
     items: [
       { to: '/financeiro/contas-receber', label: 'Contas a receber', description: 'Recebimentos e vencimentos', icon: BanknotesIcon },
       { to: '/financeiro/contas-pagar', label: 'Contas a pagar', description: 'Despesas e pagamentos', icon: BanknotesIcon },
-      { to: '/financeiro/fluxo-caixa', label: 'Fluxo de caixa', description: 'Entradas e saídas', icon: ChartBarIcon },
+      { to: '/financeiro/fluxo-caixa', label: 'Fluxo de caixa', description: 'Entradas e saÃ­das', icon: ChartBarIcon },
       { to: '/financeiro/dre', label: 'DRE', description: 'Resultado gerencial', icon: PresentationChartLineIcon },
     ],
   },
@@ -403,9 +403,10 @@ const topMenus = computed(() => [
     id: 'fiscal',
     label: 'Fiscal',
     items: [
+      { to: '/fiscal/central', label: 'Central Fiscal', description: 'Segunda via, XML e consulta SEFAZ', icon: DocumentTextIcon },
       { to: '/fiscal/nfe', label: 'NF-e', description: 'Documentos fiscais', icon: DocumentTextIcon },
-      { to: '/pdv/fiscal', label: 'NFC-e do PDV', description: 'Validação fiscal das vendas', icon: ReceiptPercentIcon },
-      { to: '/fiscal/nfe/configuracoes', label: 'Configurações fiscais', description: 'CSC, série e ambiente', icon: Cog6ToothIcon },
+      { to: '/pdv/fiscal', label: 'NFC-e do PDV', description: 'ValidaÃ§Ã£o fiscal das vendas', icon: ReceiptPercentIcon },
+      { to: '/fiscal/nfe/configuracoes', label: 'ConfiguraÃ§Ãµes fiscais', description: 'CSC, sÃ©rie e ambiente', icon: Cog6ToothIcon },
       { to: '/fiscal/certificados', label: 'Certificado digital', description: 'Certificados A1', icon: ShieldCheckIcon },
     ],
   },
@@ -414,26 +415,26 @@ const topMenus = computed(() => [
     label: 'CRM',
     items: [
       { to: '/crm', label: 'Painel CRM', description: 'Leads e oportunidades', icon: UserGroupIcon },
-      { to: '/crm/busca-cnpj', label: 'Busca CNPJ', description: 'Prospecção empresarial', icon: MagnifyingGlassIcon },
+      { to: '/crm/busca-cnpj', label: 'Busca CNPJ', description: 'ProspecÃ§Ã£o empresarial', icon: MagnifyingGlassIcon },
       { to: '/clientes', label: 'Clientes', description: 'Carteira comercial', icon: UsersIcon },
     ],
   },
   {
     id: 'servicos',
-    label: 'Serviços',
+    label: 'ServiÃ§os',
     items: [
-      { to: '/os', label: 'Ordens de serviço', description: 'Assistência técnica', icon: WrenchScrewdriverIcon },
-      { to: '/marketplace-hub', label: 'Central de Extensões', description: 'Todos os conectores e marketplaces', icon: BuildingStorefrontIcon },
+      { to: '/os', label: 'Ordens de serviÃ§o', description: 'AssistÃªncia tÃ©cnica', icon: WrenchScrewdriverIcon },
+      { to: '/marketplace-hub', label: 'Central de ExtensÃµes', description: 'Todos os conectores e marketplaces', icon: BuildingStorefrontIcon },
       { to: '/marketplaces', label: 'Marketplaces conectados', description: 'Contas e canais ativos', icon: BuildingStorefrontIcon },
-      { to: '/expedicao', label: 'Expedição', description: 'Picking, packing e volumes', icon: TruckIcon },
-      { to: '/logistica/transportadoras', label: 'Transportadoras', description: 'Cotações, etiquetas e rastreio', icon: TruckIcon },
-      { to: '/marketplaces/mercado-livre', label: 'Mercado Livre', description: 'Conta e autenticação', icon: BuildingStorefrontIcon },
-      { to: '/marketplaces/mercado-livre/catalogo', label: 'Catálogo Mercado Livre', description: 'Preço, estoque e anúncios', icon: CubeIcon },
-      { to: '/marketplaces/mercado-livre/pedidos', label: 'Pedidos Mercado Livre', description: 'Importação e acompanhamento', icon: ShoppingBagIcon },
-      { to: '/marketplaces/automacao', label: 'Automação Omnichannel', description: 'Pedido interno e baixa de estoque', icon: ArrowPathIcon },
-      { to: '/marketplaces/financeiro-fiscal', label: 'Financeiro e Fiscal', description: 'Conciliação e fila fiscal', icon: BanknotesIcon },
-      { to: '/marketplaces/emissao-fiscal', label: 'Emissão Fiscal', description: 'XML e fila de assinatura', icon: DocumentTextIcon },
-      { to: '/configuracoes/apis', label: 'APIs', description: 'Integrações externas', icon: Cog6ToothIcon },
+      { to: '/expedicao', label: 'ExpediÃ§Ã£o', description: 'Picking, packing e volumes', icon: TruckIcon },
+      { to: '/logistica/transportadoras', label: 'Transportadoras', description: 'CotaÃ§Ãµes, etiquetas e rastreio', icon: TruckIcon },
+      { to: '/marketplaces/mercado-livre', label: 'Mercado Livre', description: 'Conta e autenticaÃ§Ã£o', icon: BuildingStorefrontIcon },
+      { to: '/marketplaces/mercado-livre/catalogo', label: 'CatÃ¡logo Mercado Livre', description: 'PreÃ§o, estoque e anÃºncios', icon: CubeIcon },
+      { to: '/marketplaces/mercado-livre/pedidos', label: 'Pedidos Mercado Livre', description: 'ImportaÃ§Ã£o e acompanhamento', icon: ShoppingBagIcon },
+      { to: '/marketplaces/automacao', label: 'AutomaÃ§Ã£o Omnichannel', description: 'Pedido interno e baixa de estoque', icon: ArrowPathIcon },
+      { to: '/marketplaces/financeiro-fiscal', label: 'Financeiro e Fiscal', description: 'ConciliaÃ§Ã£o e fila fiscal', icon: BanknotesIcon },
+      { to: '/marketplaces/emissao-fiscal', label: 'EmissÃ£o Fiscal', description: 'XML e fila de assinatura', icon: DocumentTextIcon },
+      { to: '/configuracoes/apis', label: 'APIs', description: 'IntegraÃ§Ãµes externas', icon: Cog6ToothIcon },
     ],
   },
   {
@@ -458,16 +459,16 @@ const menuGrupos = computed(() => [
         children: [
           { to: '/dashboard', label: 'Dashboard Geral', name: 'dashboards.geral' },
           { to: '/dashboards/mensal', label: 'Mensal', name: 'dashboards.mensal' },
-          { to: '/dashboards/diario', label: 'Diário', name: 'dashboards.diario' },
+          { to: '/dashboards/diario', label: 'DiÃ¡rio', name: 'dashboards.diario' },
           { to: '/dashboards/vendas', label: 'Vendas', name: 'dashboards.vendas' },
           { to: '/dashboards/pedidos-venda', label: 'Pedidos de Venda', name: 'dashboards.pedidos' },
           { to: '/dashboards/venda-vendedor', label: 'Venda por Vendedor', name: 'dashboards.vendedor' },
           { to: '/dashboards/venda-canal-24-meses', label: 'Venda Canal (24 meses)', name: 'dashboards.canal' },
-          { to: '/dashboards/previsao-estoque', label: 'Previsão de Estoque', name: 'dashboards.previsao' },
+          { to: '/dashboards/previsao-estoque', label: 'PrevisÃ£o de Estoque', name: 'dashboards.previsao' },
           { to: '/dashboards/produtos', label: 'Produtos', name: 'dashboards.produtos' },
           { to: '/dashboards/estoque-produtos', label: 'Estoque de Produtos', name: 'dashboards.estoque' },
-          { to: '/dashboards/sugestao-compras', label: 'Sugestão de Compras', name: 'dashboards.compras' },
-          { to: '/dashboards/sem-movimentacao', label: 'Sem Movimentação', name: 'dashboards.sem-movimento' },
+          { to: '/dashboards/sugestao-compras', label: 'SugestÃ£o de Compras', name: 'dashboards.compras' },
+          { to: '/dashboards/sem-movimentacao', label: 'Sem MovimentaÃ§Ã£o', name: 'dashboards.sem-movimento' },
           { to: '/dashboards/clientes', label: 'Clientes', name: 'dashboards.clientes' },
           { to: '/dashboards/novos-recorrentes', label: 'Novo x Recorrentes', name: 'dashboards.recorrentes' },
           { to: '/dashboards/atividade-carteira', label: 'Atividade da Carteira', name: 'dashboards.carteira' },
@@ -483,7 +484,7 @@ const menuGrupos = computed(() => [
     items: [
       { to: '/pdv', label: 'Frente de Caixa', icon: CalculatorIcon, name: 'pdv' },
       { to: '/pdv/vendas', label: 'Vendas do PDV', icon: DocumentTextIcon, name: 'pdv.vendas' },
-      { to: '/pdv/devolucoes', label: 'Devoluções', icon: ArrowUturnLeftIcon, name: 'pdv.devolucoes' },
+      { to: '/pdv/devolucoes', label: 'DevoluÃ§Ãµes', icon: ArrowUturnLeftIcon, name: 'pdv.devolucoes' },
       { to: '/pdv/fiscal', label: 'NFC-e do PDV', icon: ReceiptPercentIcon, name: 'pdv.fiscal' },
     ],
   },
@@ -529,21 +530,21 @@ const menuGrupos = computed(() => [
     ],
   },
   {
-    label: 'Configurações',
+    label: 'ConfiguraÃ§Ãµes',
     items: [
       { to: '/configuracoes/apis', label: 'APIs', icon: Cog6ToothIcon, name: 'configuracoes.apis' },
     ],
   },
   {
-    label: 'Serviços',
+    label: 'ServiÃ§os',
     items: [
-      { to: '/os', label: 'Assistência Técnica', icon: WrenchScrewdriverIcon, name: 'os' },
-      { to: '/marketplace-tecnicos', label: 'Marketplace de Técnicos', icon: UserGroupIcon, name: 'marketplace-tecnicos' },
+      { to: '/os', label: 'AssistÃªncia TÃ©cnica', icon: WrenchScrewdriverIcon, name: 'os' },
+      { to: '/marketplace-tecnicos', label: 'Marketplace de TÃ©cnicos', icon: UserGroupIcon, name: 'marketplace-tecnicos' },
       { to: '/configuracoes/empresa', label: 'Empresa', icon: BuildingStorefrontIcon, name: 'configuracoes.empresa' },
       { to: '/marketplaces', label: 'Marketplaces', icon: BuildingStorefrontIcon, name: 'marketplaces' },
-      { to: '/expedicao', label: 'Expedição', icon: TruckIcon, name: 'expedicao' },
+      { to: '/expedicao', label: 'ExpediÃ§Ã£o', icon: TruckIcon, name: 'expedicao' },
       { to: '/logistica/transportadoras', label: 'Transportadoras', icon: TruckIcon, name: 'transportadoras' },
-      { to: '/extensoes', label: 'Central de Extensões', icon: Squares2X2Icon, name: 'extensoes-servicos' },
+      { to: '/extensoes', label: 'Central de ExtensÃµes', icon: Squares2X2Icon, name: 'extensoes-servicos' },
     ],
   },
   {
@@ -667,3 +668,4 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 </style>
+

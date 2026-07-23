@@ -120,14 +120,17 @@ $reservado = $d['inf_ad_fisco'] ?: $nota?->informacoes_fisco;
 <div class="key center">{{ $chaveFmt }}</div>
 </div>
 <div style="border-top:1px solid #000;margin:2px -3px 0;padding:4px 3px" class="value">
-Consulta de autenticidade no portal nacional da NF-e<br>
-www.nfe.fazenda.gov.br/portal<br>
-ou no site da Sefaz autorizadora
+@if(!empty($danfeConsultaUrl))
+Consulta da NFC-e no endereço oficial da SEFAZ:<br>
+{{ $danfeConsultaUrl }}
+@else
+Consulta da NFC-e pelo QR Code oficial da SEFAZ
+@endif
 </div>
 </td>
 <td style="width:12%" class="center">
 <span class="label">QR CODE</span>
-@if($danfeQrCodeDataUri)<img class="qr" src="{{ $danfeQrCodeDataUri }}">@else<div class="value" style="margin-top:35px">Indisponível</div>@endif
+@if($danfeQrCodeDataUri)<img class="qr" src="{{ $danfeQrCodeDataUri }}" alt="QR Code oficial da NFC-e"><div class="small">Consulte a autenticidade da NFC-e</div>@else<div class="value" style="margin-top:25px">QR Code oficial indisponível no XML</div>@endif
 </td>
 </tr>
 </table>

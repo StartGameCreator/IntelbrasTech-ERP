@@ -121,6 +121,11 @@ class NFeService
                 $nfe->emitente_uf ?? $empresa->estado
             );
 
+            // 2.1. NFC-e: inclui infNFeSupl com QR Code oficial antes do envio
+            if ((string) $nfe->modelo === '65') {
+                $xmlAssinado = app(NfceXmlSupplementService::class)->aplicar($nfe, $xmlAssinado);
+            }
+
             // 3. Enviar ao SEFAZ
             $retorno = $this->sefaz->enviarNFe(
                 $xmlAssinado,
@@ -132,12 +137,17 @@ class NFeService
 
             if ($retorno['cStat'] === '100') {
                 // Autorizada
+                $suplementoNfce = app(NfceXmlSupplementService::class)->extrair(
+                    $retorno['xml'] ?? $this->montarXmlProcessado($xmlAssinado, $retorno)
+                );
                 $nfe->update([
                     'status'           => NotaFiscal::STATUS_AUTORIZADA,
                     'chave_acesso'     => $retorno['chNFe'] ?: $nfe->chave_acesso,
                     'protocolo'        => $retorno['nProt'],
                     'xml'              => $retorno['xml'] ?? $this->montarXmlProcessado($xmlAssinado, $retorno),
                     'data_autorizacao' => now(),
+                    'qr_code_url'     => $suplementoNfce['qr_code_url'],
+                    'url_chave'       => $suplementoNfce['url_chave'],
                 ]);
 
                 // A autorização fiscal é irreversível e deve ser confirmada no banco

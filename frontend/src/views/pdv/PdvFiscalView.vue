@@ -48,8 +48,17 @@
 
         <RouterLink v-if="documento?.status === 'autorizada'" :to="`/pdv/devolucoes?venda=${vendaId}`" class="btn-secondary">Gerar devolução</RouterLink>
 
-        <button v-if="documento" class="btn-secondary" @click="baixarDanfe">
+        <button v-if="documento" class="btn-secondary" @click="baixarDanfe(false)">
           Baixar DANFE
+        </button>
+
+        <button
+          v-if="documento?.status === 'autorizada'"
+          class="btn-secondary"
+          :disabled="processando"
+          @click="baixarDanfe(true)"
+        >
+          Gerar segunda via
         </button>
 
         <button
@@ -328,7 +337,7 @@ async function cancelarVenda() {
   }
 }
 
-async function baixarDanfe() {
+async function baixarDanfe(segundaVia = false) {
   if (!vendaId.value) {
     toast.error('Selecione uma venda antes de baixar o DANFE.')
     return
@@ -338,6 +347,7 @@ async function baixarDanfe() {
     const response = await api.get(
       `/pdv/nfce/${vendaId.value}/pdf`,
       {
+        params: segundaVia ? { segunda_via: 1 } : undefined,
         responseType: 'blob',
         headers: {
           Accept: 'application/pdf',
@@ -370,7 +380,9 @@ async function baixarDanfe() {
       ? decodeURIComponent(utf8Name[1])
       : simpleName
         ? simpleName[1]
-        : `NFCe-${documento.value?.numero || vendaId.value}.pdf`
+        : segundaVia
+          ? `Segunda-via-NFCe-${documento.value?.numero || vendaId.value}.pdf`
+          : `NFCe-${documento.value?.numero || vendaId.value}.pdf`
 
     document.body.appendChild(link)
     link.click()
@@ -380,7 +392,7 @@ async function baixarDanfe() {
       URL.revokeObjectURL(url)
     }, 1000)
 
-    toast.success('DANFE baixado com sucesso.')
+    toast.success(segundaVia ? 'Segunda via gerada com sucesso.' : 'DANFE baixado com sucesso.')
   } catch (error) {
     let mensagem = 'Não foi possível baixar o DANFE.'
 
