@@ -1,0 +1,15 @@
+sequenceDiagram
+ participant U as Usuário/PDV
+ participant API as ERP API
+ participant F as Serviço Fiscal
+ participant DB as Banco
+ participant S as SEFAZ
+ U->>API: Solicita emissão
+ API->>F: Valida empresa, itens e configuração
+ F->>DB: Carrega certificado, série e CSC
+ F->>F: Monta e assina XML
+ F->>S: Transmite documento
+ S-->>F: Autorização ou rejeição
+ F->>DB: Salva XML, chave, protocolo e status
+ F-->>API: Resultado fiscal
+ API-->>U: DANFE/comprovante ou erro tratado

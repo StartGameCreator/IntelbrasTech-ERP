@@ -1,0 +1,15 @@
+sequenceDiagram
+ participant U as Usuário
+ participant V as Vue
+ participant A as API Laravel
+ participant S as Sanctum
+ participant DB as Banco
+ U->>V: Informa credenciais ou provedor social
+ V->>A: Solicita autenticação
+ A->>DB: Valida usuário/conta social
+ DB-->>A: Identidade e permissões
+ A->>S: Emite sessão/token
+ S-->>V: Token/estado autenticado
+ V->>A: Requisições protegidas
+ A->>S: Valida autenticação
+ A-->>V: Dados autorizados

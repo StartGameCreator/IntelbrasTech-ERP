@@ -1,0 +1,9 @@
+flowchart LR
+ PED[Pedido aprovado] --> SEP[Separação]
+ SEP --> CONF[Conferência]
+ CONF --> VOL[Volumes]
+ VOL --> ETQ[Etiqueta oficial/ERP]
+ ETQ --> IMP[Impressão e histórico]
+ IMP --> DES[Despacho]
+ DES --> RAS[Rastreamento]
+ RAS --> ENT[Entrega]

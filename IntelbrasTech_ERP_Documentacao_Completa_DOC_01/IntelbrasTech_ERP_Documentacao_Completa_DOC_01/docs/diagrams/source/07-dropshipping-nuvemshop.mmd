@@ -1,0 +1,13 @@
+sequenceDiagram
+ participant C as Cliente
+ participant N as Nuvemshop
+ participant E as IntelbrasTech ERP
+ participant A as Fornecedor/AliExpress
+ C->>N: Realiza pedido
+ N->>E: Envia pedido/webhook
+ E->>E: Valida pagamento, produto e risco
+ E->>A: Cria pedido de fornecimento
+ A-->>E: Confirma pedido e rastreamento
+ E->>N: Atualiza status/rastreio
+ N-->>C: Informa andamento
+ Note over E,A: Automação depende das APIs e autorizações oficiais disponíveis

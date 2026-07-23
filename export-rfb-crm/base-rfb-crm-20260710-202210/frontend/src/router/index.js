@@ -1,0 +1,339 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const router = createRouter({
+  history: createWebHistory(),
+  scrollBehavior: () => ({ top: 0 }),
+  routes: [
+    // â”€â”€ Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/auth/LoginView.vue'),
+      meta: { guest: true, title: 'Login' },
+    },
+
+    // â”€â”€ App Layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    {
+      path: '/',
+      component: () => import('@/components/layout/AppLayout.vue'),
+      meta: { requiresAuth: true },
+      children: [
+        { path: '',        redirect: '/dashboard' },
+        {
+          path: 'dashboard',
+          name: 'dashboard',
+          component: () => import('@/views/dashboard/DashboardView.vue'),
+          meta: { title: 'Dashboard', icon: 'ChartBarIcon' },
+        },
+
+        // â”€â”€ Clientes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        {
+          path: 'clientes',
+          name: 'clientes',
+          component: () => import('@/views/clientes/ClientesView.vue'),
+          meta: { title: 'Clientes', permissao: 'clientes.view' },
+        },
+        {
+          path: 'clientes/novo',
+          name: 'clientes.novo',
+          component: () => import('@/views/clientes/ClienteFormView.vue'),
+          meta: { title: 'Novo Cliente', permissao: 'clientes.create' },
+        },
+        {
+          path: 'clientes/:id',
+          name: 'clientes.show',
+          component: () => import('@/views/clientes/ClienteShowView.vue'),
+          meta: { title: 'Cliente', permissao: 'clientes.view' },
+        },
+        {
+          path: 'clientes/:id/editar',
+          name: 'clientes.editar',
+          component: () => import('@/views/clientes/ClienteFormView.vue'),
+          meta: { title: 'Editar Cliente', permissao: 'clientes.edit' },
+        },
+        {
+          path: 'clientes/mapa',
+          name: 'clientes.mapa',
+          component: () => import('@/views/clientes/ClienteMapaView.vue'),
+          meta: { title: 'Mapa de Clientes', permissao: 'clientes.view' },
+        },
+
+        // â”€â”€ Fornecedores â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        {
+          path: 'fornecedores',
+          name: 'fornecedores',
+          component: () => import('@/views/fornecedores/FornecedoresView.vue'),
+          meta: { title: 'Fornecedores', permissao: 'fornecedores.view' },
+        },
+        {
+          path: 'fornecedores/novo',
+          name: 'fornecedores.novo',
+          component: () => import('@/views/fornecedores/FornecedorFormView.vue'),
+          meta: { title: 'Novo Fornecedor', permissao: 'fornecedores.create' },
+        },
+        {
+          path: 'fornecedores/:id',
+          name: 'fornecedores.show',
+          component: () => import('@/views/fornecedores/FornecedorShowView.vue'),
+          meta: { title: 'Fornecedor', permissao: 'fornecedores.view' },
+        },
+        {
+          path: 'fornecedores/:id/editar',
+          name: 'fornecedores.editar',
+          component: () => import('@/views/fornecedores/FornecedorFormView.vue'),
+          meta: { title: 'Editar Fornecedor', permissao: 'fornecedores.edit' },
+        },
+
+        // â”€â”€ Produtos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        {
+          path: 'produtos',
+          name: 'produtos',
+          component: () => import('@/views/produtos/ProdutosView.vue'),
+          meta: { title: 'Produtos', permissao: 'produtos.view' },
+        },
+        {
+          path: 'produtos/novo',
+          name: 'produtos.novo',
+          component: () => import('@/views/produtos/ProdutoFormView.vue'),
+          meta: { title: 'Novo Produto', permissao: 'produtos.create' },
+        },
+        {
+          path: 'produtos/:id',
+          name: 'produtos.show',
+          component: () => import('@/views/produtos/ProdutoShowView.vue'),
+          meta: { title: 'Produto', permissao: 'produtos.view' },
+        },
+        {
+          path: 'produtos/:id/editar',
+          name: 'produtos.editar',
+          component: () => import('@/views/produtos/ProdutoFormView.vue'),
+          meta: { title: 'Editar Produto', permissao: 'produtos.edit' },
+        },
+
+        // â”€â”€ Pedidos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        {
+          path: 'pedidos',
+          name: 'pedidos',
+          component: () => import('@/views/pedidos/PedidosView.vue'),
+          meta: { title: 'Pedidos', permissao: 'pedidos.view' },
+        },
+        {
+          path: 'pedidos/novo',
+          name: 'pedidos.novo',
+          component: () => import('@/views/pedidos/PedidoFormView.vue'),
+          meta: { title: 'Novo Pedido', permissao: 'pedidos.create' },
+        },
+        {
+          path: 'pedidos/:id',
+          name: 'pedidos.show',
+          component: () => import('@/views/pedidos/PedidoShowView.vue'),
+          meta: { title: 'Pedido', permissao: 'pedidos.view' },
+        },
+        {
+          path: 'pedidos/kanban',
+          name: 'pedidos.kanban',
+          component: () => import('@/views/pedidos/PedidoKanbanView.vue'),
+          meta: { title: 'Kanban de Pedidos', permissao: 'pedidos.view' },
+        },
+
+        // â”€â”€ Estoque â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        {
+          path: 'estoque',
+          name: 'estoque',
+          component: () => import('@/views/estoque/EstoqueView.vue'),
+          meta: { title: 'Estoque', permissao: 'estoque.view' },
+        },
+        {
+          path: 'estoque/movimentacoes',
+          name: 'estoque.movimentacoes',
+          component: () => import('@/views/estoque/MovimentacoesView.vue'),
+          meta: { title: 'MovimentaÃ§Ãµes', permissao: 'estoque.view' },
+        },
+        {
+          path: 'estoque/inventario',
+          name: 'estoque.inventario',
+          component: () => import('@/views/estoque/InventarioView.vue'),
+          meta: { title: 'InventÃ¡rio', permissao: 'estoque.edit' },
+        },
+
+        // â”€â”€ Compras â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        {
+          path: 'compras',
+          name: 'compras',
+          component: () => import('@/views/compras/ComprasView.vue'),
+          meta: { title: 'Compras', permissao: 'compras.view' },
+        },
+        {
+          path: 'compras/novo',
+          name: 'compras.novo',
+          component: () => import('@/views/compras/CompraFormView.vue'),
+          meta: { title: 'Novo Pedido de Compra', permissao: 'compras.create' },
+        },
+        {
+          path: 'compras/:id',
+          name: 'compras.show',
+          component: () => import('@/views/compras/CompraShowView.vue'),
+          meta: { title: 'Pedido de Compra', permissao: 'compras.view' },
+        },
+
+        // â”€â”€ Financeiro â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        {
+          path: 'financeiro/contas-receber',
+          name: 'financeiro.receber',
+          component: () => import('@/views/financeiro/ContasReceberView.vue'),
+          meta: { title: 'Contas a Receber', permissao: 'financeiro.view' },
+        },
+        {
+          path: 'financeiro/contas-pagar',
+          name: 'financeiro.pagar',
+          component: () => import('@/views/financeiro/ContasPagarView.vue'),
+          meta: { title: 'Contas a Pagar', permissao: 'financeiro.view' },
+        },
+        {
+          path: 'financeiro/fluxo-caixa',
+          name: 'financeiro.fluxo',
+          component: () => import('@/views/financeiro/FluxoCaixaView.vue'),
+          meta: { title: 'Fluxo de Caixa', permissao: 'financeiro.view' },
+        },
+        {
+          path: 'financeiro/dre',
+          name: 'financeiro.dre',
+          component: () => import('@/views/financeiro/DREView.vue'),
+          meta: { title: 'DRE', permissao: 'financeiro.view' },
+        },
+
+        // â”€â”€ Fiscal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        {
+          path: 'fiscal/certificados',
+          name: 'fiscal.certificados',
+          component: () => import('@/views/fiscal/CertificadoDigitalView.vue'),
+          meta: { title: 'Certificado Digital', permissao: 'fiscal.view' },
+        },
+        {
+          path: 'fiscal/nfe',
+          name: 'fiscal.nfe',
+          component: () => import('@/views/fiscal/NFeView.vue'),
+          meta: { title: 'NF-e', permissao: 'fiscal.view' },
+        },
+        {
+          path: 'fiscal/nfe/configuracoes',
+          name: 'fiscal.nfe.configuracoes',
+          component: () => import('@/views/fiscal/NFeConfiguracoesView.vue'),
+          meta: { title: 'ConfiguraÃ§Ãµes NF-e e NFC-e', permissao: 'fiscal.view' },
+        },        {
+          path: 'fiscal/nfe/:id',
+          name: 'fiscal.nfe.show',
+          component: () => import('@/views/fiscal/NFeShowView.vue'),
+          meta: { title: 'NF-e', permissao: 'fiscal.view' },
+        },
+
+        // â”€â”€ CRM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        {
+          path: 'crm/busca-cnpj',
+          name: 'crm.cnpj',
+          component: () => import('@/views/crm/CnpjBuscaView.vue'),
+          meta: { title: 'Busca CNPJ', permissao: 'crm.view' },
+        },
+        {
+          path: 'crm/google-empresas',
+          name: 'crm.google-empresas',
+          component: () => import('@/views/crm/GoogleBusinessBuscaView.vue'),
+          meta: { title: 'Busca Google Empresas', permissao: 'crm.view' },
+        },
+                  {
+                    path: 'crm',
+          name: 'crm',
+          component: () => import('@/views/crm/CRMView.vue'),
+          meta: { title: 'CRM', permissao: 'crm.view' },
+        },
+
+        // â”€â”€ AssistÃªncia TÃ©cnica â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        {
+          path: 'os',
+          name: 'os',
+          component: () => import('@/views/os/OSView.vue'),
+          meta: { title: 'AssistÃªncia TÃ©cnica', permissao: 'os.view' },
+        },
+        {
+          path: 'os/nova',
+          name: 'os.nova',
+          component: () => import('@/views/os/OSFormView.vue'),
+          meta: { title: 'Nova OS', permissao: 'os.create' },
+        },
+        {
+          path: 'os/:id',
+          name: 'os.show',
+          component: () => import('@/views/os/OSShowView.vue'),
+          meta: { title: 'Ordem de ServiÃ§o', permissao: 'os.view' },
+        },
+        {
+          path: 'os/:id/editar',
+          name: 'os.editar',
+          component: () => import('@/views/os/OSFormView.vue'),
+          meta: { title: 'Editar OS', permissao: 'os.edit' },
+        },
+
+        // â”€â”€ Marketplaces â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        {
+          path: 'marketplaces',
+          name: 'marketplaces',
+          component: () => import('@/views/marketplaces/MarketplacesView.vue'),
+          meta: { title: 'Marketplaces' },
+        },
+        {
+          path: 'marketplaces/callback/:plataforma',
+          name: 'marketplaces.callback',
+          component: () => import('@/views/marketplaces/MarketplaceCallbackView.vue'),
+          meta: { title: 'Conectando...' },
+        },
+
+        // â”€â”€ Mapa GPS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        {
+          path: 'mapa',
+          name: 'mapa',
+          component: () => import('@/views/dashboard/MapaView.vue'),
+          meta: { title: 'Mapa ONS' },
+        },
+
+        // â”€â”€ ConfiguraÃ§Ãµes / APIs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        {
+          path: 'configuracoes/apis',
+          name: 'configuracoes.apis',
+          component: () => import('@/views/configuracoes/ApiIntegrationsView.vue'),
+          meta: { title: 'Central de APIs', permissao: 'integracoes.view' },
+        },
+
+        // â”€â”€ 404 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        {
+          path: 'configuracoes/empresa',
+          name: 'configuracoes.empresa',
+          component: () => import('@/views/configuracoes/EmpresaView.vue'),
+          meta: { title: 'Dados da Empresa' },
+        },
+        { path: ':pathMatch(.*)*', name: 'not-found',
+          component: () => import('@/views/NotFoundView.vue') },
+      ],
+    },
+  ],
+})
+
+// Guards
+router.beforeEach(async (to) => {
+  const auth = useAuthStore()
+
+  document.title = to.meta.title ? `${to.meta.title} â€” IntelbrasTech ERP` : 'IntelbrasTech ERP'
+
+  if (to.meta.requiresAuth && !auth.logado) return { name: 'login' }
+  if (to.meta.guest && auth.logado) return { name: 'dashboard' }
+
+  if (to.meta.requiresAuth && auth.logado && !auth.usuario) {
+    await auth.carregarUsuario()
+  }
+
+  if (to.meta.permissao && !auth.pode(to.meta.permissao)) {
+    return { name: 'dashboard' }
+  }
+})
+
+export default router
