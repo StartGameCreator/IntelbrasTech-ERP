@@ -1,86 +1,80 @@
 # IntelbrasTech ERP
 
-Sistema de Gestão Empresarial completo desenvolvido com Laravel 11 + Vue.js 3 + PostgreSQL.
+Sistema integrado de gestão empresarial desenvolvido com **Laravel 13**, **Vue 3** e API REST. O checkpoint documentado corresponde aos arquivos `backend(15).zip` e `frontend(14).zip`, recebidos em julho de 2026.
 
-## Stack
+> **Situação:** desenvolvimento ativo. Esta documentação descreve a estrutura encontrada no checkpoint e diferencia funcionalidades implementadas de integrações ainda dependentes de credenciais, homologação ou implantação.
 
-- **Backend**: Laravel 11 / PHP 8.4
-- **Frontend**: Vue.js 3 / Tailwind CSS / Pinia
-- **Banco**: PostgreSQL 16
-- **Cache/Filas**: Redis 7
-- **Mensageria**: RabbitMQ 3.12
-- **Storage**: MinIO (S3-compatível)
-- **Container**: Docker + Docker Compose
+## Principais áreas
 
-## Módulos
+- Cadastros: empresas, clientes, fornecedores, produtos, categorias, marcas e unidades.
+- Comercial: pedidos, recibos, tabelas de preço e Kanban.
+- CRM: leads, pipelines, enriquecimento CNPJ, Google Business e reuniões.
+- Estoque: depósitos, saldos, movimentações, inventários e entrada por XML.
+- Financeiro: contas a pagar, contas a receber, fluxo de caixa, plano de contas e DRE.
+- Fiscal: NF-e, NFC-e, DANFE, certificado A1, CSC, numeração, cancelamento, carta de correção e devolução fiscal.
+- PDV: vendas, pagamentos, histórico, emissão NFC-e, cancelamento e devoluções.
+- Marketplace: hub, Mercado Livre, Shopee, Nuvemshop, catálogo, pedidos, fiscal e automações.
+- Expedição e logística: separação, volumes, etiquetas, transportadoras e rastreamento.
+- Ordens de serviço: cadastro, peças, fotos, histórico e status.
+- Energia: mapas e captação de oportunidades ONS, ANEEL e CCEE.
 
-- Dashboard executivo com KPIs em tempo real
-- Gestão de Clientes (com mapa GPS)
-- Gestão de Produtos / Catálogo / Variações
-- Controle de Estoque (multi-depósito, inventário)
-- Pedidos de Venda (multi-canal)
-- Compras
-- Financeiro (CR, CP, Fluxo de Caixa, DRE)
-- Fiscal (NF-e, NFC-e, NFS-e — integração SEFAZ)
-- Logística (Correios, Jadlog, Loggi)
-- Marketplaces (Mercado Livre, Shopee, Amazon, Nuvemshop)
-- CRM (Pipeline de Vendas, Leads)
-- Assistência Técnica (OS exclusivo Intelbras)
-- RH / Comissões
-- Mapa Inteligente GIS
-- Dark Mode completo
+## Stack confirmada
 
-## Instalação rápida (Docker)
+### Backend
 
-```bash
-cp .env.example .env
-cd docker
-docker compose up -d
-docker compose exec app php artisan key:generate
-docker compose exec app php artisan migrate --seed
+- PHP `^8.3`
+- Laravel `^13.0`
+- Laravel Sanctum `^4.0`
+- PHPUnit `^12.0`
+- NFePHP SPED-NFe `~5.2.6`
+- DomPDF, Guzzle, Redis/Predis, AWS S3, QR Code e código de barras
+
+### Frontend
+
+- Vue `^3.4`
+- Vue Router `^4.3`
+- Pinia `^2.1`
+- Vite `^5.2`
+- Axios, Tailwind CSS, Leaflet, Chart.js, ApexCharts e XLSX
+
+## Documentação
+
+- [Índice completo](docs/README.md)
+- [Arquitetura](docs/01-Arquitetura/README.md)
+- [Instalação](docs/02-Instalacao/README.md)
+- [Banco de dados](docs/03-Banco-de-Dados/README.md)
+- [API](docs/04-API/README.md)
+- [Módulos](docs/05-Modulos/README.md)
+- [Fiscal](docs/06-Fiscal/README.md)
+- [Marketplace](docs/07-Marketplace/README.md)
+- [Logística e expedição](docs/08-Logistica/README.md)
+- [CRM](docs/09-CRM/README.md)
+- [PDV](docs/10-PDV/README.md)
+- [OS](docs/11-OS/README.md)
+- [Administração](docs/12-Administrador/README.md)
+- [Manual do usuário](docs/13-Usuario/README.md)
+- [Guia do desenvolvedor](docs/14-Desenvolvedor/README.md)
+- [Diagramas](docs/diagrams/README.md)
+
+## Execução local resumida
+
+```powershell
+# Backend
+cd D:\Skill\IntelbrasTech-ERP\backend
+composer install
+copy .env.example .env
+php artisan key:generate
+php artisan migrate
+php artisan serve
+
+# Frontend (outro terminal)
+cd D:\Skill\IntelbrasTech-ERP\frontend
+npm install
+npm run dev
 ```
 
-Acesse: http://localhost
-
-## Credenciais padrão (desenvolvimento)
-
-- **E-mail**: admin@intelbrastech.com.br
-- **Senha**: Admin@123
-
-## Estrutura do Projeto
-
-```
-intelbrastech-erp/
-├── backend/          # Laravel 11 API
-│   ├── app/
-│   │   ├── Http/Controllers/Api/V1/
-│   │   ├── Models/
-│   │   ├── Services/
-│   │   └── Traits/
-│   ├── database/
-│   └── routes/
-├── frontend/         # Vue.js 3 SPA
-│   └── src/
-│       ├── views/
-│       ├── components/
-│       ├── stores/
-│       ├── composables/
-│       ├── router/
-│       └── services/
-├── docker/           # Docker configs
-├── sql/              # Schema PostgreSQL
-└── docs/             # Documentação
-```
-
-## Fases de Desenvolvimento
-
-- **Fase 1** (concluída): Arquitetura + ERD + SQL + Docker
-- **Fase 2** (concluída): Backend Laravel (Models, Controllers, Services)
-- **Fase 3** (concluída): Frontend Vue.js 3 (Layout, Dashboard, Clientes, Pedidos, OS, Mapa)
-- **Fase 4**: Views completas de todos os módulos
-- **Fase 5**: Integração com SEFAZ (NF-e real)
-- **Fase 6**: App Mobile (React Native)
+Revise os arquivos `.env` antes de executar. Nunca publique certificados, tokens, senhas ou chaves no GitHub.
 
 ## Licença
 
-Proprietário — IntelbrasTech © 2025
+Código proprietário. Consulte [LICENSE](LICENSE).
