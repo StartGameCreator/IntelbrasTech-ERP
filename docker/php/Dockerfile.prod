@@ -1,12 +1,12 @@
 FROM php:8.4-fpm-alpine
 
 RUN apk add --no-cache \
-        curl icu-libs libjpeg-turbo libpng libpq libzip oniguruma \
+        curl icu-libs libjpeg-turbo libpng libpq libzip oniguruma sqlite-libs \
     && apk add --no-cache --virtual .build-deps \
-        $PHPIZE_DEPS icu-dev libjpeg-turbo-dev libpng-dev libpq-dev libzip-dev oniguruma-dev libxml2-dev \
+        $PHPIZE_DEPS icu-dev libjpeg-turbo-dev libpng-dev libpq-dev libzip-dev oniguruma-dev libxml2-dev sqlite-dev \
     && docker-php-ext-configure gd --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
-        bcmath exif gd intl mbstring opcache pcntl pdo_pgsql soap xml zip \
+        bcmath exif gd intl mbstring opcache pcntl pdo_pgsql pdo_sqlite soap xml zip \
     && pecl install redis \
     && docker-php-ext-enable redis \
     && apk del .build-deps
