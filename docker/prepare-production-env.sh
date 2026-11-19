@@ -1,0 +1,110 @@
+#!/usr/bin/env sh
+set -eu
+
+ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+BACKEND_ENV="$ROOT_DIR/backend/.env"
+COMPOSE_ENV="$ROOT_DIR/docker/.env"
+STAMP="$(date +%Y%m%d-%H%M%S)"
+
+umask 077
+
+for file in "$BACKEND_ENV" "$COMPOSE_ENV"; do
+    if [ -f "$file" ]; then
+        cp "$file" "$file.backup-$STAMP"
+    fi
+done
+
+APP_KEY="base64:$(openssl rand -base64 32 | tr -d '\n')"
+DB_PASSWORD="$(openssl rand -hex 32)"
+REDIS_PASSWORD="$(openssl rand -hex 32)"
+RABBITMQ_PASS="$(openssl rand -hex 24)"
+MINIO_PASS="$(openssl rand -hex 32)"
+
+cat > "$COMPOSE_ENV" <<EOF
+DB_DATABASE=intelbrastech
+DB_USERNAME=erp_user
+DB_PASSWORD=$DB_PASSWORD
+REDIS_PASSWORD=$REDIS_PASSWORD
+RABBITMQ_USER=intelbrastech
+RABBITMQ_PASS=$RABBITMQ_PASS
+MINIO_USER=intelbrastechminio
+MINIO_PASS=$MINIO_PASS
+AWS_BUCKET=intelbrastech
+EOF
+
+cat > "$BACKEND_ENV" <<EOF
+APP_NAME="IntelbrasTech ERP"
+APP_ENV=production
+APP_KEY=$APP_KEY
+APP_DEBUG=false
+APP_TIMEZONE=America/Sao_Paulo
+APP_URL=http://187.127.49.251
+FRONTEND_URL=http://187.127.49.251
+APP_LOCALE=pt_BR
+APP_FALLBACK_LOCALE=pt_BR
+LOG_CHANNEL=stack
+LOG_STACK=single
+LOG_LEVEL=warning
+
+DB_CONNECTION=pgsql
+DB_HOST=postgres
+DB_PORT=5432
+DB_DATABASE=intelbrastech
+DB_USERNAME=erp_user
+DB_PASSWORD=$DB_PASSWORD
+
+REDIS_CLIENT=phpredis
+REDIS_HOST=redis
+REDIS_PASSWORD=$REDIS_PASSWORD
+REDIS_PORT=6379
+CACHE_STORE=redis
+CACHE_DRIVER=redis
+SESSION_DRIVER=redis
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=true
+QUEUE_CONNECTION=redis
+QUEUE_FAILED_DRIVER=database-uuids
+
+MAIL_MAILER=smtp
+MAIL_HOST=mailpit
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS=nao-responda@intelbrastech.com.br
+MAIL_FROM_NAME="IntelbrasTech ERP"
+
+FILESYSTEM_DISK=s3
+AWS_ACCESS_KEY_ID=intelbrastechminio
+AWS_SECRET_ACCESS_KEY=$MINIO_PASS
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=intelbrastech
+AWS_ENDPOINT=http://minio:9000
+AWS_USE_PATH_STYLE_ENDPOINT=true
+
+RABBITMQ_HOST=rabbitmq
+RABBITMQ_PORT=5672
+RABBITMQ_USER=intelbrastech
+RABBITMQ_PASS=$RABBITMQ_PASS
+RABBITMQ_PASSWORD=$RABBITMQ_PASS
+
+CORS_ALLOWED_ORIGINS=http://187.127.49.251
+SANCTUM_STATEFUL_DOMAINS=187.127.49.251
+BCRYPT_ROUNDS=12
+
+PORTAL_AUTORIZACAO_INTELBRAS=false
+FISCAL_DRIVER=fake
+FISCAL_ALLOW_FAKE_IN_PRODUCTION=false
+FISCAL_STORAGE_DISK=local
+FISCAL_SCHEMAS=PL_010_V1.30
+SEFAZ_AMBIENTE=2
+NFE_AMBIENTE=2
+NFE_VERSAO=4.00
+SEFAZ_NFE_CONSULTA_URL=https://nfeweb.sefaz.go.gov.br/nfeweb/sites/nfe/consulta-completa
+
+CNPJ_PROVIDER=brasilapi
+CNPJ_TIMEOUT=20
+EOF
+
+chmod 600 "$BACKEND_ENV" "$COMPOSE_ENV"
+printf 'Ambiente de produção reconstruído. Backups: *backup-%s\n' "$STAMP"

@@ -2,6 +2,7 @@
 /backend/.env
 /backend/.env.*
 !/backend/.env.example
+/docker/.env
 /backend/vendor/
 /backend/storage/*.key
 /backend/storage/logs/*
