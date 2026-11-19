@@ -29,10 +29,10 @@ return new class extends Migration {
             ->orderBy('id')
             ->value('id');
 
+        // Em uma instalação nova ainda não há empresa nem cadastros legados
+        // para unificar. A migração deve ser um no-op nesse cenário.
         if (!$empresaId) {
-            throw new \RuntimeException(
-                'Nenhuma empresa cadastrada. Cadastre a empresa principal antes de executar esta migration.'
-            );
+            return;
         }
 
         $userColumns = array_flip(Schema::getColumnListing($userTable));
