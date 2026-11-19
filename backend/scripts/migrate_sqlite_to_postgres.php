@@ -48,6 +48,40 @@ if ($tables === []) {
     exit(1);
 }
 
+$foreignKeys = $target->select(
+    "SELECT child.relname AS table_name, parent.relname AS depends_on
+     FROM pg_constraint constraint_info
+     JOIN pg_class child ON child.oid = constraint_info.conrelid
+     JOIN pg_class parent ON parent.oid = constraint_info.confrelid
+     JOIN pg_namespace namespace_info ON namespace_info.oid = child.relnamespace
+     WHERE constraint_info.contype = 'f' AND namespace_info.nspname = 'public'"
+);
+$dependencies = array_fill_keys($tables, []);
+foreach ($foreignKeys as $foreignKey) {
+    if ($foreignKey->table_name !== $foreignKey->depends_on
+        && isset($dependencies[$foreignKey->table_name], $dependencies[$foreignKey->depends_on])) {
+        $dependencies[$foreignKey->table_name][$foreignKey->depends_on] = true;
+    }
+}
+$orderedTables = [];
+while ($dependencies !== []) {
+    $ready = array_keys(array_filter($dependencies, static fn (array $items) => $items === []));
+    if ($ready === []) {
+        throw new RuntimeException(
+            'Dependência circular encontrada: '.implode(', ', array_keys($dependencies))
+        );
+    }
+    foreach ($ready as $table) {
+        $orderedTables[] = $table;
+        unset($dependencies[$table]);
+        foreach ($dependencies as &$items) {
+            unset($items[$table]);
+        }
+        unset($items);
+    }
+}
+$tables = $orderedTables;
+
 function quoteIdentifier(string $identifier): string
 {
     return '"'.str_replace('"', '""', $identifier).'"';
