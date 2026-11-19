@@ -81,7 +81,6 @@ $quotedTables = implode(', ', array_map('quoteIdentifier', $tables));
 $target->beginTransaction();
 
 try {
-    $target->statement('SET LOCAL session_replication_role = replica');
     $target->statement("TRUNCATE TABLE {$quotedTables} RESTART IDENTITY CASCADE");
 
     foreach ($tables as $table) {
