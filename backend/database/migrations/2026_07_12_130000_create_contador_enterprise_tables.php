@@ -43,7 +43,7 @@ return new class extends Migration {
                 $table->text('caminho_arquivo')->nullable();
                 $table->unsignedBigInteger('tamanho_bytes')->nullable();
                 $table->text('erro')->nullable();
-                $table->foreignId('gerado_por')->nullable()->constrained('users')->nullOnDelete();
+                $table->foreignId('gerado_por')->nullable()->constrained('usuarios')->nullOnDelete();
                 $table->timestamp('gerado_em')->nullable();
                 $table->timestamp('enviado_em')->nullable();
                 $table->timestamps();
