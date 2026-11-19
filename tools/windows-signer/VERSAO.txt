@@ -1,0 +1,5 @@
+IntelbrasTech Assinador Local
+Versao: 0.1.0-experimental
+Plataforma: Windows 10/11 com Windows PowerShell 5.1 ou superior
+
+Componente independente e opcional. Nao substitui o certificado A1 ativo no servidor.

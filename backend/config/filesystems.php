@@ -1,0 +1,46 @@
+<?php
+
+return [
+
+    'default' => env('FILESYSTEM_DISK', 's3'),
+
+    'disks' => [
+
+        'local' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private'),
+            'serve' => true,
+            'throw' => false,
+        ],
+
+        'public' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
+        // Usado por todo o sistema (Produto, NF-e/DANFE, OS) via Storage::disk('s3').
+        // Em desenvolvimento aponta para o MinIO do docker-compose; em produção,
+        // basta trocar as variáveis de ambiente para o S3 real da AWS.
+        's3' => [
+            'driver' => 's3',
+            'key' => env('AWS_ACCESS_KEY_ID', 'minioadmin'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY', 'minioadmin'),
+            'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+            'bucket' => env('AWS_BUCKET', 'intelbrastech'),
+            'url' => env('AWS_URL', 'http://localhost:9000/intelbrastech'),
+            'endpoint' => env('AWS_ENDPOINT', 'http://minio:9000'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', true),
+            'throw' => false,
+            'visibility' => 'public',
+        ],
+
+    ],
+
+    'links' => [
+        public_path('storage') => storage_path('app/public'),
+    ],
+
+];

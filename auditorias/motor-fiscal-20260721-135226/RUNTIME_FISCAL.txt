@@ -1,0 +1,3 @@
+
+> php artisan tinker --execute="require storage_path('app/auditoria_motor_fiscal_runtime.php');"
+

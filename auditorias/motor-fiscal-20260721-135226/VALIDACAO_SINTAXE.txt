@@ -1,0 +1,84 @@
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Auth\AuthController.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Auth\SocialAuthController.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Cadastros\ProdutoController.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Comercial\PedidoController.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Comercial\ReciboController.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Configuracoes\EmpresaController.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Fiscal\ContadorController.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Fiscal\NFe\NFeController.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Marketplace\MarketplaceFiscalEmissionController.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\OS\OrdemServicoController.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Pdv\NfcePdvController.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Platform\PlatformCadastroController.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Http\Controllers\Api\V1\Utilitarios\CnpjController.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Models\Empresa.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Models\NotaFiscal.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\ChaveAcessoService.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\ContadorExportacaoService.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\DanfeService.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\NFeService.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\PdvNfceService.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\RegimeTributarioService.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\SefazService.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\ValidacaoFiscalService.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Services\Fiscal\XmlNFeGenerator.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Services\MarketplaceTecnicos\MarketplaceAccountService.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Services\OS\OsPdfService.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Services\Produtos\ProductAiService.php"
+
+
+> php -l "D:\Skill\IntelbrasTech-ERP\backend\app\Services\Vendas\ReciboPdfService.php"
+

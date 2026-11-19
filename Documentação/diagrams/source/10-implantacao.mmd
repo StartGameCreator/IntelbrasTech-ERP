@@ -1,0 +1,11 @@
+flowchart TB
+ DEV[Desenvolvimento Windows] --> GIT[GitHub privado]
+ GIT --> CI[Pipeline de testes/build]
+ CI --> VPS[VPS Linux]
+ VPS --> NG[Nginx + HTTPS]
+ NG --> FE[Frontend compilado]
+ NG --> PHP[PHP-FPM / Laravel]
+ PHP --> PG[(PostgreSQL)]
+ PHP --> REDIS[(Redis/Filas)]
+ PHP --> STORE[Storage/Backups]
+ MON[Logs e monitoramento] --> VPS
