@@ -1,0 +1,156 @@
+name: intelbrastech
+
+x-app: &app
+  image: intelbrastech-app:latest
+  restart: unless-stopped
+  env_file:
+    - ../backend/.env
+  volumes:
+    - app_storage:/var/www/html/storage
+  networks:
+    - intelbrastech_net
+
+services:
+  app:
+    <<: *app
+    build:
+      context: ..
+      dockerfile: docker/php/Dockerfile.prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  queue:
+    <<: *app
+    command: php artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  scheduler:
+    <<: *app
+    command: sh -c "while true; do php artisan schedule:run --no-interaction; sleep 60; done"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/nginx/Dockerfile.backend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - app_storage:/var/www/html/storage:ro
+    depends_on:
+      - app
+    networks:
+      - intelbrastech_net
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/frontend/Dockerfile.prod
+      args:
+        VITE_API_URL: /api/v1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:80"
+    networks:
+      - intelbrastech_net
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:?DB_DATABASE obrigatorio}
+      POSTGRES_USER: ${DB_USERNAME:?DB_USERNAME obrigatorio}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD obrigatorio}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - intelbrastech_net
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?REDIS_PASSWORD obrigatorio}", "--appendonly", "yes"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD obrigatorio}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - intelbrastech_net
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?RABBITMQ_USER obrigatorio}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:?RABBITMQ_PASS obrigatorio}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - intelbrastech_net
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:?MINIO_USER obrigatorio}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASS:?MINIO_PASS obrigatorio}
+    volumes:
+      - minio_data:/data
+    networks:
+      - intelbrastech_net
+
+  minio-init:
+    image: minio/mc:latest
+    restart: "no"
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "until mc alias set local http://minio:9000 '$${MINIO_USER}' '$${MINIO_PASS}'; do sleep 2; done;
+      mc mb --ignore-existing local/$${AWS_BUCKET}; exit 0"
+    environment:
+      MINIO_USER: ${MINIO_USER:?MINIO_USER obrigatorio}
+      MINIO_PASS: ${MINIO_PASS:?MINIO_PASS obrigatorio}
+      AWS_BUCKET: ${AWS_BUCKET:-intelbrastech}
+    networks:
+      - intelbrastech_net
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    networks:
+      - intelbrastech_net
+
+networks:
+  intelbrastech_net:
+    driver: bridge
+
+volumes:
+  app_storage:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  minio_data:
