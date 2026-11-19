@@ -101,7 +101,7 @@ services:
       - intelbrastech_net
 
   rabbitmq:
-    image: rabbitmq:3.13-management-alpine
+    image: rabbitmq:management-alpine
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?RABBITMQ_USER obrigatorio}
@@ -111,35 +111,8 @@ services:
     networks:
       - intelbrastech_net
 
-  minio:
-    image: minio/minio:latest
-    restart: unless-stopped
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_USER:?MINIO_USER obrigatorio}
-      MINIO_ROOT_PASSWORD: ${MINIO_PASS:?MINIO_PASS obrigatorio}
-    volumes:
-      - minio_data:/data
-    networks:
-      - intelbrastech_net
-
-  minio-init:
-    image: minio/mc:latest
-    restart: "no"
-    depends_on:
-      - minio
-    entrypoint: >
-      /bin/sh -c "until mc alias set local http://minio:9000 '$${MINIO_USER}' '$${MINIO_PASS}'; do sleep 2; done;
-      mc mb --ignore-existing local/$${AWS_BUCKET}; exit 0"
-    environment:
-      MINIO_USER: ${MINIO_USER:?MINIO_USER obrigatorio}
-      MINIO_PASS: ${MINIO_PASS:?MINIO_PASS obrigatorio}
-      AWS_BUCKET: ${AWS_BUCKET:-intelbrastech}
-    networks:
-      - intelbrastech_net
-
   mailpit:
-    image: axllent/mailpit:latest
+    image: ghcr.io/axllent/mailpit:v1.33.1
     restart: unless-stopped
     networks:
       - intelbrastech_net
@@ -153,4 +126,3 @@ volumes:
   postgres_data:
   redis_data:
   rabbitmq_data:
-  minio_data:

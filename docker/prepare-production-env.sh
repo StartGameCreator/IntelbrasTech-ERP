@@ -18,7 +18,6 @@ APP_KEY="base64:$(openssl rand -base64 32 | tr -d '\n')"
 DB_PASSWORD="$(openssl rand -hex 32)"
 REDIS_PASSWORD="$(openssl rand -hex 32)"
 RABBITMQ_PASS="$(openssl rand -hex 24)"
-MINIO_PASS="$(openssl rand -hex 32)"
 
 cat > "$COMPOSE_ENV" <<EOF
 DB_DATABASE=intelbrastech
@@ -27,9 +26,6 @@ DB_PASSWORD=$DB_PASSWORD
 REDIS_PASSWORD=$REDIS_PASSWORD
 RABBITMQ_USER=intelbrastech
 RABBITMQ_PASS=$RABBITMQ_PASS
-MINIO_USER=intelbrastechminio
-MINIO_PASS=$MINIO_PASS
-AWS_BUCKET=intelbrastech
 EOF
 
 cat > "$BACKEND_ENV" <<EOF
@@ -74,13 +70,7 @@ MAIL_ENCRYPTION=null
 MAIL_FROM_ADDRESS=nao-responda@intelbrastech.com.br
 MAIL_FROM_NAME="IntelbrasTech ERP"
 
-FILESYSTEM_DISK=s3
-AWS_ACCESS_KEY_ID=intelbrastechminio
-AWS_SECRET_ACCESS_KEY=$MINIO_PASS
-AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=intelbrastech
-AWS_ENDPOINT=http://minio:9000
-AWS_USE_PATH_STYLE_ENDPOINT=true
+FILESYSTEM_DISK=local
 
 RABBITMQ_HOST=rabbitmq
 RABBITMQ_PORT=5672
