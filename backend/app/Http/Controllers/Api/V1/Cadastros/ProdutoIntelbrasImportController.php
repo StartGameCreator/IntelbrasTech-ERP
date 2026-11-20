@@ -121,9 +121,11 @@ class ProdutoIntelbrasImportController extends Controller
                         'nome' => $nome,
                         'descricao' => $item['descricao'] ?: ($nomeCompleto !== $nome ? $nomeCompleto : $item['nome']),
                         'descricao_curta' => mb_substr((string) ($item['resumo'] ?: ''), 0, 5000),
-                        'preco_custo' => (float) ($item['preco_custo'] ?? 0),
-                        'preco_venda' => (float) ($item['preco_venda'] ?? 0),
-                        'preco_venda_minimo' => (float) ($item['preco_venda'] ?? 0),
+                        'preco_custo' => (float) (($item['preco_venda'] ?? 0) > 0 ? $item['preco_venda'] : ($item['preco_custo'] ?? 0)),
+                        'preco_venda' => 0,
+                        'preco_venda_minimo' => 0,
+                        'modo_preco_venda' => 'manual',
+                        'markup_venda' => 0,
                         'icms_aliquota' => ((float) ($item['icms'] ?? 0)) * 100,
                         'ipi_aliquota' => ((float) ($item['ipi'] ?? 0)) * 100,
                         'controla_estoque' => true,
@@ -143,9 +145,7 @@ class ProdutoIntelbrasImportController extends Controller
                         'importado_em' => now(),
                     ];
 
-                    $payload['margem_lucro'] = (new Produto())->calcularMargem(
-                        $payload['preco_custo'], $payload['preco_venda']
-                    );
+                    $payload['margem_lucro'] = 0;
 
                     if ($produto) {
                         if ($produto->trashed()) $produto->restore();

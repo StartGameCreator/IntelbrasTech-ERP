@@ -85,7 +85,12 @@ class PdvController extends Controller
                 'nome' => $produto->nome,
                 'marca' => $produto->marca?->nome,
                 'unidade' => $produto->unidade?->sigla ?: 'UN',
-                'preco' => (float) $produto->preco_venda,
+                'preco' => $produto->modo_preco_venda === 'markup'
+                    ? round((float) $produto->preco_custo * (1 + ((float) $produto->markup_venda / 100)), 2)
+                    : (float) $produto->preco_venda,
+                'custo_compra' => (float) $produto->preco_custo,
+                'modo_preco' => $produto->modo_preco_venda ?: 'manual',
+                'markup' => (float) $produto->markup_venda,
                 'preco_minimo' => (float) $produto->preco_venda_minimo,
                 'controla_estoque' => (bool) $produto->controla_estoque,
                 'estoque_disponivel' => (float) $produto->estoque->sum('quantidade_disponivel'),

@@ -39,9 +39,12 @@
             <div><label class="label">Condição</label><select v-model="form.condicao" class="select"><option value="novo">Novo</option><option value="usado">Usado</option><option value="recondicionado">Recondicionado</option></select></div>
           </div>
 
-          <div class="grid gap-3 md:grid-cols-4">
+          <div class="grid gap-3 md:grid-cols-6">
             <label class="switch-line"><input type="checkbox" v-model="form.ativo"/> Ativado</label>
-            <div><label class="label">Preço de venda *</label><DecimalInput v-model="form.preco_venda" :decimals="2" fixed class="input"/></div>
+            <div><label class="label">Custo de compra</label><DecimalInput v-model="form.preco_custo" :decimals="2" fixed class="input" @update:model-value="recalcularPrecoVenda"/></div>
+            <div><label class="label">Formação do preço</label><select v-model="form.modo_preco_venda" class="select" @change="recalcularPrecoVenda"><option value="manual">Manual</option><option value="markup">Markup sobre o custo</option></select></div>
+            <div><label class="label">Markup (%)</label><DecimalInput v-model="form.markup_venda" :decimals="2" class="input" :disabled="form.modo_preco_venda !== 'markup'" @update:model-value="recalcularPrecoVenda"/></div>
+            <div><label class="label">Preço de venda</label><DecimalInput v-model="form.preco_venda" :decimals="2" fixed class="input" :disabled="form.modo_preco_venda === 'markup'"/><p class="field-help">Pode ser alterado manualmente no caixa.</p></div>
             <div><label class="label">Unidade</label><select v-model="form.unidade_id" class="select"><option :value="null">Selecione</option><option v-for="u in unidades" :key="u.id" :value="u.id">{{ u.sigla }}</option></select></div>
             <div><label class="label">Marca</label><select v-model="form.marca_id" class="select"><option :value="null">Selecione</option><option v-for="m in marcas" :key="m.id" :value="m.id">{{ m.nome }}</option></select></div>
           </div>
@@ -488,7 +491,7 @@ const form = ref({
   categoria_id:null,marca_id:null,fornecedor_id:null,unidade_id:null,
   descricao:'',descricao_curta:'',descricao_complementar:'',link_externo:'',video_url:'',observacoes:'',tags:[],
   peso:0,peso_bruto:0,largura:0,altura:0,comprimento:0,volumes:1,itens_caixa:1,unidade_dimensao:'cm',
-  data_validade:null,frete_gratis:false,preco_custo:0,preco_venda:0,preco_venda_minimo:0,seo_titulo:'',seo_descricao:'',seo_palavras_chave:[],
+  data_validade:null,frete_gratis:false,preco_custo:0,preco_venda:0,preco_venda_minimo:0,modo_preco_venda:'manual',markup_venda:0,seo_titulo:'',seo_descricao:'',seo_palavras_chave:[],
   ncm:'',cest:'',cfop:'',origem:0,tipo_item:'',grupo_produtos:'',percentual_tributos:0,
   icms_cst:'',icms_aliquota:0,icms_st_base:0,icms_st_valor:0,ipi_cst:'',ipi_aliquota:0,
   pis_cst:'',pis_aliquota:0,cofins_cst:'',cofins_aliquota:0,informacoes_adicionais:'',
@@ -500,6 +503,13 @@ const tagsTexto = computed({
   set: v => form.value.tags = String(v).split(',').map(x=>x.trim()).filter(Boolean),
 })
 const imagemPrincipal = computed(() => imagens.value.find(i=>i.principal) || imagens.value[0])
+
+function recalcularPrecoVenda() {
+  if (form.value.modo_preco_venda !== 'markup') return
+  const custo = Number(form.value.preco_custo || 0)
+  const markup = Number(form.value.markup_venda || 0)
+  form.value.preco_venda = Math.round(custo * (1 + markup / 100) * 100) / 100
+}
 
 async function carregarAuxiliares() {
   const reqs = await Promise.allSettled([

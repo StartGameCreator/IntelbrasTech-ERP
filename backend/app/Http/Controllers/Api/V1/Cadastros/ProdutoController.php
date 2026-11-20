@@ -35,6 +35,7 @@ class ProdutoController extends Controller
         $this->authorize('produtos.create');
         $dados = $this->validarDados($request);
         $dados['empresa_id'] = auth()->user()->empresa_id;
+        $dados = $this->aplicarFormacaoPreco($dados);
         $dados['margem_lucro'] = (new Produto())->calcularMargem(
             (float) ($dados['preco_custo'] ?? 0),
             (float) ($dados['preco_venda'] ?? 0)
@@ -66,6 +67,7 @@ class ProdutoController extends Controller
         $this->authorize('produtos.edit');
         $produto = Produto::findOrFail($id);
         $dados = $this->validarDados($request, true);
+        $dados = $this->aplicarFormacaoPreco($dados, $produto);
         $dados['margem_lucro'] = $produto->calcularMargem(
             (float) ($dados['preco_custo'] ?? $produto->preco_custo),
             (float) ($dados['preco_venda'] ?? $produto->preco_venda)
@@ -703,6 +705,7 @@ class ProdutoController extends Controller
             'itens_caixa'=>'nullable|numeric|min:0','unidade_dimensao'=>'nullable|string|max:20',
             'data_validade'=>'nullable|date','frete_gratis'=>'nullable|boolean',
             'preco_custo'=>'nullable|numeric|min:0','preco_venda'=>"$req|numeric|min:0",
+            'modo_preco_venda'=>'nullable|in:manual,markup','markup_venda'=>'nullable|numeric|min:0|max:10000',
             'preco_venda_minimo'=>'nullable|numeric|min:0','desconto_maximo'=>'nullable|numeric|min:0|max:100',
             'icms_cst'=>'nullable|string|max:5','icms_aliquota'=>'nullable|numeric|min:0|max:100',
             'pis_cst'=>'nullable|string|max:3','pis_aliquota'=>'nullable|numeric|min:0|max:100',
@@ -717,5 +720,18 @@ class ProdutoController extends Controller
             'estoque_maximo'=>'nullable|numeric|min:0','ponto_reposicao'=>'nullable|numeric|min:0',
             'ativo'=>'nullable|boolean','destaque'=>'nullable|boolean',
         ]);
+    }
+
+    private function aplicarFormacaoPreco(array $dados, ?Produto $produto = null): array
+    {
+        $modo = $dados['modo_preco_venda'] ?? $produto?->modo_preco_venda ?? 'manual';
+        $custo = (float) ($dados['preco_custo'] ?? $produto?->preco_custo ?? 0);
+        $markup = (float) ($dados['markup_venda'] ?? $produto?->markup_venda ?? 0);
+
+        if ($modo === 'markup') {
+            $dados['preco_venda'] = round($custo * (1 + ($markup / 100)), 2);
+        }
+
+        return $dados;
     }
 }

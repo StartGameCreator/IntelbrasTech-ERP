@@ -17,7 +17,7 @@ class Produto extends Model
         'descricao_curta','descricao_complementar','link_externo','video_url','observacoes',
         'tags','peso','peso_bruto','largura','altura','comprimento','volumes','itens_caixa',
         'unidade_dimensao','data_validade','frete_gratis',
-        'preco_custo','preco_venda','preco_venda_minimo','margem_lucro','desconto_maximo',
+        'preco_custo','preco_venda','preco_venda_minimo','margem_lucro','desconto_maximo','modo_preco_venda','markup_venda',
         'icms_cst','icms_aliquota','pis_cst','pis_aliquota','cofins_cst','cofins_aliquota',
         'ipi_cst','ipi_aliquota','tipo_item','grupo_produtos','percentual_tributos',
         'icms_st_base','icms_st_valor','icms_st_substituto','ipi_excecao',
@@ -31,7 +31,7 @@ class Produto extends Model
 
     protected $casts = [
         'preco_custo'=>'decimal:4','preco_venda'=>'decimal:4',
-        'preco_venda_minimo'=>'decimal:4','margem_lucro'=>'decimal:2',
+        'preco_venda_minimo'=>'decimal:4','margem_lucro'=>'decimal:2','markup_venda'=>'decimal:2',
         'desconto_maximo'=>'decimal:2','icms_aliquota'=>'decimal:2',
         'pis_aliquota'=>'decimal:2','cofins_aliquota'=>'decimal:2',
         'ipi_aliquota'=>'decimal:2','peso'=>'decimal:3','peso_bruto'=>'decimal:3',

@@ -93,7 +93,7 @@
                 <span>{{ produto.sku || produto.codigo || produto.ean || 'Sem código' }}</span>
                 <small>Estoque: {{ numero(produto.estoque_disponivel, 3) }} {{ produto.unidade }}</small>
               </div>
-              <div class="product-price">{{ moeda(produto.preco) }}</div>
+              <div class="product-price">{{ Number(produto.preco) > 0 ? moeda(produto.preco) : 'Definir no caixa' }}</div>
             </button>
             <div ref="pdvProductSentinel" class="pdv-load-more">
               <button v-if="paginaProdutos < ultimaPaginaProdutos" :disabled="loadingMoreProducts" @click="carregarMaisProdutos">

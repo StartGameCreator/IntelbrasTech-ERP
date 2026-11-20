@@ -44,21 +44,22 @@
         <thead>
           <tr>
             <th>Produto</th><th>Categoria</th><th>SKU/Código</th>
-            <th class="text-right">Preço Venda</th><th class="text-right">Margem</th>
+            <th class="text-right">Custo de compra</th><th class="text-right">Preço de venda</th><th class="text-right">Markup</th>
             <th>Status</th><th class="text-right">Ações</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-if="loading"><td colspan="7"><div class="skeleton h-8 rounded m-2" /></td></tr>
-          <tr v-else-if="!items.length"><td colspan="7">
+          <tr v-if="loading"><td colspan="8"><div class="skeleton h-8 rounded m-2" /></td></tr>
+          <tr v-else-if="!items.length"><td colspan="8">
             <div class="empty-state"><p class="text-sm text-[var(--text-muted)]">Nenhum produto encontrado</p></div>
           </td></tr>
           <tr v-else v-for="item in items" :key="item.id" class="cursor-pointer" @click="verItem(item.id)">
             <td class="text-sm font-medium text-[var(--text-primary)]">{{ item.nome }}</td>
             <td class="text-xs text-[var(--text-muted)]">{{ item.categoria?.nome || '—' }}</td>
             <td class="text-xs">{{ item.sku || item.codigo || '—' }}</td>
+            <td class="text-sm text-right font-medium">{{ moeda(item.preco_custo) }}</td>
             <td class="text-sm text-right font-medium">{{ moeda(item.preco_venda) }}</td>
-            <td class="text-xs text-right" :class="parseFloat(item.margem_lucro) < 0 ? 'text-danger' : 'text-[var(--text-muted)]'">{{ percentual(item.margem_lucro) }}</td>
+            <td class="text-xs text-right text-[var(--text-muted)]">{{ item.modo_preco_venda === 'markup' ? percentual(item.markup_venda) : 'Manual' }}</td>
             <td><span class="badge" :class="item.ativo ? 'badge-success' : 'badge-gray'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td>
             <td class="text-right" @click.stop>
               <router-link :to="`/produtos/${item.id}/editar`" class="btn-ghost btn-icon"><PencilIcon class="w-4 h-4" /></router-link>
@@ -398,8 +399,9 @@ async function selecionarArquivo(event) {
         familia,
         multiplo: preco.multiplo,
         preco_referencia: preco.preco_referencia,
-        preco_venda: precoPrincipal(linha, mapa),
-        preco_custo: preco.custo ?? 0,
+        // A tabela do fabricante informa custo de aquisição, não preço de revenda.
+        preco_venda: 0,
+        preco_custo: precoPrincipal(linha, mapa),
         ipi: preco.ipi,
         icms: preco.icms,
         bndes: boolSim(linha[mapa['disp. bndes']]),
