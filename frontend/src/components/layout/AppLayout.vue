@@ -1,8 +1,17 @@
 ﻿<template>
   <div class="flex h-screen overflow-hidden" :class="temaClasse">
+    <button
+      v-if="sidebarAberta"
+      type="button"
+      class="mobile-sidebar-backdrop"
+      aria-label="Fechar menu"
+      @click="sidebarAberta = false"
+    />
+
     <aside
       :class="[
-        'flex flex-col flex-shrink-0 transition-all duration-300 border-r border-[var(--border)] bg-dark-800',
+        'app-sidebar flex flex-col flex-shrink-0 transition-all duration-300 border-r border-[var(--border)] bg-dark-800',
+        sidebarAberta && 'mobile-open',
         sidebarAberta ? 'w-60' : 'w-16',
       ]"
     >
@@ -147,7 +156,16 @@
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="border-b border-[var(--border)] bg-[var(--bg-surface)] flex-shrink-0">
         <div class="min-h-12 flex items-center gap-3 px-5 py-1.5">
-          <div class="flex items-center gap-1.5 flex-1 min-w-0 flex-wrap">
+          <button
+            type="button"
+            class="mobile-menu-button btn-ghost btn-icon"
+            aria-label="Abrir menu principal"
+            @click="sidebarAberta = true"
+          >
+            <Bars3Icon class="w-5 h-5" />
+          </button>
+
+          <div class="desktop-top-menus flex items-center gap-1.5 flex-1 min-w-0 flex-wrap">
             <div v-for="menu in topMenus" :key="menu.id" class="relative flex-shrink-0">
               <button
                 type="button"
@@ -198,7 +216,7 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-2 flex-shrink-0">
+          <div class="header-actions flex items-center gap-2 flex-shrink-0">
             <button class="btn-ghost btn-icon" title="Busca global">
               <MagnifyingGlassIcon class="w-4 h-4" />
             </button>
@@ -257,7 +275,7 @@
         </div>
       </header>
 
-      <main class="flex-1 overflow-y-auto bg-[var(--bg-base)] p-6">
+      <main class="app-content flex-1 overflow-y-auto bg-[var(--bg-base)] p-6">
         <RouterView v-slot="{ Component, route }">
           <Transition name="page" mode="out-in">
             <component :is="Component" :key="route.path" />
@@ -269,8 +287,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { RouterView, RouterLink } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { RouterView, RouterLink, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useDashboardStore } from '@/stores/dashboard'
 import {
@@ -305,16 +323,32 @@ import {
   ArrowPathIcon,
   UserCircleIcon,
   GlobeAltIcon,
+  Bars3Icon,
 } from '@heroicons/vue/24/outline'
 
 const auth = useAuthStore()
 const dashboard = useDashboardStore()
+const route = useRoute()
 
 const sidebarAberta = ref(true)
 const notifAberta = ref(false)
 const topMenuAberto = ref(null)
 const menuLateralAberto = ref(null)
 const tema = ref(auth.usuario?.tema || 'dark')
+
+function configurarLayoutResponsivo() {
+  if (window.innerWidth < 768) {
+    sidebarAberta.value = false
+    topMenuAberto.value = null
+  }
+}
+
+watch(() => route.fullPath, () => {
+  if (window.innerWidth < 768) {
+    sidebarAberta.value = false
+    menuLateralAberto.value = null
+  }
+})
 
 const temaClasse = computed(() => (tema.value === 'dark' ? 'dark' : 'light'))
 const alertas = computed(() => dashboard.alertas)
@@ -580,11 +614,14 @@ function handleClickFora(event) {
 
 onMounted(() => {
   document.addEventListener('click', handleClickFora)
+  window.addEventListener('resize', configurarLayoutResponsivo)
+  configurarLayoutResponsivo()
   dashboard.carregarAlertas()
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickFora)
+  window.removeEventListener('resize', configurarLayoutResponsivo)
 })
 </script>
 
@@ -676,5 +713,72 @@ onUnmounted(() => {
   border-radius: 50%;
   background: currentColor;
   flex-shrink: 0;
+}
+
+.mobile-menu-button,
+.mobile-sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .app-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 200;
+    width: min(86vw, 320px) !important;
+    transform: translateX(-100%);
+    box-shadow: 18px 0 50px rgba(0, 0, 0, .42);
+  }
+
+  .app-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .mobile-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 190;
+    border: 0;
+    background: rgba(3, 7, 18, .68);
+    backdrop-filter: blur(2px);
+  }
+
+  .mobile-menu-button {
+    display: inline-flex;
+    flex: 0 0 auto;
+  }
+
+  .desktop-top-menus {
+    display: none;
+  }
+
+  .header-actions {
+    margin-left: auto;
+  }
+
+  .header-actions > button:first-child {
+    display: none;
+  }
+
+  .app-content {
+    padding: 14px !important;
+  }
+
+  header > div:first-child {
+    min-height: 56px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  header > div:last-child {
+    height: 34px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .app-sidebar nav {
+    overscroll-behavior: contain;
+  }
 }
 </style>
