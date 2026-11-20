@@ -188,6 +188,7 @@ class DashboardAnalyticsController extends Controller
                     $join->on('e.produto_id', '=', 'p.id');
                 })
                 ->where('p.empresa_id', $empresaId)
+                ->select('p.id', 'p.estoque_minimo')
                 ->groupBy('p.id', 'p.estoque_minimo')
                 ->havingRaw('COALESCE(SUM(e.quantidade_disponivel),0) < p.estoque_minimo')
                 ->get()
