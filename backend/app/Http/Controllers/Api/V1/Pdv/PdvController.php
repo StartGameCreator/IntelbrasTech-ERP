@@ -54,6 +54,7 @@ class PdvController extends Controller
 
         $empresaId = auth()->user()->empresa_id;
         $termo = trim((string) ($data['q'] ?? ''));
+        $termos = array_values(array_filter(preg_split('/\s+/u', $termo) ?: []));
         $perPage = $data['per_page'] ?? 30;
 
         $produtos = Produto::query()
@@ -67,14 +68,16 @@ class PdvController extends Controller
             ])
             ->where('empresa_id', $empresaId)
             ->where('ativo', true)
-            ->when($termo !== '', function ($query) use ($termo) {
-                $query->where(function ($q) use ($termo) {
-                    $q->where('nome', 'like', "%{$termo}%")
-                        ->orWhere('codigo', 'like', "%{$termo}%")
-                        ->orWhere('sku', 'like', "%{$termo}%")
-                        ->orWhere('codigo_barras', 'like', "%{$termo}%")
-                        ->orWhere('ean', 'like', "%{$termo}%");
-                });
+            ->when($termos !== [], function ($query) use ($termos) {
+                foreach ($termos as $palavra) {
+                    $query->where(function ($q) use ($palavra) {
+                        $q->whereLike('nome', "%{$palavra}%", caseSensitive: false)
+                            ->orWhereLike('codigo', "%{$palavra}%", caseSensitive: false)
+                            ->orWhereLike('sku', "%{$palavra}%", caseSensitive: false)
+                            ->orWhereLike('codigo_barras', "%{$palavra}%", caseSensitive: false)
+                            ->orWhereLike('ean', "%{$palavra}%", caseSensitive: false);
+                    });
+                }
             })
             ->orderBy('nome')
             ->paginate($perPage);

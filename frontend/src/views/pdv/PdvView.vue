@@ -65,15 +65,20 @@
               v-model="busca"
               class="pdv-search"
               placeholder="Código de barras, SKU, código ou nome do produto"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
               @input="debouncedSearch"
+              @blur="consolidarBusca"
               @keydown.enter.prevent="adicionarPrimeiroResultado"
             />
             <kbd>F2</kbd>
           </div>
 
-          <div v-if="buscando" class="catalog-empty">Buscando...</div>
+          <div v-if="buscando && !resultados.length" class="catalog-empty">Buscando...</div>
           <div v-else-if="busca && !resultados.length" class="catalog-empty">Nenhum produto encontrado.</div>
           <div v-else class="product-results">
+            <div v-if="buscando" class="search-progress" role="status">Atualizando resultados...</div>
             <button
               v-for="produto in resultados"
               :key="produto.id"
@@ -470,6 +475,8 @@ const fechamento = ref({ valor_informado: 0, observacoes: '' })
 const abertura = ref({ deposito_id: null, valor_abertura: 0, observacoes: '' })
 let searchTimer = null
 let clientTimer = null
+let productSearchSequence = 0
+let lastCommittedSearch = ''
 
 const formasRapidas = [
   { tipo:'dinheiro', label:'Dinheiro', icon:BanknotesIcon },
@@ -516,19 +523,31 @@ function debouncedSearch(){
   clearTimeout(searchTimer)
   searchTimer=setTimeout(()=>buscarProdutos(false),250)
 }
+function consolidarBusca(){
+  clearTimeout(searchTimer)
+  const termo=busca.value.trim()
+  if(termo!==lastCommittedSearch) buscarProdutos(false)
+}
 async function buscarProdutos(append=false){
-  if(append ? loadingMoreProducts.value : buscando.value)return
+  if(append&&loadingMoreProducts.value)return
+  const termo=append?lastCommittedSearch:busca.value.trim()
+  const sequence=append?productSearchSequence:++productSearchSequence
   if(append)loadingMoreProducts.value=true
   else{buscando.value=true;paginaProdutos.value=1}
   try{
-    const {data}=await api.get('/pdv/produtos',{params:{q:busca.value,deposito_id:caixa.value?.deposito_id,page:paginaProdutos.value,per_page:30}})
+    const {data}=await api.get('/pdv/produtos',{params:{q:termo,deposito_id:caixa.value?.deposito_id,page:paginaProdutos.value,per_page:30}})
+    if(sequence!==productSearchSequence)return
     const recebidos=data.data||[]
     resultados.value=append?[...resultados.value,...recebidos]:recebidos
+    lastCommittedSearch=termo
     ultimaPaginaProdutos.value=data.last_page||1
-    if(!append&&resultados.value.length===1 && [resultados.value[0].ean,resultados.value[0].sku,resultados.value[0].codigo].includes(busca.value.trim())){
+    if(!append&&resultados.value.length===1 && [resultados.value[0].ean,resultados.value[0].sku,resultados.value[0].codigo].includes(termo)){
       adicionarProduto(resultados.value[0])
     }
-  }finally{buscando.value=false;loadingMoreProducts.value=false}
+  }finally{
+    if(sequence===productSearchSequence) buscando.value=false
+    loadingMoreProducts.value=false
+  }
 }
 async function carregarMaisProdutos(){
   if(paginaProdutos.value>=ultimaPaginaProdutos.value||loadingMoreProducts.value)return
@@ -992,6 +1011,7 @@ onBeforeUnmount(()=>{clearTimeout(searchTimer);clearTimeout(clientTimer);window.
 kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.6rem;color:var(--text-muted);background:var(--bg-input)}
 .catalog-empty{flex:1;display:flex;align-items:center;justify-content:center;padding:30px;font-size:.78rem;color:var(--text-muted)}
 .product-results{padding:10px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.search-progress{position:sticky;top:0;z-index:3;align-self:center;padding:6px 12px;border:1px solid var(--border);border-radius:999px;background:var(--bg-elevated);color:var(--text-muted);font-size:.68rem;box-shadow:0 4px 14px rgba(0,0,0,.18)}
 .pdv-load-more{min-height:48px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:.68rem}.pdv-load-more button{width:100%;min-height:42px;border:1px solid var(--border);border-radius:8px;background:var(--bg-elevated);color:var(--text-secondary);font-weight:700}
 .product-result{display:grid;grid-template-columns:56px 1fr auto;align-items:center;gap:12px;text-align:left;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input)}
 .product-result:hover{border-color:var(--primary);background:var(--bg-elevated)}
