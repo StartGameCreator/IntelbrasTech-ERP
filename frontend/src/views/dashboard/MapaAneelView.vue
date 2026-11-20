@@ -83,7 +83,7 @@
         </div>
       </div>
 
-      <div class="card overflow-hidden relative min-h-0">
+      <div class="card overflow-hidden relative min-h-0 mapa-aneel-canvas">
         <div ref="mapContainer" class="mapa-aneel-container"></div>
         <div v-if="mapError" class="absolute inset-0 z-[700] flex items-center justify-center bg-[#090910] p-6">
           <div class="max-w-md text-center">
@@ -279,13 +279,16 @@ onBeforeUnmount(()=>destruirMapa())
 </script>
 
 <style>
-.mapa-aneel-grid{height:calc(100vh - 325px);min-height:540px;overflow:hidden}
-.mapa-aneel-container{position:absolute;inset:0;width:100%;height:100%;min-height:540px;background:#0b0b12;z-index:1}
+.mapa-aneel-grid{height:calc(100dvh - 325px);min-height:540px;overflow:hidden}
+.mapa-aneel-canvas{isolation:isolate;contain:layout paint;z-index:0}
+.mapa-aneel-container{position:absolute;inset:0;width:100%;height:100%;min-height:540px;background:#0b0b12;z-index:0}
+.mapa-aneel-canvas .leaflet-container{z-index:0}
 .mapa-aneel-grid .overflow-y-auto{overscroll-behavior:contain}
 .leaflet-control-zoom a{background:#171724!important;color:#f8fafc!important;border-color:#2b2b45!important}
 .leaflet-control-attribution{background:rgba(9,9,16,.82)!important;color:#94a3b8!important}
 .leaflet-control-attribution a{color:#a5b4fc!important}
 .leaflet-tooltip{background:#171724!important;border:1px solid #2b2b45!important;color:#f8fafc!important;box-shadow:0 10px 25px rgba(0,0,0,.35)!important}
 .leaflet-tooltip-top::before{border-top-color:#171724!important}
-@media(max-width:1279px){.mapa-aneel-grid{height:auto}.mapa-aneel-grid>:first-child{height:420px}.mapa-aneel-grid>:last-child{height:620px}}
+@media(max-width:1279px){.mapa-aneel-grid{height:auto;overflow:visible}.mapa-aneel-grid>:first-child{height:420px}.mapa-aneel-grid>:last-child{height:min(620px,65dvh);min-height:440px}}
+@media(max-width:767px){.mapa-aneel-grid>:first-child{height:300px}.mapa-aneel-grid>:last-child{height:58dvh;min-height:380px}.mapa-aneel-container{min-height:380px}}
 </style>
