@@ -1,6 +1,6 @@
 <template>
-  <div class="space-y-4 animate-fade-in">
-    <div class="page-header">
+  <div class="mapa-page mapa-aneel-page space-y-4 animate-fade-in">
+    <div class="page-header mapa-page-header">
       <div>
         <h1 class="page-title">Mapa ANEEL</h1>
         <p class="text-xs text-[var(--text-muted)] mt-0.5">Consulta de microgeração distribuída pela base pública da ANEEL.</p>
@@ -14,14 +14,14 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div class="mapa-kpis grid grid-cols-2 lg:grid-cols-4 gap-3">
       <div class="card p-3"><p class="kpi-value text-lg">{{ resumo.total || 0 }}</p><p class="kpi-label">Registros na ANEEL</p></div>
       <div class="card p-3"><p class="kpi-value text-lg text-green-400">{{ registros.length }}</p><p class="kpi-label">Resultados carregados</p></div>
       <div class="card p-3"><p class="kpi-value text-lg text-amber-400">{{ comCoordenadas }}</p><p class="kpi-label">Com coordenadas</p></div>
       <div class="card p-3"><p class="kpi-value text-lg">{{ formatarNumero(potenciaTotal) }} MW</p><p class="kpi-label">Potência da consulta</p></div>
     </div>
 
-    <div class="card p-3">
+    <div class="card p-3 mapa-filtros">
       <div class="grid grid-cols-1 md:grid-cols-7 gap-2">
         <select v-model="filtros.perfil" class="select" @change="perfilAlterado">
           <option value="gd_residencial_comercial">GD resid. + comercial</option>
@@ -52,7 +52,7 @@
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-[360px_minmax(0,1fr)] gap-3 mapa-aneel-grid">
-      <div class="card overflow-hidden flex flex-col min-h-0">
+      <div class="card overflow-hidden flex flex-col min-h-0 mapa-resultados">
         <div class="p-3 border-b border-[var(--border)] flex items-center justify-between">
           <div>
             <p class="font-semibold text-sm">{{ registros.length }} resultados ANEEL</p>
@@ -290,5 +290,16 @@ onBeforeUnmount(()=>destruirMapa())
 .leaflet-tooltip{background:#171724!important;border:1px solid #2b2b45!important;color:#f8fafc!important;box-shadow:0 10px 25px rgba(0,0,0,.35)!important}
 .leaflet-tooltip-top::before{border-top-color:#171724!important}
 @media(max-width:1279px){.mapa-aneel-grid{height:auto;overflow:visible}.mapa-aneel-grid>:first-child{height:420px}.mapa-aneel-grid>:last-child{height:min(620px,65dvh);min-height:440px}}
-@media(max-width:767px){.mapa-aneel-grid>:first-child{height:300px}.mapa-aneel-grid>:last-child{height:58dvh;min-height:380px}.mapa-aneel-container{min-height:380px}}
+@media(max-width:767px){
+  .mapa-aneel-page{display:flex;flex-direction:column;gap:12px}
+  .mapa-aneel-page>*{margin-top:0!important}
+  .mapa-aneel-page .mapa-page-header{order:0}
+  .mapa-aneel-page .mapa-aneel-grid{display:contents}
+  .mapa-aneel-page .mapa-aneel-canvas{order:1;height:48dvh;min-height:340px}
+  .mapa-aneel-page .mapa-filtros{order:2}
+  .mapa-aneel-page .mapa-resultados{order:3;height:360px}
+  .mapa-aneel-page .mapa-kpis{order:4}
+  .mapa-aneel-page>p{order:5}
+  .mapa-aneel-container{min-height:340px}
+}
 </style>

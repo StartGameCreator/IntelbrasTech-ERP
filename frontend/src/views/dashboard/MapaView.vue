@@ -1,6 +1,6 @@
 <template>
-  <div class="space-y-4 animate-fade-in">
-    <div class="page-header">
+  <div class="mapa-page mapa-ons-page space-y-4 animate-fade-in">
+    <div class="page-header mapa-page-header">
       <div>
         <h1 class="page-title">Mapa ONS</h1>
         <p class="text-xs text-[var(--text-muted)] mt-0.5">Localizador nacional de usinas fotovoltaicas e oportunidades comerciais.</p>
@@ -14,14 +14,14 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div class="mapa-kpis grid grid-cols-2 lg:grid-cols-4 gap-3">
       <div class="card p-3"><p class="kpi-value text-lg">{{ resumo.total || 0 }}</p><p class="kpi-label">Usinas solares</p></div>
       <div class="card p-3"><p class="kpi-value text-lg text-green-400">{{ resumo.operacao || 0 }}</p><p class="kpi-label">Em operação</p></div>
       <div class="card p-3"><p class="kpi-value text-lg text-amber-400">{{ resumo.construcao || 0 }}</p><p class="kpi-label">Em construção</p></div>
       <div class="card p-3"><p class="kpi-value text-lg">{{ formatarNumero(resumo.potencia_mw) }} MW</p><p class="kpi-label">Potência cadastrada</p></div>
     </div>
 
-    <div class="card p-3">
+    <div class="card p-3 mapa-filtros">
       <div class="grid grid-cols-1 md:grid-cols-6 gap-2">
         <input v-model="filtros.busca" class="input md:col-span-2" placeholder="Nome, município ou código CEG" @keyup.enter="carregar" />
         <select v-model="filtros.uf" class="select"><option value="">Todos os estados</option><option v-for="uf in resumo.ufs || []" :key="uf" :value="uf">{{ uf }}</option></select>
@@ -32,7 +32,7 @@
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-[330px_minmax(0,1fr)] gap-3 mapa-ons-grid">
-      <div class="card overflow-hidden flex flex-col min-h-0">
+      <div class="card overflow-hidden flex flex-col min-h-0 mapa-resultados">
         <div class="p-3 border-b border-[var(--border)] flex items-center justify-between">
           <div><p class="font-semibold text-sm">{{ usinas.length }} resultados</p><p class="text-[11px] text-[var(--text-muted)]">Clique para localizar e prospectar</p></div>
           <button class="btn-secondary btn-sm" @click="carregar" :disabled="loading"><ArrowPathIcon class="w-4 h-4" :class="loading && 'animate-spin'" /></button>
@@ -190,5 +190,16 @@ onBeforeUnmount(()=>destruirMapa())
 .leaflet-tooltip{background:#171724!important;border:1px solid #2b2b45!important;color:#f8fafc!important;box-shadow:0 10px 25px rgba(0,0,0,.35)!important}
 .leaflet-tooltip-top::before{border-top-color:#171724!important}
 @media(max-width:1279px){.mapa-ons-grid{height:auto;overflow:visible}.mapa-ons-grid>:first-child{height:420px}.mapa-ons-grid>:last-child{height:min(620px,65dvh);min-height:440px}}
-@media(max-width:767px){.mapa-ons-grid>:first-child{height:300px}.mapa-ons-grid>:last-child{height:58dvh;min-height:380px}.mapa-ons-container{min-height:380px}}
+@media(max-width:767px){
+  .mapa-ons-page{display:flex;flex-direction:column;gap:12px}
+  .mapa-ons-page>*{margin-top:0!important}
+  .mapa-ons-page .mapa-page-header{order:0}
+  .mapa-ons-page .mapa-ons-grid{display:contents}
+  .mapa-ons-page .mapa-ons-canvas{order:1;height:48dvh;min-height:340px}
+  .mapa-ons-page .mapa-filtros{order:2}
+  .mapa-ons-page .mapa-resultados{order:3;height:360px}
+  .mapa-ons-page .mapa-kpis{order:4}
+  .mapa-ons-page>p{order:5}
+  .mapa-ons-container{min-height:340px}
+}
 </style>
