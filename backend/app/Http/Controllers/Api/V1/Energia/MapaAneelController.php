@@ -368,6 +368,9 @@ class MapaAneelController extends Controller
             ])),
         ]);
 
+        $lead = app(\App\Services\Crm\CrmLeadIntakeService::class)
+            ->registrar($lead, auth()->id(), 'Lead importado do mapa ANEEL');
+
         return response()->json([
             'message' => 'Registro ANEEL enviado ao CRM para prospecção.',
             'lead' => $lead->fresh(['etapa', 'responsavel']),

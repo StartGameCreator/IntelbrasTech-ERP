@@ -237,6 +237,9 @@ class MapaOnsController extends Controller
             ])),
         ]);
 
+        $lead = app(\App\Services\Crm\CrmLeadIntakeService::class)
+            ->registrar($lead, auth()->id(), 'Lead importado do mapa ONS');
+
         $usina->update(['lead_id' => $lead->id, 'importada_crm_em' => now()]);
 
         return response()->json([

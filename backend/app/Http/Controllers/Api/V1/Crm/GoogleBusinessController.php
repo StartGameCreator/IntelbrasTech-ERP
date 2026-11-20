@@ -186,6 +186,9 @@ class GoogleBusinessController extends Controller
             'tags' => implode(',', $tags),
         ]);
 
+        $lead = app(\App\Services\Crm\CrmLeadIntakeService::class)
+            ->registrar($lead, $user->id, 'Lead importado do Google Business');
+
         return response()->json([
             'message' => 'Empresa importada como lead com sucesso.',
             'lead' => $lead->fresh(['etapa', 'responsavel']),

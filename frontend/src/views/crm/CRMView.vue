@@ -89,6 +89,12 @@
       <div v-if="loading" class="skeleton h-72 rounded-xl" />
 
       <div v-else-if="abaAtiva === 'quadro'" class="crm-table-board">
+        <div v-if="!gruposTabela.length" class="crm-empty-state">
+          <UserGroupIcon class="w-10 h-10" />
+          <h3>Nenhum lead no pipeline</h3>
+          <p>Os leads enviados pelo portal, simulador, assistência ou cadastrados pela equipe aparecerão aqui.</p>
+          <button class="btn-primary btn-sm" @click="abrirNovo"><PlusIcon class="w-4 h-4" /> Criar primeiro lead</button>
+        </div>
         <div v-for="grupo in gruposTabela" :key="grupo.nome" class="crm-group">
           <div class="crm-group-title" :style="{ color: grupo.cor }">
             <ChevronDownIcon class="w-4 h-4" /> {{ grupo.nome }}
@@ -122,6 +128,10 @@
       </div>
 
       <div v-else-if="abaAtiva === 'kanban'" class="crm-kanban">
+        <div v-if="!colunasView.length" class="crm-empty-state w-full">
+          <Squares2X2Icon class="w-10 h-10" /><h3>Pipeline ainda não configurado</h3>
+          <p>Configure um pipeline ativo para iniciar o quadro Kanban.</p>
+        </div>
         <div
           v-for="coluna in colunasView"
           :key="coluna.etapa.id"
@@ -190,8 +200,8 @@
       <div v-else-if="abaAtiva === 'calendario'" class="crm-calendar">
         <div class="crm-calendar-head"><strong>Agenda comercial</strong><span>Próximos prazos e follow-ups</span></div>
         <div class="crm-calendar-grid">
-          <div v-for="dia in calendario" :key="dia.label" class="crm-day">
-            <strong>{{ dia.label }}</strong>
+          <div v-for="dia in calendario" :key="dia.data" class="crm-day">
+            <strong>{{ dia.label }} <small>{{ dia.dataLabel }}</small></strong>
             <article v-for="lead in dia.items" :key="lead.id" :style="{ borderColor: corLead(lead) }" @click="abrirDetalhe(lead)">
               {{ lead.titulo || lead.nome }}
             </article>
@@ -201,12 +211,13 @@
 
       <div v-else-if="abaAtiva === 'gantt'" class="crm-gantt">
         <div class="crm-gantt-head">
-          <span>Lead</span><span>Jul 9</span><span>Jul 10</span><span>Jul 11</span><span>Jul 12</span><span>Jul 13</span><span>Jul 14</span>
+          <span>Lead</span><span v-for="dia in ganttDias" :key="dia.data">{{ dia.curto }}</span>
         </div>
-        <div v-for="(lead, index) in leadsFiltrados" :key="lead.id" class="crm-gantt-row">
+        <div v-for="lead in leadsComPrazo" :key="lead.id" class="crm-gantt-row">
           <span>{{ lead.titulo || lead.nome }}</span>
-          <i :style="{ gridColumn: `${2 + (index % 4)} / span 2`, background: corLead(lead) }">{{ lead.etapa_nome }}</i>
+          <i :style="{ gridColumn: `${colunaGantt(lead)} / span 1`, background: corLead(lead) }">{{ lead.etapa_nome }}</i>
         </div>
+        <div v-if="!leadsComPrazo.length" class="crm-empty-state"><ClockIcon class="w-9 h-9" /><h3>Nenhum prazo nos próximos dias</h3><p>Cadastre a próxima ação ou a previsão de fechamento nos leads.</p></div>
       </div>
 
       <div v-else class="crm-management">
@@ -339,8 +350,7 @@ import {
   ArrowPathIcon, PlusIcon, XMarkIcon, ChevronDownIcon, MagnifyingGlassIcon,
   FunnelIcon, ArrowsUpDownIcon, EyeSlashIcon, ViewColumnsIcon, Squares2X2Icon,
   ChartPieIcon, CalendarDaysIcon, Bars3BottomLeftIcon, BoltIcon, SparklesIcon,
-  LinkIcon, BanknotesIcon, UserGroupIcon, ClockIcon, CheckCircleIcon,
-  ChatBubbleLeftRightIcon, BellAlertIcon
+  LinkIcon, BanknotesIcon, UserGroupIcon, ClockIcon, CheckCircleIcon
 } from '@heroicons/vue/24/outline'
 
 const toast = useToast()
@@ -353,29 +363,6 @@ const abas = [
   { id: 'calendario', label: 'Calendário', icon: CalendarDaysIcon },
   { id: 'gantt', label: 'Gantt', icon: Bars3BottomLeftIcon },
   { id: 'automacoes', label: 'Automações', icon: BoltIcon },
-]
-
-const etapasBase = [
-  { id: 1, nome: 'Novo lead', cor: '#3b82f6' },
-  { id: 2, nome: 'Qualificação', cor: '#8b5cf6' },
-  { id: 3, nome: 'Proposta enviada', cor: '#f59e0b' },
-  { id: 4, nome: 'Negociação', cor: '#06b6d4' },
-  { id: 5, nome: 'Ganho', cor: '#10b981' },
-]
-
-const leadsDemo = [
-  { id: 'demo-1', nome: 'Ana Martins', empresa_nome: 'Solar Prime', titulo: 'Energia solar residencial', email: 'ana@solarprime.com', telefone: '(61) 99999-0001', valor_estimado: 18500, etapa_id: 1, etapa_nome: 'Novo lead', responsavel_nome: 'Elvis', data_previsao_fechamento: '2026-07-09', origem: 'Indicação', proxima_acao: 'Ligar hoje', cor: '#3b82f6' },
-  { id: 'demo-2', nome: 'Carlos Lima', empresa_nome: 'Lima Construções', titulo: 'Projeto fotovoltaico comercial', email: 'carlos@lima.com', telefone: '(61) 99999-0002', valor_estimado: 43000, etapa_id: 2, etapa_nome: 'Qualificação', responsavel_nome: 'Elvis', data_previsao_fechamento: '2026-07-10', origem: 'Site', proxima_acao: 'Enviar diagnóstico', cor: '#8b5cf6' },
-  { id: 'demo-3', nome: 'Bianca Rocha', empresa_nome: 'Mercado BR', titulo: 'Integração marketplace', email: 'bianca@mercadobr.com', telefone: '(61) 99999-0003', valor_estimado: 12600, etapa_id: 3, etapa_nome: 'Proposta enviada', responsavel_nome: 'Comercial', data_previsao_fechamento: '2026-07-11', origem: 'Marketplace', proxima_acao: 'Follow-up proposta', cor: '#f59e0b' },
-  { id: 'demo-4', nome: 'João Pedro', empresa_nome: 'JP Distribuidora', titulo: 'Contrato de suporte ERP', email: 'joao@jp.com', telefone: '(61) 99999-0004', valor_estimado: 8900, etapa_id: 4, etapa_nome: 'Negociação', responsavel_nome: 'Suporte', data_previsao_fechamento: '2026-07-12', origem: 'Telefone', proxima_acao: 'Revisar contrato', cor: '#06b6d4' },
-  { id: 'demo-5', nome: 'Marina Alves', empresa_nome: 'Pet Center', titulo: 'Venda consultiva PetLove', email: 'marina@petcenter.com', telefone: '(61) 99999-0005', valor_estimado: 5200, etapa_id: 5, etapa_nome: 'Ganho', responsavel_nome: 'Elvis', data_previsao_fechamento: '2026-07-13', origem: 'PetLove', proxima_acao: 'Implantação', cor: '#10b981' },
-]
-
-const automacoes = [
-  { titulo: 'Lead novo', texto: 'Quando um lead entrar, criar tarefa de primeiro contato e avisar o responsável.', icon: BellAlertIcon },
-  { titulo: 'Proposta parada', texto: 'Se uma proposta ficar parada por 3 dias, enviar alerta para follow-up.', icon: ClockIcon },
-  { titulo: 'Ganho confirmado', texto: 'Ao marcar como ganho, criar pedido ou ordem de serviço automaticamente.', icon: CheckCircleIcon },
-  { titulo: 'Resumo diário', texto: 'Gerar um resumo com oportunidades novas, vencidas e próximas ações.', icon: ChatBubbleLeftRightIcon },
 ]
 
 const colunas = ref([])
@@ -402,7 +389,7 @@ const metaForm=reactive({periodo_inicio:new Date().toISOString().slice(0,10),per
 const motivoForm=reactive({nome:'',ativo:true})
 const produtosLead=ref([]),produtoForm=reactive({descricao:'',quantidade:1,valor_unitario:0,desconto:0,produto_id:null})
 
-const baseColunas = computed(() => colunas.value.length ? colunas.value : etapasBase.map(etapa => ({ etapa, leads: leadsDemo.filter(l => l.etapa_id === etapa.id) })))
+const baseColunas = computed(() => colunas.value)
 const leads = computed(() => baseColunas.value.flatMap(c => c.leads || []))
 const valorTotal = computed(() => leads.value.reduce((s, l) => s + Number(l.valor_estimado || 0), 0))
 const leadsFiltrados = computed(() => {
@@ -427,12 +414,24 @@ const colunasView = computed(() => {
 const gruposTabela = computed(() => colunasView.value.map(c => ({ nome: c.etapa.nome, cor: c.etapa.cor || '#6366f1', etapa_id: c.etapa.id, items: c.leads })))
 const maiorValorColuna = computed(() => Math.max(...colunasView.value.map(c => c.valor_total), 1))
 const kpis = computed(() => [
-  { label: 'Leads abertos', value: leads.value.filter(l => (l.etapa_nome || '').toLowerCase() !== 'ganho').length, caption: 'Em andamento no funil', icon: UserGroupIcon, bg: 'bg-brand-500/15 text-brand-400' },
+  { label: 'Leads abertos', value: resumo.value.total_leads ?? leads.value.length, caption: 'Em andamento no funil', icon: UserGroupIcon, bg: 'bg-brand-500/15 text-brand-400' },
   { label: 'Valor em negociação', value: moeda(valorTotal.value), caption: 'Soma estimada do pipeline', icon: BanknotesIcon, bg: 'bg-success/15 text-success' },
   { label: 'Próximas ações', value: leads.value.filter(l => l.proxima_acao).length, caption: 'Follow-ups cadastrados', icon: ClockIcon, bg: 'bg-warning/15 text-warning' },
-  { label: 'Conversão', value: `${Math.round((leads.value.filter(l => (l.etapa_nome || '').toLowerCase() === 'ganho').length / Math.max(leads.value.length, 1)) * 100)}%`, caption: 'Base atual do quadro', icon: CheckCircleIcon, bg: 'bg-info/15 text-info' },
+  { label: 'Conversão', value: `${Math.round((Number(gestao.forecast?.negocios_ganhos || 0) / Math.max(leads.value.length + Number(gestao.forecast?.negocios_ganhos || 0), 1)) * 100)}%`, caption: 'Ganhos no mês sobre a base atual', icon: CheckCircleIcon, bg: 'bg-info/15 text-info' },
 ])
-const calendario = computed(() => ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map((label, i) => ({ label, items: leadsFiltrados.value.filter((_, idx) => idx % 7 === i) })))
+const inicioAgenda = computed(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d })
+const calendario = computed(() => Array.from({ length: 7 }, (_, i) => {
+  const dia = new Date(inicioAgenda.value); dia.setDate(dia.getDate() + i)
+  const data = dia.toISOString().slice(0, 10)
+  return {
+    data,
+    label: new Intl.DateTimeFormat('pt-BR', { weekday: 'short' }).format(dia).replace('.', ''),
+    dataLabel: new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(dia),
+    items: leadsFiltrados.value.filter(lead => dataLead(lead) === data),
+  }
+}))
+const ganttDias = computed(() => calendario.value.map(dia => ({ ...dia, curto: `${dia.label} ${dia.dataLabel}` })))
+const leadsComPrazo = computed(() => leadsFiltrados.value.filter(lead => ganttDias.value.some(dia => dia.data === dataLead(lead))))
 const modalTitulo = computed(() => modalAgente.value ? 'Agente comercial IA' : modalAutomacao.value ? 'Automações do CRM' : modalIntegracao.value ? 'Integrações' : 'Nova visualização')
 const modalTexto = computed(() => modalAgente.value
   ? 'Aqui ficará o assistente para resumir leads, sugerir follow-ups e preparar contatos. A tela já está pronta para integrar com uma API de IA depois.'
@@ -464,22 +463,18 @@ async function carregar() {
     pipelineNome.value = data.pipeline?.nome || 'Pipeline Comercial'
     pipelineId.value = data.pipeline?.id || null
     await carregarGestao()
-  } catch {
+  } catch (error) {
     colunas.value = []
+    toast.error(error.response?.data?.message || 'Não foi possível carregar o CRM.')
   } finally { loading.value = false }
 }
 function abrirNovo() { leadAtual.value = leadVazio(); modalLead.value = true }
 function abrirNovoComEtapa(grupo) { leadAtual.value = { ...leadVazio(), etapa_id: grupo.etapa_id || grupo.id }; modalLead.value = true }
-async function abrirDetalhe(lead) { leadAtual.value = { ...lead, proxima_acao_em: paraInputData(lead.proxima_acao_em) }; atividades.value=[];produtosLead.value=[]; modalLead.value = true; if(!String(lead.id).startsWith('demo-')){try{const [{data},{data:produtos}]=await Promise.all([api.get(`/leads/${lead.id}`),api.get(`/leads/${lead.id}/produtos`)]);leadAtual.value={...data,proxima_acao_em:paraInputData(data.proxima_acao_em),data_previsao_fechamento:String(data.data_previsao_fechamento||'').slice(0,10)};atividades.value=data.atividades||[];produtosLead.value=produtos||[]}catch{}} }
+async function abrirDetalhe(lead) { leadAtual.value = { ...lead, proxima_acao_em: paraInputData(lead.proxima_acao_em) }; atividades.value=[];produtosLead.value=[]; modalLead.value = true; try{const [{data},{data:produtos}]=await Promise.all([api.get(`/leads/${lead.id}`),api.get(`/leads/${lead.id}/produtos`)]);leadAtual.value={...data,proxima_acao_em:paraInputData(data.proxima_acao_em),data_previsao_fechamento:String(data.data_previsao_fechamento||'').slice(0,10)};atividades.value=data.atividades||[];produtosLead.value=produtos||[]}catch(e){toast.error(e.response?.data?.message||'Não foi possível carregar o lead.')} }
 async function salvar() {
   if (!leadAtual.value.nome?.trim()) { toast.warning('Informe o nome do contato.'); return }
   processando.value = true
   try {
-    if (String(leadAtual.value.id || '').startsWith('demo-')) {
-      toast.success('Lead salvo no modo visual. Conecte a API para persistir este registro.')
-      modalLead.value = false
-      return
-    }
     if (leadAtual.value.id) {
       const { data } = await api.put(`/leads/${leadAtual.value.id}`, leadAtual.value)
       toast.success(data.message || 'Lead atualizado.')
@@ -495,7 +490,6 @@ async function salvar() {
 async function ganho() { await acaoLead('ganho', 'Lead marcado como ganho.') }
 async function perdido() {const nomes=gestao.motivos_perda.map((m,i)=>`${i+1}. ${m.nome}`).join('\n');const escolha=window.prompt(`Informe o número do motivo da perda:\n${nomes}`);if(escolha===null)return;const motivo=gestao.motivos_perda[Number(escolha)-1];if(!motivo){toast.warning('Selecione um motivo válido.');return}await acaoLead('perdido','Lead marcado como perdido.',{motivo_perda_id:motivo.id,motivo_perda:motivo.nome}) }
 async function acaoLead(acao, msg, payload={}) {
-  if (String(leadAtual.value.id || '').startsWith('demo-')) { toast.success(msg); modalLead.value = false; return }
   processando.value = true
   try { const { data } = await api.post(`/leads/${leadAtual.value.id}/${acao}`,payload); toast.success(data.message || msg); modalLead.value = false; await carregar() }
   catch (e) { toast.error(e.response?.data?.message || 'Não foi possível atualizar o lead.') }
@@ -505,7 +499,6 @@ async function mover(etapaId) {
   if (!leadArrastado.value) return
   const id = leadArrastado.value
   leadArrastado.value = null
-  if (String(id).startsWith('demo-')) { toast.info('Arraste real disponível para leads salvos na API.'); return }
   try { await api.post(`/leads/${id}/mover-etapa`, { etapa_id: etapaId }); await carregar() }
   catch (e) { toast.error(e.response?.data?.message || 'Não foi possível mover o lead.') }
 }
@@ -528,6 +521,8 @@ function formatarCnpj(value) {
 function iniciais(nome) { return String(nome || 'IT').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase() }
 function formatarData(data) { if (!data) return 'Sem prazo'; const [a, m, d] = String(data).split('-'); return d && m ? `${d}/${m}` : data }
 function formatarDataHora(data){if(!data)return 'Sem data';return new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(data))}
+function dataLead(lead){return String(lead.proxima_acao_em || lead.data_previsao_fechamento || '').slice(0,10)}
+function colunaGantt(lead){const indice=ganttDias.value.findIndex(dia=>dia.data===dataLead(lead));return Math.max(2,indice+2)}
 function paraInputData(data){if(!data)return '';const d=new Date(data);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
 async function registrarAtividade(){processando.value=true;try{const payload={...novaAtividade,agendada_para:novaAtividade.agendada_para||null};await api.post(`/leads/${leadAtual.value.id}/atividades`,payload);Object.assign(novaAtividade,{tipo:'tarefa',titulo:'',agendada_para:'',status:'pendente'});const {data}=await api.get(`/leads/${leadAtual.value.id}/timeline`);atividades.value=data.atividades||[];toast.success('Atividade registrada.');await carregar()}catch(e){toast.error(e.response?.data?.message||'Não foi possível registrar a atividade.')}finally{processando.value=false}}
 async function concluirAtividade(item){await api.put(`/leads/${leadAtual.value.id}/atividades/${item.id}`,{status:'concluida'});item.status='concluida';toast.success('Atividade concluída.')}
@@ -536,7 +531,7 @@ async function salvarAutomacao(){const {data}=await api.post('/crm/automacoes',a
 async function salvarMeta(){const {data}=await api.post('/crm/metas',metaForm);toast.success(data.message);await carregarGestao()}
 async function salvarMotivo(){const {data}=await api.post('/crm/motivos-perda',motivoForm);motivoForm.nome='';toast.success(data.message);await carregarGestao()}
 async function adicionarProduto(){const {data}=await api.post(`/leads/${leadAtual.value.id}/produtos`,produtoForm);leadAtual.value.valor_estimado=data.total;Object.assign(produtoForm,{descricao:'',quantidade:1,valor_unitario:0,desconto:0,produto_id:null});const response=await api.get(`/leads/${leadAtual.value.id}/produtos`);produtosLead.value=response.data;toast.success(data.message);await carregar()}
-function corLead(lead) { return lead.cor || etapasBase.find(e => e.id === lead.etapa_id)?.cor || '#6366f1' }
+function corLead(lead) { return lead.cor || colunas.value.find(c => (c.etapa || c).id === lead.etapa_id)?.etapa?.cor || '#6366f1' }
 function larguraBarra(valor) { return `${Math.max(8, Math.round((Number(valor || 0) / maiorValorColuna.value) * 100))}%` }
 
 onMounted(carregar)
@@ -610,7 +605,7 @@ onMounted(carregar)
 .crm-day strong { color: var(--text-secondary); font-size: .8rem; }
 .crm-day article { margin-top: .55rem; padding: .45rem .55rem; border-left: 3px solid; background: var(--bg-elevated); border-radius: .45rem; font-size: .75rem; cursor: pointer; }
 .crm-gantt { min-width: 860px; overflow-x: auto; }
-.crm-gantt-head, .crm-gantt-row { display: grid; grid-template-columns: 190px repeat(6, 1fr); border-bottom: 1px solid var(--border-subtle); align-items: center; }
+.crm-gantt-head, .crm-gantt-row { display: grid; grid-template-columns: 190px repeat(7, 1fr); border-bottom: 1px solid var(--border-subtle); align-items: center; }
 .crm-gantt-head { color: var(--text-secondary); font-weight: 700; font-size: .75rem; border-top: 1px solid var(--border); }
 .crm-gantt-head span, .crm-gantt-row span { padding: .75rem; border-right: 1px solid var(--border-subtle); }
 .crm-gantt-row { min-height: 56px; position: relative; }
@@ -622,7 +617,7 @@ onMounted(carregar)
 .crm-help { position: fixed; right: 1.5rem; bottom: 1.5rem; z-index: 30; display: flex; align-items: center; gap: .6rem; border-radius: 1rem; padding: .85rem 1rem; color: var(--text-primary); background: var(--bg-surface); border: 1px solid var(--border); box-shadow: 0 12px 35px rgba(0,0,0,.35); }
 .crm-help:before { content: ''; position: absolute; inset: -2px; border-radius: 1.1rem; background: linear-gradient(90deg, #06b6d4, #8b5cf6, #f59e0b); z-index: -1; }
 .crm-prompt-box { display: flex; gap: .75rem; align-items: flex-start; border: 1px solid var(--border); background: var(--bg-elevated); border-radius: .9rem; padding: .9rem; color: var(--text-secondary); }
-.crm-qualification{border:1px solid var(--border);border-radius:.8rem;padding:.85rem}.crm-qualification summary{cursor:pointer;font-size:.82rem;font-weight:800;color:var(--text-primary)}.crm-timeline{border-top:1px solid var(--border);padding-top:1rem}.crm-timeline-head h4{font-weight:800}.crm-timeline-head p{font-size:.75rem;color:var(--text-muted)}.crm-activity-form{display:grid;grid-template-columns:110px 1fr 180px 110px auto;gap:.5rem;margin:1rem 0}.crm-timeline-list{max-height:260px;overflow:auto}.crm-timeline-list article{display:flex;gap:.75rem;align-items:flex-start;border-left:1px solid var(--border);padding:0 0 1rem 1rem;margin-left:.3rem}.crm-timeline-list i{width:9px;height:9px;border-radius:50%;background:#64748b;margin-left:-1.32rem;margin-top:.35rem;box-shadow:0 0 0 4px var(--bg-surface)}.crm-timeline-list i.pendente{background:#f59e0b}.crm-timeline-list i.concluida{background:#10b981}.crm-timeline-list article>div{flex:1}.crm-timeline-list b,.crm-timeline-list small{display:block}.crm-timeline-list small{font-size:.7rem;color:var(--text-muted);margin-top:.2rem}.crm-timeline-list p{font-size:.75rem;color:var(--text-secondary);margin-top:.25rem}.crm-forecast{grid-column:1/-1}.crm-forecast>div{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}.crm-forecast span{padding:1rem;border-radius:.75rem;background:var(--bg-surface);color:var(--text-muted);font-size:.75rem}.crm-forecast strong{display:block;color:var(--text-primary);font-size:1.2rem;margin-top:.35rem}.crm-productivity{grid-column:1/-1}.crm-productivity-row{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:1rem;padding:.65rem;border-bottom:1px solid var(--border-subtle);font-size:.8rem}.crm-productivity-row.head{font-weight:800;color:var(--text-muted)}.crm-management{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}.crm-config-card{border:1px solid var(--border);background:var(--bg-elevated);border-radius:1rem;padding:1rem;display:flex;flex-direction:column;gap:.7rem}.crm-config-card h3,.crm-products h4{font-weight:800}.crm-config-card>p{font-size:.78rem;color:var(--text-muted)}.crm-rule{display:flex;align-items:center;justify-content:space-between;padding:.65rem;border:1px solid var(--border-subtle);border-radius:.6rem}.crm-rule small{display:block;color:var(--text-muted);font-size:.68rem}.crm-tags{display:flex;gap:.4rem;flex-wrap:wrap}.crm-tags span{padding:.35rem .6rem;border-radius:999px;background:var(--bg-surface);font-size:.72rem}.crm-products{border-top:1px solid var(--border);padding-top:1rem}.crm-products form{display:grid;grid-template-columns:1fr 90px 140px auto;gap:.5rem;margin:.8rem 0}.crm-product-row{display:flex;justify-content:space-between;padding:.55rem;border-bottom:1px solid var(--border-subtle);font-size:.78rem}
+.crm-qualification{border:1px solid var(--border);border-radius:.8rem;padding:.85rem}.crm-qualification summary{cursor:pointer;font-size:.82rem;font-weight:800;color:var(--text-primary)}.crm-timeline{border-top:1px solid var(--border);padding-top:1rem}.crm-timeline-head h4{font-weight:800}.crm-timeline-head p{font-size:.75rem;color:var(--text-muted)}.crm-activity-form{display:grid;grid-template-columns:110px 1fr 180px 110px auto;gap:.5rem;margin:1rem 0}.crm-timeline-list{max-height:260px;overflow:auto}.crm-timeline-list article{display:flex;gap:.75rem;align-items:flex-start;border-left:1px solid var(--border);padding:0 0 1rem 1rem;margin-left:.3rem}.crm-timeline-list i{width:9px;height:9px;border-radius:50%;background:#64748b;margin-left:-1.32rem;margin-top:.35rem;box-shadow:0 0 0 4px var(--bg-surface)}.crm-timeline-list i.pendente{background:#f59e0b}.crm-timeline-list i.concluida{background:#10b981}.crm-timeline-list article>div{flex:1}.crm-timeline-list b,.crm-timeline-list small{display:block}.crm-timeline-list small{font-size:.7rem;color:var(--text-muted);margin-top:.2rem}.crm-timeline-list p{font-size:.75rem;color:var(--text-secondary);margin-top:.25rem}.crm-forecast{grid-column:1/-1}.crm-forecast>div{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}.crm-forecast span{padding:1rem;border-radius:.75rem;background:var(--bg-surface);color:var(--text-muted);font-size:.75rem}.crm-forecast strong{display:block;color:var(--text-primary);font-size:1.2rem;margin-top:.35rem}.crm-productivity{grid-column:1/-1}.crm-productivity-row{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:1rem;padding:.65rem;border-bottom:1px solid var(--border-subtle);font-size:.8rem}.crm-productivity-row.head{font-weight:800;color:var(--text-muted)}.crm-management{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}.crm-config-card{border:1px solid var(--border);background:var(--bg-elevated);border-radius:1rem;padding:1rem;display:flex;flex-direction:column;gap:.7rem}.crm-config-card h3,.crm-products h4{font-weight:800}.crm-config-card>p{font-size:.78rem;color:var(--text-muted)}.crm-rule{display:flex;align-items:center;justify-content:space-between;padding:.65rem;border:1px solid var(--border-subtle);border-radius:.6rem}.crm-rule small{display:block;color:var(--text-muted);font-size:.68rem}.crm-tags{display:flex;gap:.4rem;flex-wrap:wrap}.crm-tags span{padding:.35rem .6rem;border-radius:999px;background:var(--bg-surface);font-size:.72rem}.crm-products{border-top:1px solid var(--border);padding-top:1rem}.crm-products form{display:grid;grid-template-columns:1fr 90px 140px auto;gap:.5rem;margin:.8rem 0}.crm-product-row{display:flex;justify-content:space-between;padding:.55rem;border-bottom:1px solid var(--border-subtle);font-size:.78rem}.crm-empty-state{min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.65rem;text-align:center;color:var(--text-muted);border:1px dashed var(--border);border-radius:1rem;padding:2rem}.crm-empty-state h3{color:var(--text-primary);font-weight:800}.crm-empty-state p{max-width:540px;font-size:.82rem}.crm-day strong small{color:var(--text-muted);font-weight:500;margin-left:.25rem}
 @media (max-width: 1200px) { .crm-kpis, .crm-automation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .crm-dashboard { grid-template-columns: 1fr; } }
 @media (max-width: 760px) { .crm-hero, .crm-board-header { flex-direction: column; align-items: stretch; } .crm-kpis, .crm-automation-grid,.crm-management { grid-template-columns: 1fr; } .crm-help { right: 1rem; bottom: 1rem; }.crm-activity-form,.crm-products form{grid-template-columns:1fr}.crm-forecast>div{grid-template-columns:1fr 1fr} }
 </style>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Portal;
 
 use App\Http\Controllers\Controller;
 use App\Models\{Empresa, Lead, Pipeline, PipelineEtapa, PortalSolicitacao, Produto};
+use App\Services\Crm\CrmLeadIntakeService;
 use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -122,21 +123,24 @@ class PortalController extends Controller
 
         $empresa = $this->empresa();
         $pipeline = Pipeline::withoutGlobalScope('empresa')->where('empresa_id', $empresa->id)->where('ativo', true)->first();
-        $etapaId = $pipeline ? PipelineEtapa::where('pipeline_id', $pipeline->id)->orderBy('ordem')->value('id') : null;
+        $etapa = $pipeline ? PipelineEtapa::where('pipeline_id', $pipeline->id)->orderBy('ordem')->first() : null;
 
         $rotulos = [
             'contato' => 'Contato pelo portal', 'orcamento' => 'Pedido de orçamento',
             'solar' => 'Pré-simulação de energia solar', 'assistencia' => 'Solicitação de assistência técnica',
         ];
 
-        [$lead, $solicitacao] = DB::transaction(function () use ($dados, $empresa, $pipeline, $etapaId, $rotulos, $request) {
+        [$lead, $solicitacao] = DB::transaction(function () use ($dados, $empresa, $pipeline, $etapa, $rotulos, $request) {
             $lead = Lead::withoutGlobalScope('empresa')->create([
                 'uuid' => (string) Str::uuid(), 'empresa_id' => $empresa->id,
-                'pipeline_id' => $pipeline?->id, 'etapa_id' => $etapaId,
+                'pipeline_id' => $pipeline?->id, 'etapa_id' => $etapa?->id,
                 'nome' => $dados['nome'], 'email' => $dados['email'] ?? null,
                 'telefone' => $dados['telefone'], 'cidade' => $dados['cidade'] ?? null,
                 'origem' => 'portal', 'titulo' => $rotulos[$dados['tipo']],
-                'status' => Lead::STATUS_ABERTO, 'probabilidade' => 10,
+                'status' => Lead::STATUS_ABERTO, 'probabilidade' => $etapa?->probabilidade ?? 10,
+                'prioridade' => in_array($dados['tipo'], ['orcamento', 'assistencia'], true) ? 'alta' : 'media',
+                'score' => (! empty($dados['email']) ? 8 : 0) + (! empty($dados['telefone']) ? 8 : 0),
+                'entrou_etapa_em' => now(),
                 'tags' => 'portal,' . $dados['tipo'], 'dados_extras' => $dados,
             ]);
 
@@ -147,6 +151,8 @@ class PortalController extends Controller
                 'dados' => collect($dados)->except(['consentimento', 'website', 'portal_guard'])->all(),
                 'ip_hash' => hash('sha256', (string) $request->ip()),
             ]);
+
+            app(CrmLeadIntakeService::class)->registrar($lead, null, 'Lead recebido pelo portal');
 
             return [$lead, $solicitacao];
         });

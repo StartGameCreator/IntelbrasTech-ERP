@@ -197,6 +197,9 @@ class CnpjController extends Controller
             'tags' => implode(',', $tags),
         ]);
 
+        $lead = app(\App\Services\Crm\CrmLeadIntakeService::class)
+            ->registrar($lead, auth()->id(), 'Lead importado da busca CNPJ');
+
         return response()->json([
             'message' => 'Empresa salva como lead no CRM.',
             'lead' => $lead->fresh(['etapa', 'responsavel']),

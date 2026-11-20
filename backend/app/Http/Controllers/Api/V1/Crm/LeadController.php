@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\{Lead, Pipeline, PipelineEtapa, Cliente, CrmAtividade, CrmHistoricoEtapa};
 use Illuminate\Http\{Request, JsonResponse};
 use Illuminate\Support\Facades\DB;
-use App\Services\Crm\CrmAutomationService;
+use App\Services\Crm\{CrmAutomationService, CrmLeadIntakeService};
 
 class LeadController extends Controller
 {
@@ -90,8 +90,7 @@ class LeadController extends Controller
         $dados['score'] = $this->calcularScore($dados);
 
         $lead = Lead::create($dados);
-        CrmAtividade::create(['empresa_id'=>$lead->empresa_id,'lead_id'=>$lead->id,'usuario_id'=>auth()->id(),'tipo'=>'sistema','titulo'=>'Lead criado','status'=>'concluida','concluida_em'=>now()]);
-        app(CrmAutomationService::class)->executar('lead_criado',$lead);
+        $lead = app(CrmLeadIntakeService::class)->registrar($lead, auth()->id());
 
         return response()->json([
             'message' => 'Lead criado com sucesso.',

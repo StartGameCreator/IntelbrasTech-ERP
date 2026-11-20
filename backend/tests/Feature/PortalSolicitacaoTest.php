@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Lead, PortalSolicitacao};
+use App\Models\{CrmAtividade, Lead, PortalSolicitacao};
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -37,6 +37,14 @@ class PortalSolicitacaoTest extends TestCase
         $this->assertSame($lead->id, $solicitacao->lead_id);
         $this->assertSame('portal', $lead->origem);
         $this->assertSame('Pré-simulação de energia solar', $lead->titulo);
+        $this->assertNotNull($lead->entrou_etapa_em);
+        $this->assertGreaterThan(0, $lead->score);
+        $this->assertSame('Realizar primeiro contato', $lead->proxima_acao);
+        $this->assertNotNull($lead->proxima_acao_em);
+        $this->assertTrue(CrmAtividade::query()
+            ->where('lead_id', $lead->id)
+            ->where('titulo', 'Lead recebido pelo portal')
+            ->exists());
     }
 
     public function test_honeypot_nunca_retorna_falso_sucesso(): void
