@@ -8,7 +8,7 @@
     <section class="overview">
       <article><small>Cards no carrossel</small><strong>{{ carousel.length }}</strong><span>{{ carousel.filter(i => i.ativo).length }} ativos</span></article>
       <article><small>SEO do site</small><strong>{{ seo.seo_titulo ? 'Configurado' : 'Pendente' }}</strong><span>{{ seo.indexar_site ? 'Indexação permitida' : 'Indexação bloqueada' }}</span></article>
-      <article><small>Pixels ativos</small><strong>{{ pixelsAtivos }}</strong><span>Meta e TikTok</span></article>
+      <article><small>Ferramentas de análise</small><strong>{{ pixelsAtivos }}</strong><span>GA4, GTM, Clarity, Meta e TikTok</span></article>
     </section>
 
     <section class="admin-grid">
@@ -16,7 +16,7 @@
         <div class="icon violet"><RectangleStackIcon /></div><span>CONTEÚDO</span><h2>Carrossel do portal</h2><p>Crie, edite, agende, ordene e desative produtos, serviços ou campanhas da página inicial.</p><b>Administrar carrossel <ArrowRightIcon /></b>
       </RouterLink>
       <RouterLink to="/configuracoes/site/seo" class="admin-card">
-        <div class="icon green"><GlobeAltIcon /></div><span>VISIBILIDADE</span><h2>SEO e rastreamento</h2><p>Configure Search Console, Meta Pixel, TikTok Pixel, metadados, logo e favicon.</p><b>Administrar SEO <ArrowRightIcon /></b>
+        <div class="icon green"><GlobeAltIcon /></div><span>VISIBILIDADE E DADOS</span><h2>SEO e Analytics</h2><p>Configure Search Console, GA4, Tag Manager, Clarity, Meta, TikTok, metadados, logo e favicon.</p><b>Administrar métricas <ArrowRightIcon /></b>
       </RouterLink>
       <RouterLink to="/configuracoes/site/email" class="admin-card">
         <div class="icon blue"><EnvelopeIcon /></div><span>COMUNICAÇÃO</span><h2>Meu E-mail</h2><p>Configure SMTP, contatos autorizados, modelos, campanhas, fila e descadastros.</p><b>Administrar e-mails <ArrowRightIcon /></b>
@@ -32,8 +32,8 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { ArrowRightIcon, ArrowTopRightOnSquareIcon, EnvelopeIcon, GlobeAltIcon, RectangleStackIcon } from '@heroicons/vue/24/outline'
 import api from '@/services/api'
-const carousel=ref([]); const seo=reactive({seo_titulo:'',indexar_site:true,meta_pixel_ativo:false,tiktok_pixel_ativo:false})
-const pixelsAtivos=computed(()=>Number(Boolean(seo.meta_pixel_ativo))+Number(Boolean(seo.tiktok_pixel_ativo)))
+const carousel=ref([]); const seo=reactive({seo_titulo:'',indexar_site:true,google_analytics_ativo:false,google_tag_manager_ativo:false,microsoft_clarity_ativo:false,meta_pixel_ativo:false,tiktok_pixel_ativo:false})
+const pixelsAtivos=computed(()=>['google_analytics_ativo','google_tag_manager_ativo','microsoft_clarity_ativo','meta_pixel_ativo','tiktok_pixel_ativo'].filter(key=>Boolean(seo[key])).length)
 onMounted(async()=>{const [items,settings]=await Promise.allSettled([api.get('/portal/conteudo/carrossel'),api.get('/portal/configuracoes/site')]);if(items.status==='fulfilled')carousel.value=items.value.data.data||[];if(settings.status==='fulfilled')Object.assign(seo,settings.value.data.data||{})})
 </script>
 
