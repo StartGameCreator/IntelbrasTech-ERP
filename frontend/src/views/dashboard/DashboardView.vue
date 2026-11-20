@@ -254,7 +254,7 @@
 
     <!-- ── Mapa de origem das vendas ─────────────────────────── -->
     <div class="card p-5">
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
+      <div class="mb-4">
         <div>
           <h3 class="text-sm font-semibold text-[var(--text-primary)]">Origem geográfica das vendas</h3>
           <p class="text-xs text-[var(--text-muted)] mt-1">
@@ -262,19 +262,13 @@
           </p>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
-          <div class="map-kpi"><strong>{{ mapaResumo.clientes || 0 }}</strong><span>clientes</span></div>
-          <div class="map-kpi"><strong>{{ mapaResumo.pedidos || 0 }}</strong><span>pedidos</span></div>
-          <div class="map-kpi"><strong>{{ fmt.moeda(mapaResumo.valor || 0) }}</strong><span>em vendas</span></div>
-          <button class="btn-secondary btn-sm" :disabled="sincronizandoMapa" @click="sincronizarCeps">
-            <MapPinIcon class="w-4 h-4"/>
-            {{ sincronizandoMapa ? 'Localizando...' : 'Atualizar CEPs' }}
-          </button>
-        </div>
       </div>
 
       <div class="dashboard-map-grid">
-        <div class="dashboard-map-wrapper">
+        <div v-show="mapaMobileVisivel" class="dashboard-map-wrapper">
+          <button class="dashboard-map-close" type="button" aria-label="Recolher mapa" @click="mapaMobileVisivel = false">
+            <XMarkIcon class="w-5 h-5"/>
+          </button>
           <div ref="mapContainer" class="dashboard-sales-map"></div>
           <div v-if="mapError" class="dashboard-map-error">
             <ExclamationTriangleIcon class="w-8 h-8"/>
@@ -282,6 +276,23 @@
             <span>{{ mapError }}</span>
             <button class="btn-primary btn-sm" @click="reiniciarMapa">Tentar novamente</button>
           </div>
+        </div>
+
+        <div class="dashboard-map-filters">
+          <div class="map-filter-heading">
+            <strong>Filtragem e resumo</strong>
+            <span>Selecione um resultado abaixo para localizar no mapa.</span>
+          </div>
+          <div class="map-kpi"><strong>{{ mapaResumo.clientes || 0 }}</strong><span>clientes</span></div>
+          <div class="map-kpi"><strong>{{ mapaResumo.pedidos || 0 }}</strong><span>pedidos</span></div>
+          <div class="map-kpi"><strong>{{ fmt.moeda(mapaResumo.valor || 0) }}</strong><span>em vendas</span></div>
+          <button v-if="!mapaMobileVisivel" class="btn-secondary btn-sm dashboard-map-show" @click="mostrarMapaMobile">
+            <MapIcon class="w-4 h-4"/> Exibir mapa
+          </button>
+          <button class="btn-secondary btn-sm" :disabled="sincronizandoMapa" @click="sincronizarCeps">
+            <MapPinIcon class="w-4 h-4"/>
+            {{ sincronizandoMapa ? 'Localizando...' : 'Atualizar CEPs' }}
+          </button>
         </div>
 
         <div class="dashboard-map-ranking">
@@ -352,7 +363,7 @@ import SkeletonChart from '@/components/ui/SkeletonChart.vue'
 import {
   ShoppingBagIcon, ChartBarIcon, BanknotesIcon, BuildingLibraryIcon,
   UsersIcon, CubeIcon, WrenchScrewdriverIcon, ReceiptPercentIcon,
-  ArrowPathIcon, ExclamationTriangleIcon, MapPinIcon,
+  ArrowPathIcon, ExclamationTriangleIcon, MapPinIcon, MapIcon, XMarkIcon,
 } from '@heroicons/vue/24/outline'
 
 const auth      = useAuthStore()
@@ -367,8 +378,15 @@ const mapContainer = ref(null)
 const loadingMapa = ref(false)
 const sincronizandoMapa = ref(false)
 const mapError = ref('')
+const mapaMobileVisivel = ref(true)
 const mapaPontos = ref([])
 const mapaResumo = ref({ clientes: 0, pedidos: 0, valor: 0, estados: 0 })
+
+async function mostrarMapaMobile() {
+  mapaMobileVisivel.value = true
+  await nextTick()
+  salesMap?.invalidateSize()
+}
 let salesMap = null
 let salesLayer = null
 let salesResizeObserver = null
@@ -617,10 +635,16 @@ onBeforeUnmount(() => destruirMapaVendas())
 .dashboard-map-grid {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(280px, .8fr);
+  grid-template-areas:
+    "map ranking"
+    "filters ranking";
   gap: 14px;
 }
 .dashboard-map-wrapper {
+  grid-area: map;
   position: relative;
+  isolation: isolate;
+  z-index: 0;
   min-height: 430px;
   overflow: hidden;
   border: 1px solid var(--border);
@@ -633,6 +657,36 @@ onBeforeUnmount(() => destruirMapaVendas())
   width: 100%;
   height: 100%;
   min-height: 430px;
+}
+.dashboard-map-close,
+.dashboard-map-show {
+  display: none;
+}
+.dashboard-map-filters {
+  grid-area: filters;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--bg-surface);
+}
+.map-filter-heading {
+  margin-right: auto;
+}
+.map-filter-heading strong,
+.map-filter-heading span {
+  display: block;
+}
+.map-filter-heading strong {
+  font-size: .72rem;
+}
+.map-filter-heading span {
+  margin-top: 2px;
+  font-size: .58rem;
+  color: var(--text-muted);
 }
 .dashboard-map-error {
   position: absolute;
@@ -649,6 +703,7 @@ onBeforeUnmount(() => destruirMapaVendas())
   color: var(--text-muted);
 }
 .dashboard-map-ranking {
+  grid-area: ranking;
   min-height: 430px;
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -715,9 +770,67 @@ onBeforeUnmount(() => destruirMapaVendas())
 @media (max-width: 1100px) {
   .dashboard-map-grid {
     grid-template-columns: 1fr;
+    grid-template-areas: "map" "filters" "ranking";
   }
   .dashboard-map-ranking {
     min-height: auto;
+  }
+}
+@media (max-width: 767px) {
+  .dashboard-map-grid {
+    gap: 10px;
+  }
+  .dashboard-map-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    min-height: 300px;
+    height: min(46svh, 360px);
+    border-radius: 10px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, .35);
+  }
+  .dashboard-sales-map {
+    min-height: 300px;
+  }
+  .dashboard-map-close {
+    position: absolute;
+    z-index: 1000;
+    top: 8px;
+    right: 8px;
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, .28);
+    border-radius: 9px;
+    background: rgba(12, 14, 24, .92);
+    color: #fff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .3);
+  }
+  .dashboard-map-show {
+    display: inline-flex;
+  }
+  .dashboard-map-filters {
+    align-items: stretch;
+  }
+  .map-filter-heading {
+    flex-basis: 100%;
+  }
+  .map-kpi {
+    flex: 1 1 28%;
+    min-width: 0;
+  }
+  .dashboard-map-filters > .btn-secondary {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  .dashboard-map-ranking {
+    min-height: 0;
+  }
+  .dashboard-map-ranking .max-h-\[360px\] {
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
   }
 }
 </style>
