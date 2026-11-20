@@ -234,11 +234,17 @@ class DashboardAnalyticsController extends Controller
             return [];
         }
 
+        $periodoSql = match (DB::connection()->getDriverName()) {
+            'pgsql' => "TO_CHAR(data_pedido, 'YYYY-MM')",
+            'mysql', 'mariadb' => "DATE_FORMAT(data_pedido, '%Y-%m')",
+            default => "strftime('%Y-%m', data_pedido)",
+        };
+
         $rows = DB::table('pedidos')
             ->where('empresa_id', $empresaId)
             ->whereBetween('data_pedido', [$inicio, $fim])
             ->whereNotIn('status', ['cancelado', 'cancelada'])
-            ->selectRaw("strftime('%Y-%m', data_pedido) as periodo, SUM(total) as valor")
+            ->selectRaw("{$periodoSql} as periodo, SUM(total) as valor")
             ->groupBy('periodo')
             ->orderBy('periodo')
             ->get();
