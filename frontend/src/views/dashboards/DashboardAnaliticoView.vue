@@ -392,21 +392,22 @@ const painel = computed(()=>{
 
   return {
     ...selected,
-    cards: (remoto.cards || selected.cards || []).map((card,index)=>({
+    cards: (remoto.cards || []).map((card,index)=>({
       ...card,
       icon: selected.cards?.[index]?.icon || icons.grafico,
     })),
-    serie: remoto.serie || selected.serie || baseSerie,
-    ranking: remoto.ranking || selected.ranking || baseRanking,
-    indicadores: remoto.indicadores || selected.indicadores || baseIndicadores,
+    serie: remoto.serie || [],
+    ranking: remoto.ranking || [],
+    indicadores: remoto.indicadores || [],
     acoes: selected.acoes || baseAcoes,
-    colunas: remoto.colunas || selected.colunas || baseColunas,
-    linhas: remoto.linhas || selected.linhas || baseLinhas,
+    colunas: remoto.colunas || [],
+    linhas: remoto.linhas || [],
   }
 })
 
 async function atualizar(mostrarMensagem=true){
   carregando.value=true
+  dadosApi.value=null
 
   try {
     const key = route.meta.dashboardKey || 'geral'
@@ -427,9 +428,18 @@ function exportar(){
 }
 
 watch(
-  () => [route.meta.dashboardKey, periodo.value],
-  () => atualizar(false),
+  () => route.meta.dashboardKey,
+  () => {
+    const periodoPadrao = route.meta.dashboardPeriodo || '30d'
+    if (periodo.value !== periodoPadrao) {
+      periodo.value = periodoPadrao
+      return
+    }
+    atualizar(false)
+  },
 )
+
+watch(periodo, () => atualizar(false))
 
 onMounted(() => atualizar(false))
 </script>
