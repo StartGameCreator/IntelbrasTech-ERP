@@ -46,14 +46,14 @@ class PdvController extends Controller
         $this->authorize('produtos.view');
 
         $data = $request->validate([
-            'q' => 'required|string|min:1|max:200',
+            'q' => 'nullable|string|max:200',
             'deposito_id' => 'nullable|exists:depositos,id',
             'per_page' => 'nullable|integer|min:1|max:50',
             'page' => 'nullable|integer|min:1',
         ]);
 
         $empresaId = auth()->user()->empresa_id;
-        $termo = trim($data['q']);
+        $termo = trim((string) ($data['q'] ?? ''));
         $perPage = $data['per_page'] ?? 30;
 
         $produtos = Produto::query()
@@ -67,12 +67,14 @@ class PdvController extends Controller
             ])
             ->where('empresa_id', $empresaId)
             ->where('ativo', true)
-            ->where(function ($q) use ($termo) {
-                $q->where('nome', 'like', "%{$termo}%")
-                    ->orWhere('codigo', 'like', "%{$termo}%")
-                    ->orWhere('sku', 'like', "%{$termo}%")
-                    ->orWhere('codigo_barras', 'like', "%{$termo}%")
-                    ->orWhere('ean', 'like', "%{$termo}%");
+            ->when($termo !== '', function ($query) use ($termo) {
+                $query->where(function ($q) use ($termo) {
+                    $q->where('nome', 'like', "%{$termo}%")
+                        ->orWhere('codigo', 'like', "%{$termo}%")
+                        ->orWhere('sku', 'like', "%{$termo}%")
+                        ->orWhere('codigo_barras', 'like', "%{$termo}%")
+                        ->orWhere('ean', 'like', "%{$termo}%");
+                });
             })
             ->orderBy('nome')
             ->paginate($perPage);

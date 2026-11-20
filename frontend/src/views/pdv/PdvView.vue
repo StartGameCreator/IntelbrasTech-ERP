@@ -73,10 +73,6 @@
 
           <div v-if="buscando" class="catalog-empty">Buscando...</div>
           <div v-else-if="busca && !resultados.length" class="catalog-empty">Nenhum produto encontrado.</div>
-          <div v-else-if="!busca" class="catalog-empty">
-            Digite um código, SKU, EAN ou nome para localizar produtos.
-          </div>
-
           <div v-else class="product-results">
             <button
               v-for="produto in resultados"
@@ -503,6 +499,7 @@ async function carregar(){
     depositos.value=data.depositos||[]
     formasPagamento.value=data.formas_pagamento||[]
     if(!abertura.value.deposito_id) abertura.value.deposito_id=depositos.value[0]?.id||null
+    if(caixa.value) await buscarProdutos(false)
   }finally{loading.value=false; nextTick(()=>searchInput.value?.focus())}
 }
 
@@ -520,7 +517,6 @@ function debouncedSearch(){
   searchTimer=setTimeout(()=>buscarProdutos(false),250)
 }
 async function buscarProdutos(append=false){
-  if(!busca.value.trim()){resultados.value=[];paginaProdutos.value=1;ultimaPaginaProdutos.value=1;return}
   if(append ? loadingMoreProducts.value : buscando.value)return
   if(append)loadingMoreProducts.value=true
   else{buscando.value=true;paginaProdutos.value=1}
@@ -557,7 +553,7 @@ function adicionarProduto(produto){
     quantidade:1,preco_unitario:Number(produto.preco||0),desconto:0,
     estoque_disponivel:Number(produto.estoque_disponivel||0),controla_estoque:produto.controla_estoque
   })
-  busca.value=''; resultados.value=[]; nextTick(()=>searchInput.value?.focus())
+  busca.value=''; nextTick(()=>searchInput.value?.focus()); buscarProdutos(false)
 }
 function alterarQuantidade(index,delta){
   const item=carrinho.value[index]
@@ -1099,7 +1095,7 @@ kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.
 
   .pdv-grid{display:block;min-height:calc(100dvh - 154px);background:var(--bg-card)}
   .catalog-panel,.cart-panel{min-height:calc(100dvh - 154px)!important;border:0!important}
-  .catalog-panel{border-right:0;border-bottom:2px solid var(--border)!important}
+  .catalog-panel{border-right:0;border-bottom:2px solid var(--border)!important;overflow:visible!important;height:auto!important}
   .cart-panel{height:auto}
 
   .sale-steps{display:grid;position:sticky;top:0;z-index:4;padding:7px}
@@ -1113,7 +1109,7 @@ kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.
   .pdv-search{min-width:0;font-size:16px}
   .search-row kbd,kbd{display:none}
   .catalog-empty{min-height:42dvh;margin:0 10px;padding:24px 18px;align-items:center;justify-content:center;text-align:center;font-size:.82rem}
-  .product-results{padding:0 10px 16px;gap:9px;overflow:visible;touch-action:pan-y;overscroll-behavior-y:auto}
+  .product-results{flex:none;padding:0 10px 16px;gap:9px;overflow:visible!important;max-height:none!important;touch-action:pan-y;overscroll-behavior-y:auto}
   .product-result{grid-template-columns:62px minmax(0,1fr) auto;min-height:84px;padding:10px;gap:10px}
   .product-image{width:62px;height:62px}.product-copy strong{font-size:.82rem}.product-copy span,.product-copy small{font-size:.7rem}.product-price{font-size:.85rem}
   .catalog-footer{display:grid;position:sticky;bottom:calc(70px + env(safe-area-inset-bottom));z-index:3}
