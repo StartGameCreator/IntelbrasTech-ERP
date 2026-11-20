@@ -763,6 +763,9 @@ onUnmounted(() => {
 
   .app-content {
     padding: 14px !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: auto;
+    touch-action: pan-y;
   }
 
   header > div:first-child {

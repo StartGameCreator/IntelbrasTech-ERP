@@ -68,6 +68,12 @@
         </tbody>
       </table>
     </div>
+    <div ref="listSentinel" class="product-load-more">
+      <button v-if="pagina < ultimaPagina" class="btn-secondary btn-sm" :disabled="loadingMore" @click="carregarMais">
+        {{ loadingMore ? 'Carregando...' : 'Carregar mais produtos' }}
+      </button>
+      <span v-else-if="items.length">Todos os {{ total }} produtos foram carregados.</span>
+    </div>
 
     <div v-if="modalImportacao" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
       <div class="card w-full max-w-2xl overflow-hidden">
@@ -161,7 +167,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onBeforeUnmount, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import api from '@/services/api'
@@ -184,6 +190,10 @@ const { moeda, percentual } = useFormato()
 const items = ref([])
 const total = ref(0)
 const loading = ref(false)
+const loadingMore = ref(false)
+const pagina = ref(1)
+const ultimaPagina = ref(1)
+const listSentinel = ref(null)
 const busca = ref('')
 const filtroTipo = ref('')
 const filtroEstoqueBaixo = ref(false)
@@ -201,22 +211,34 @@ let timer = null
 
 const ufs = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
 
-async function carregar() {
-  loading.value = true
+async function carregar(append = false) {
+  if (append ? loadingMore.value : loading.value) return
+  if (append) loadingMore.value = true
+  else { loading.value = true; pagina.value = 1 }
   try {
     const { data } = await api.get('/produtos', {
       params: {
         busca: busca.value,
         tipo: filtroTipo.value,
         estoque_baixo: filtroEstoqueBaixo.value ? 1 : undefined,
-        per_page: 15,
+        per_page: 30,
+        page: pagina.value,
       },
     })
-    items.value = data.data ?? data
+    const recebidos = data.data ?? data
+    items.value = append ? [...items.value, ...recebidos] : recebidos
     total.value = data.total ?? items.value.length
+    ultimaPagina.value = data.last_page ?? 1
   } finally {
     loading.value = false
+    loadingMore.value = false
   }
+}
+
+async function carregarMais() {
+  if (pagina.value >= ultimaPagina.value || loadingMore.value) return
+  pagina.value += 1
+  try { await carregar(true) } catch (error) { pagina.value -= 1; throw error }
 }
 
 function debounceBusca() {
@@ -475,7 +497,15 @@ async function importar() {
   }
 }
 
-onMounted(carregar)
+let listObserver
+onMounted(() => {
+  carregar()
+  listObserver = new IntersectionObserver(entries => {
+    if (entries[0]?.isIntersecting) carregarMais()
+  }, { rootMargin: '240px' })
+  if (listSentinel.value) listObserver.observe(listSentinel.value)
+})
+onBeforeUnmount(() => listObserver?.disconnect())
 
 function normalizarTextoImportacao(valor, limite = 50000) {
   if (valor === null || valor === undefined) return ''
@@ -528,6 +558,7 @@ function normalizarTextoImportacao(valor, limite = 50000) {
   color: var(--text-primary);
   font-size: 1.05rem;
 }
+.product-load-more{min-height:54px;display:flex;align-items:center;justify-content:center;padding:8px;color:var(--text-muted);font-size:.7rem}.product-load-more button{min-height:40px}
 
 .import-kpi span {
   margin-top: 3px;

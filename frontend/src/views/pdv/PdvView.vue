@@ -95,6 +95,12 @@
               </div>
               <div class="product-price">{{ moeda(produto.preco) }}</div>
             </button>
+            <div ref="pdvProductSentinel" class="pdv-load-more">
+              <button v-if="paginaProdutos < ultimaPaginaProdutos" :disabled="loadingMoreProducts" @click="carregarMaisProdutos">
+                {{ loadingMoreProducts ? 'Carregando...' : 'Carregar mais produtos' }}
+              </button>
+              <span v-else>Todos os resultados foram carregados.</span>
+            </div>
           </div>
           <div class="catalog-footer">
             <button class="btn-secondary" @click="limparCarrinho" :disabled="!carrinho.length">Excluir venda</button>
@@ -409,7 +415,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, nextTick, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import api from '@/services/api'
 import {
@@ -428,6 +434,10 @@ const formasPagamento = ref([])
 const busca = ref('')
 const resultados = ref([])
 const buscando = ref(false)
+const loadingMoreProducts = ref(false)
+const paginaProdutos = ref(1)
+const ultimaPaginaProdutos = ref(1)
+const pdvProductSentinel = ref(null)
 const searchInput = ref(null)
 const discountInput = ref(null)
 const notesInput = ref(null)
@@ -505,18 +515,27 @@ async function abrirCaixa(){
 
 function debouncedSearch(){
   clearTimeout(searchTimer)
-  searchTimer=setTimeout(buscarProdutos,250)
+  searchTimer=setTimeout(()=>buscarProdutos(false),250)
 }
-async function buscarProdutos(){
-  if(!busca.value.trim()){resultados.value=[];return}
-  buscando.value=true
+async function buscarProdutos(append=false){
+  if(!busca.value.trim()){resultados.value=[];paginaProdutos.value=1;ultimaPaginaProdutos.value=1;return}
+  if(append ? loadingMoreProducts.value : buscando.value)return
+  if(append)loadingMoreProducts.value=true
+  else{buscando.value=true;paginaProdutos.value=1}
   try{
-    const {data}=await api.get('/pdv/produtos',{params:{q:busca.value,deposito_id:caixa.value?.deposito_id}})
-    resultados.value=data.data||[]
-    if(resultados.value.length===1 && [resultados.value[0].ean,resultados.value[0].sku,resultados.value[0].codigo].includes(busca.value.trim())){
+    const {data}=await api.get('/pdv/produtos',{params:{q:busca.value,deposito_id:caixa.value?.deposito_id,page:paginaProdutos.value,per_page:30}})
+    const recebidos=data.data||[]
+    resultados.value=append?[...resultados.value,...recebidos]:recebidos
+    ultimaPaginaProdutos.value=data.last_page||1
+    if(!append&&resultados.value.length===1 && [resultados.value[0].ean,resultados.value[0].sku,resultados.value[0].codigo].includes(busca.value.trim())){
       adicionarProduto(resultados.value[0])
     }
-  }finally{buscando.value=false}
+  }finally{buscando.value=false;loadingMoreProducts.value=false}
+}
+async function carregarMaisProdutos(){
+  if(paginaProdutos.value>=ultimaPaginaProdutos.value||loadingMoreProducts.value)return
+  paginaProdutos.value+=1
+  try{await buscarProdutos(true)}catch(error){paginaProdutos.value-=1;throw error}
 }
 function adicionarPrimeiroResultado(){ if(resultados.value[0]) adicionarProduto(resultados.value[0]) }
 function focarBuscaMobile(){ nextTick(()=>searchInput.value?.focus()) }
@@ -944,7 +963,13 @@ function onKey(e){
   if(e.key==='F8'){e.preventDefault();if(!modalPagamento.value) abrirPagamento();nextTick(()=>notesInput.value?.focus())}
   if(e.key==='Escape'){modalCliente.value=false;modalPagamento.value=false;modalMovimento.value=false;modalResumo.value=false;modalFechamento.value=false}
 }
-onMounted(()=>{carregar();window.addEventListener('keydown',onKey)})
+let pdvProductsObserver
+onMounted(()=>{
+  pdvProductsObserver=new IntersectionObserver(entries=>{if(entries[0]?.isIntersecting)carregarMaisProdutos()},{rootMargin:'240px'})
+  carregar();window.addEventListener('keydown',onKey)
+})
+watch(pdvProductSentinel,(element,previous)=>{if(previous)pdvProductsObserver?.unobserve(previous);if(element)pdvProductsObserver?.observe(element)})
+onBeforeUnmount(()=>{clearTimeout(searchTimer);clearTimeout(clientTimer);window.removeEventListener('keydown',onKey);pdvProductsObserver?.disconnect()})
 </script>
 
 <style scoped>
@@ -962,6 +987,7 @@ onMounted(()=>{carregar();window.addEventListener('keydown',onKey)})
 kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.6rem;color:var(--text-muted);background:var(--bg-input)}
 .catalog-empty{flex:1;display:flex;align-items:center;justify-content:center;padding:30px;font-size:.78rem;color:var(--text-muted)}
 .product-results{padding:10px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.pdv-load-more{min-height:48px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:.68rem}.pdv-load-more button{width:100%;min-height:42px;border:1px solid var(--border);border-radius:8px;background:var(--bg-elevated);color:var(--text-secondary);font-weight:700}
 .product-result{display:grid;grid-template-columns:56px 1fr auto;align-items:center;gap:12px;text-align:left;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input)}
 .product-result:hover{border-color:var(--primary);background:var(--bg-elevated)}
 .product-image{width:56px;height:56px;border-radius:8px;background:white;display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--text-muted)}
@@ -1078,7 +1104,7 @@ kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.
   .pdv-search{min-width:0;font-size:16px}
   .search-row kbd,kbd{display:none}
   .catalog-empty{min-height:42dvh;margin:0 10px;padding:24px 18px;align-items:center;justify-content:center;text-align:center;font-size:.82rem}
-  .product-results{padding:0 10px 16px;gap:9px;overflow:visible}
+  .product-results{padding:0 10px 16px;gap:9px;overflow:visible;touch-action:pan-y;overscroll-behavior-y:auto}
   .product-result{grid-template-columns:62px minmax(0,1fr) auto;min-height:84px;padding:10px;gap:10px}
   .product-image{width:62px;height:62px}.product-copy strong{font-size:.82rem}.product-copy span,.product-copy small{font-size:.7rem}.product-price{font-size:.85rem}
   .catalog-footer{display:none}

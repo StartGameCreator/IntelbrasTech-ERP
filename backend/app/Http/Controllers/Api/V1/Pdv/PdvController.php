@@ -48,12 +48,13 @@ class PdvController extends Controller
         $data = $request->validate([
             'q' => 'required|string|min:1|max:200',
             'deposito_id' => 'nullable|exists:depositos,id',
-            'limit' => 'nullable|integer|min:1|max:50',
+            'per_page' => 'nullable|integer|min:1|max:50',
+            'page' => 'nullable|integer|min:1',
         ]);
 
         $empresaId = auth()->user()->empresa_id;
         $termo = trim($data['q']);
-        $limit = $data['limit'] ?? 20;
+        $perPage = $data['per_page'] ?? 30;
 
         $produtos = Produto::query()
             ->with([
@@ -73,9 +74,10 @@ class PdvController extends Controller
                     ->orWhere('codigo_barras', 'like', "%{$termo}%")
                     ->orWhere('ean', 'like', "%{$termo}%");
             })
-            ->limit($limit)
-            ->get()
-            ->map(fn (Produto $produto) => [
+            ->orderBy('nome')
+            ->paginate($perPage);
+
+        $produtos->setCollection($produtos->getCollection()->map(fn (Produto $produto) => [
                 'id' => $produto->id,
                 'codigo' => $produto->codigo,
                 'sku' => $produto->sku,
@@ -88,9 +90,9 @@ class PdvController extends Controller
                 'controla_estoque' => (bool) $produto->controla_estoque,
                 'estoque_disponivel' => (float) $produto->estoque->sum('quantidade_disponivel'),
                 'imagem' => $produto->imagens->first()?->url,
-            ]);
+            ]));
 
-        return response()->json(['data' => $produtos]);
+        return response()->json($produtos);
     }
 
     public function buscarClientes(Request $request): JsonResponse
