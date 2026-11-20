@@ -24,7 +24,7 @@
           <RouterLink to="/sobre" @click="close">Sobre</RouterLink>
           <RouterLink to="/contato" @click="close">Contato</RouterLink>
           <RouterLink class="portal-service-request" to="/solicite-um-tecnico" @click="close">Solicite um Técnico</RouterLink>
-          <a class="portal-store" :href="portal.canais?.loja_url || 'https://loja.intelbrastech.com.br'" target="_blank" rel="noopener" @click="close">Acessar loja</a>
+          <a class="portal-store" :href="portal.canais?.loja_url || 'https://www.loja.intelbrastech.com.br'" target="_blank" rel="noopener" @click="close">Acessar loja</a>
         </nav>
       </div>
     </header>

@@ -82,7 +82,7 @@ CORS_ALLOWED_ORIGINS=https://intelbrastech.com.br,https://www.intelbrastech.com.
 SANCTUM_STATEFUL_DOMAINS=intelbrastech.com.br,www.intelbrastech.com.br
 BCRYPT_ROUNDS=12
 
-PORTAL_LOJA_URL=https://loja.intelbrastech.com.br
+PORTAL_LOJA_URL=https://www.loja.intelbrastech.com.br
 PORTAL_AUTORIZACAO_INTELBRAS=false
 FISCAL_DRIVER=fake
 FISCAL_ALLOW_FAKE_IN_PRODUCTION=false
