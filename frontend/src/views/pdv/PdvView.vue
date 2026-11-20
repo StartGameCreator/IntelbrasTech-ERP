@@ -48,7 +48,7 @@
       </div>
 
       <div v-else class="pdv-grid" :class="`mobile-panel-${mobilePanel}`">
-        <section class="catalog-panel" :aria-hidden="mobilePanel !== 'catalogo'">
+        <section ref="catalogPanel" class="catalog-panel">
           <nav class="sale-steps" aria-label="Etapas da venda">
             <button class="active" @click="searchInput?.focus()"><span>1</span> Produto <kbd>F2</kbd></button>
             <button @click="modalCliente=true"><span>2</span> Cliente <kbd>F3</kbd></button>
@@ -108,7 +108,7 @@
           </div>
         </section>
 
-        <aside class="cart-panel" :aria-hidden="mobilePanel !== 'carrinho'">
+        <aside ref="cartPanel" class="cart-panel">
           <div class="cart-top">
             <div>
               <h2>Produtos da venda</h2>
@@ -193,11 +193,11 @@
       </div>
 
       <nav v-if="caixa" class="mobile-pdv-nav" aria-label="Navegação do frente de caixa">
-        <button :class="{ active: mobilePanel === 'catalogo' }" @click="mobilePanel = 'catalogo'; focarBuscaMobile()">
+        <button :class="{ active: mobilePanel === 'catalogo' }" @click="irParaPainel('catalogo')">
           <MagnifyingGlassIcon class="w-5 h-5"/>
           <span>Produtos</span>
         </button>
-        <button :class="{ active: mobilePanel === 'carrinho' }" @click="mobilePanel = 'carrinho'">
+        <button :class="{ active: mobilePanel === 'carrinho' }" @click="irParaPainel('carrinho')">
           <span class="mobile-cart-icon">
             <ShoppingCartIcon class="w-5 h-5"/>
             <b v-if="carrinho.length">{{ carrinho.length }}</b>
@@ -443,6 +443,8 @@ const discountInput = ref(null)
 const notesInput = ref(null)
 const carrinho = ref([])
 const mobilePanel = ref('catalogo')
+const catalogPanel = ref(null)
+const cartPanel = ref(null)
 const clienteSelecionado = ref(null)
 const clientes = ref([])
 const buscaCliente = ref('')
@@ -539,6 +541,13 @@ async function carregarMaisProdutos(){
 }
 function adicionarPrimeiroResultado(){ if(resultados.value[0]) adicionarProduto(resultados.value[0]) }
 function focarBuscaMobile(){ nextTick(()=>searchInput.value?.focus()) }
+async function irParaPainel(painel){
+  mobilePanel.value=painel
+  await nextTick()
+  const alvo=painel==='carrinho'?cartPanel.value:catalogPanel.value
+  alvo?.scrollIntoView({behavior:'smooth',block:'start'})
+  if(painel==='catalogo') focarBuscaMobile()
+}
 function adicionarProduto(produto){
   if(produto.controla_estoque && produto.estoque_disponivel<=0){toast.warning('Produto sem estoque disponível.');return}
   const existente=carrinho.value.find(i=>i.produto_id===produto.id)
@@ -1089,25 +1098,25 @@ kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.
   .pdv-header-actions button{min-height:36px;padding:6px 9px;font-size:.65rem}
 
   .pdv-grid{display:block;min-height:calc(100dvh - 154px);background:var(--bg-card)}
-  .pdv-grid.mobile-panel-catalogo .cart-panel,.pdv-grid.mobile-panel-carrinho .catalog-panel{display:none}
   .catalog-panel,.cart-panel{min-height:calc(100dvh - 154px)!important;border:0!important}
-  .catalog-panel{border-right:0}
+  .catalog-panel{border-right:0;border-bottom:2px solid var(--border)!important}
   .cart-panel{height:auto}
 
-  .sale-steps{display:none}
+  .sale-steps{display:grid;position:sticky;top:0;z-index:4;padding:7px}
+  .sale-steps button{min-height:40px;padding:6px 4px;font-size:.66rem}
   .catalog-tools{grid-template-columns:1fr auto;padding:10px 12px 8px;gap:12px}
   .catalog-tools .select{min-height:42px;font-size:.8rem}
-  .barcode-toggle>span,.barcode-toggle>b{display:none!important}
-  .barcode-toggle{display:flex!important;align-items:center!important;padding-bottom:11px}
+  .barcode-toggle>span,.barcode-toggle>b{display:block!important}
+  .barcode-toggle{display:grid!important;align-items:center!important;padding-bottom:4px}
   .barcode-toggle input{width:42px;height:24px}
-  .search-row{position:sticky;top:0;z-index:2;margin:0 10px 10px;padding:0 13px;min-height:50px;background:var(--bg-input);box-shadow:0 5px 14px rgba(0,0,0,.12)}
+  .search-row{position:relative;z-index:2;margin:0 10px 10px;padding:0 13px;min-height:50px;background:var(--bg-input);box-shadow:0 5px 14px rgba(0,0,0,.12)}
   .pdv-search{min-width:0;font-size:16px}
   .search-row kbd,kbd{display:none}
   .catalog-empty{min-height:42dvh;margin:0 10px;padding:24px 18px;align-items:center;justify-content:center;text-align:center;font-size:.82rem}
   .product-results{padding:0 10px 16px;gap:9px;overflow:visible;touch-action:pan-y;overscroll-behavior-y:auto}
   .product-result{grid-template-columns:62px minmax(0,1fr) auto;min-height:84px;padding:10px;gap:10px}
   .product-image{width:62px;height:62px}.product-copy strong{font-size:.82rem}.product-copy span,.product-copy small{font-size:.7rem}.product-price{font-size:.85rem}
-  .catalog-footer{display:none}
+  .catalog-footer{display:grid;position:sticky;bottom:calc(70px + env(safe-area-inset-bottom));z-index:3}
 
   .cart-top,.client-box{min-height:58px;padding:11px 13px}
   .cart-top h2{font-size:.92rem}.client-box strong{max-width:58vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.78rem}
@@ -1123,7 +1132,8 @@ kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.
   .cart-item-controls button{width:42px;height:42px;font-size:1.2rem}.cart-item-controls input{width:72px;height:42px;font-size:16px}
   .cart-item-values input{width:104px;height:42px;font-size:16px}.cart-item-values strong{font-size:.82rem}.remove-item{width:40px;height:40px;font-size:1.3rem}
   .cart-summary{padding:13px;gap:10px}.cart-summary>div{font-size:.78rem}.summary-input input{width:112px;min-height:40px;font-size:16px}.grand-total strong{font-size:1.35rem}
-  .total-dock{display:none}
+  .total-dock{display:grid;position:sticky;bottom:calc(70px + env(safe-area-inset-bottom));z-index:3;grid-template-columns:1fr auto;gap:7px}
+  .total-dock>span{display:none}.total-dock>strong{font-size:1.2rem}.total-dock .finish-sale{grid-column:1/-1;width:100%}
 
   .mobile-pdv-nav{position:fixed;z-index:80;left:0;right:0;bottom:0;display:grid;grid-template-columns:72px 72px minmax(0,1fr);gap:7px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:color-mix(in srgb,var(--bg-card) 94%,transparent);box-shadow:0 -8px 28px rgba(0,0,0,.28);backdrop-filter:blur(16px)}
   .mobile-pdv-nav>button{min-height:54px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;color:var(--text-muted);font-size:.65rem;font-weight:700}
