@@ -23,6 +23,7 @@
 
     <div class="card p-3 mapa-filtros">
       <div class="grid grid-cols-1 md:grid-cols-7 gap-2">
+        <button v-if="!mapaVisivel" type="button" class="btn-secondary mapa-show" @click="mostrarMapa"><MapIcon class="w-4 h-4"/> Exibir mapa</button>
         <select v-model="filtros.perfil" class="select" @change="perfilAlterado">
           <option value="gd_residencial_comercial">GD resid. + comercial</option>
           <option value="gd_residencial">GD residencial</option>
@@ -83,7 +84,8 @@
         </div>
       </div>
 
-      <div class="card overflow-hidden relative min-h-0 mapa-aneel-canvas">
+      <div v-show="mapaVisivel" class="card overflow-hidden relative min-h-0 mapa-aneel-canvas">
+        <button type="button" class="mapa-close" aria-label="Recolher mapa" @click="mapaVisivel=false"><XMarkIcon class="w-5 h-5"/></button>
         <div ref="mapContainer" class="mapa-aneel-container"></div>
         <div v-if="mapError" class="absolute inset-0 z-[700] flex items-center justify-center bg-[#090910] p-6">
           <div class="max-w-md text-center">
@@ -133,6 +135,7 @@ const importando = ref(false)
 const registros = ref([])
 const selecionado = ref(null)
 const mapError = ref('')
+const mapaVisivel = ref(true)
 const cidadeStatus = ref('')
 const resourceId = ref('11ec447d-698d-4ab8-977f-b424d5deee6a')
 const resumo = ref({ total: 0, potencia_mw: 0 })
@@ -142,6 +145,8 @@ let map = null
 let markersLayer = null
 let resizeObserver = null
 const markersById = new Map()
+
+async function mostrarMapa(){mapaVisivel.value=true;await nextTick();map?.invalidateSize()}
 
 const comCoordenadas = computed(() => registros.value.filter(coordenadasValidas).length)
 const potenciaTotal = computed(() => registros.value.reduce((total, item) => total + Number(item.potencia_mw || 0), 0))
@@ -281,6 +286,7 @@ onBeforeUnmount(()=>destruirMapa())
 <style>
 .mapa-aneel-grid{height:calc(100dvh - 325px);min-height:540px;overflow:hidden}
 .mapa-aneel-canvas{isolation:isolate;contain:layout paint;z-index:0}
+.mapa-close,.mapa-show{display:none}
 .mapa-aneel-container{position:absolute;inset:0;width:100%;height:100%;min-height:540px;background:#0b0b12;z-index:0}
 .mapa-aneel-canvas .leaflet-container{z-index:0}
 .mapa-aneel-grid .overflow-y-auto{overscroll-behavior:contain}
@@ -295,11 +301,14 @@ onBeforeUnmount(()=>destruirMapa())
   .mapa-aneel-page>*{margin-top:0!important}
   .mapa-aneel-page .mapa-page-header{order:0}
   .mapa-aneel-page .mapa-aneel-grid{display:contents}
-  .mapa-aneel-page .mapa-aneel-canvas{order:1;height:48dvh;min-height:340px}
+  .mapa-aneel-page .mapa-aneel-canvas{order:1;position:sticky;top:0;z-index:20;height:min(48dvh,380px);min-height:320px;box-shadow:0 10px 28px rgba(0,0,0,.35)}
   .mapa-aneel-page .mapa-filtros{order:2}
   .mapa-aneel-page .mapa-resultados{order:3;height:360px}
   .mapa-aneel-page .mapa-kpis{order:4}
   .mapa-aneel-page>p{order:5}
-  .mapa-aneel-container{min-height:340px}
+  .mapa-aneel-container{min-height:320px}
+  .mapa-close{position:absolute;display:grid;place-items:center;right:8px;top:8px;z-index:1000;width:36px;height:36px;border:1px solid rgba(255,255,255,.28);border-radius:9px;background:rgba(12,14,24,.92);color:#fff}
+  .mapa-show{display:inline-flex}
+  .mapa-resultados .overflow-y-auto{overflow:visible}
 }
 </style>

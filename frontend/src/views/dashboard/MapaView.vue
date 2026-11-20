@@ -23,6 +23,7 @@
 
     <div class="card p-3 mapa-filtros">
       <div class="grid grid-cols-1 md:grid-cols-6 gap-2">
+        <button v-if="!mapaVisivel" type="button" class="btn-secondary mapa-show" @click="mostrarMapa"><MapIcon class="w-4 h-4"/> Exibir mapa</button>
         <input v-model="filtros.busca" class="input md:col-span-2" placeholder="Nome, município ou código CEG" @keyup.enter="carregar" />
         <select v-model="filtros.uf" class="select"><option value="">Todos os estados</option><option v-for="uf in resumo.ufs || []" :key="uf" :value="uf">{{ uf }}</option></select>
         <select v-model="filtros.fase" class="select"><option value="">Todas as fases</option><option v-for="fase in resumo.fases || []" :key="fase" :value="fase">{{ fase }}</option></select>
@@ -57,7 +58,8 @@
         </div>
       </div>
 
-      <div class="card overflow-hidden relative min-h-0 mapa-ons-canvas">
+      <div v-show="mapaVisivel" class="card overflow-hidden relative min-h-0 mapa-ons-canvas">
+        <button type="button" class="mapa-close" aria-label="Recolher mapa" @click="mapaVisivel=false"><XMarkIcon class="w-5 h-5"/></button>
         <div ref="mapContainer" class="mapa-ons-container"></div>
         <div v-if="mapError" class="absolute inset-0 z-[700] flex items-center justify-center bg-[#090910] p-6">
           <div class="max-w-md text-center">
@@ -120,12 +122,15 @@ const usinas = ref([])
 const selecionada = ref(null)
 const cnpjSelecionado = ref('')
 const mapError = ref('')
+const mapaVisivel = ref(true)
 const resumo = ref({ total: 0, operacao: 0, construcao: 0, potencia_mw: 0, ufs: [], fases: [] })
 const filtros = reactive({ busca: '', uf: '', fase: '', potencia_min: '' })
 let map = null
 let markersLayer = null
 let resizeObserver = null
 const markersById = new Map()
+
+async function mostrarMapa(){mapaVisivel.value=true;await nextTick();map?.invalidateSize()}
 
 function inicializarMapa() {
   if (!mapContainer.value || map) return
@@ -182,6 +187,7 @@ onBeforeUnmount(()=>destruirMapa())
 <style>
 .mapa-ons-grid{height:calc(100dvh - 325px);min-height:540px;overflow:hidden}
 .mapa-ons-canvas{isolation:isolate;contain:layout paint;z-index:0}
+.mapa-close,.mapa-show{display:none}
 .mapa-ons-container{position:absolute;inset:0;width:100%;height:100%;min-height:540px;background:#0b0b12;z-index:0}
 .mapa-ons-canvas .leaflet-container{z-index:0}
 .leaflet-control-zoom a{background:#171724!important;color:#f8fafc!important;border-color:#2b2b45!important}
@@ -195,11 +201,14 @@ onBeforeUnmount(()=>destruirMapa())
   .mapa-ons-page>*{margin-top:0!important}
   .mapa-ons-page .mapa-page-header{order:0}
   .mapa-ons-page .mapa-ons-grid{display:contents}
-  .mapa-ons-page .mapa-ons-canvas{order:1;height:48dvh;min-height:340px}
+  .mapa-ons-page .mapa-ons-canvas{order:1;position:sticky;top:0;z-index:20;height:min(48dvh,380px);min-height:320px;box-shadow:0 10px 28px rgba(0,0,0,.35)}
   .mapa-ons-page .mapa-filtros{order:2}
   .mapa-ons-page .mapa-resultados{order:3;height:360px}
   .mapa-ons-page .mapa-kpis{order:4}
   .mapa-ons-page>p{order:5}
-  .mapa-ons-container{min-height:340px}
+  .mapa-ons-container{min-height:320px}
+  .mapa-close{position:absolute;display:grid;place-items:center;right:8px;top:8px;z-index:1000;width:36px;height:36px;border:1px solid rgba(255,255,255,.28);border-radius:9px;background:rgba(12,14,24,.92);color:#fff}
+  .mapa-show{display:inline-flex}
+  .mapa-resultados .overflow-y-auto{overflow:visible}
 }
 </style>
