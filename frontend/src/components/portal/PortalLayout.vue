@@ -24,8 +24,7 @@
           <RouterLink to="/sobre" @click="close">Sobre</RouterLink>
           <RouterLink to="/contato" @click="close">Contato</RouterLink>
           <RouterLink class="portal-service-request" to="/solicite-um-tecnico" @click="close">Solicite um Técnico</RouterLink>
-          <a v-if="portal.canais?.loja_url" class="portal-store" :href="portal.canais.loja_url" target="_blank" rel="noopener">Acessar loja</a>
-          <RouterLink v-else class="portal-store" to="/contato?assunto=loja" @click="close">Acessar loja</RouterLink>
+          <a class="portal-store" :href="portal.canais?.loja_url || 'https://loja.intelbrastech.com.br'" target="_blank" rel="noopener" @click="close">Acessar loja</a>
         </nav>
       </div>
     </header>
