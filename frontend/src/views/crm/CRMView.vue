@@ -109,19 +109,19 @@
             class="crm-grid crm-grid-row"
             @click="abrirDetalhe(lead)"
           >
-            <span><input type="checkbox" @click.stop /></span>
-            <span class="crm-lead-cell">
+            <span class="crm-select-cell"><input type="checkbox" @click.stop /></span>
+            <span class="crm-lead-cell" data-label="Lead">
               <strong>{{ lead.titulo || lead.nome }}</strong>
               <small>{{ lead.empresa_nome || lead.nome }}</small>
               <small v-if="lead.cnpj">CNPJ {{ formatarCnpj(lead.cnpj) }}</small>
             </span>
-            <span><span class="crm-avatar">{{ iniciais(lead.responsavel_nome || lead.responsavel?.nome || 'IT') }}</span></span>
-            <span><span class="crm-status" :style="{ background: lead.cor || grupo.cor }">{{ lead.etapa_nome || grupo.nome }}</span></span>
-            <span>{{ moeda(lead.valor_estimado) }}</span>
-            <span>{{ formatarData(lead.data_previsao_fechamento) }}</span>
-            <span>{{ lead.origem || 'Comercial' }}</span>
-            <span>{{ lead.proxima_acao || 'Acompanhar' }}</span>
-            <span class="text-[var(--text-muted)]">•••</span>
+            <span data-label="Responsável"><span class="crm-avatar">{{ iniciais(lead.responsavel_nome || lead.responsavel?.nome || 'IT') }}</span></span>
+            <span data-label="Etapa"><span class="crm-status" :style="{ background: lead.cor || grupo.cor }">{{ lead.etapa_nome || grupo.nome }}</span></span>
+            <span data-label="Valor">{{ moeda(lead.valor_estimado) }}</span>
+            <span data-label="Prazo">{{ formatarData(lead.data_previsao_fechamento) }}</span>
+            <span data-label="Origem">{{ lead.origem || 'Comercial' }}</span>
+            <span data-label="Próxima ação">{{ lead.proxima_acao || 'Acompanhar' }}</span>
+            <span class="crm-more text-[var(--text-muted)]">•••</span>
           </div>
           <button class="crm-add-row" @click="abrirNovoComEtapa(grupo)">+ Adicionar lead</button>
         </div>
@@ -233,8 +233,8 @@
     </button>
 
     <Teleport to="body" v-if="modalLead">
-      <div class="modal-overlay" @click.self="modalLead = false">
-        <div class="modal-lg animate-slide-up">
+      <div class="modal-overlay crm-modal-overlay" @click.self="modalLead = false">
+        <div class="modal-lg crm-modal animate-slide-up">
           <div class="modal-header">
             <div>
               <h3 class="text-base font-semibold text-[var(--text-primary)]">{{ leadAtual.id ? 'Editar lead' : 'Novo lead' }}</h3>
@@ -318,8 +318,8 @@
     </Teleport>
 
     <Teleport to="body" v-if="modalAgente || modalAutomacao || modalIntegracao || modalView">
-      <div class="modal-overlay" @click.self="fecharModais">
-        <div class="modal-md animate-slide-up">
+      <div class="modal-overlay crm-modal-overlay" @click.self="fecharModais">
+        <div class="modal-md crm-modal animate-slide-up">
           <div class="modal-header">
             <h3 class="text-base font-semibold text-[var(--text-primary)]">{{ modalTitulo }}</h3>
             <button @click="fecharModais" class="btn-ghost btn-icon"><XMarkIcon class="w-4 h-4" /></button>
@@ -378,7 +378,7 @@ const modalIntegracao = ref(false)
 const modalView = ref(false)
 const leadArrastado = ref(null)
 const leadAtual = ref({})
-const abaAtiva = ref('quadro')
+const abaAtiva = ref(window.matchMedia('(max-width: 760px)').matches ? 'kanban' : 'quadro')
 const busca = ref('')
 const filtroResponsavel = ref('')
 const atividades = ref([])
@@ -619,5 +619,69 @@ onMounted(carregar)
 .crm-prompt-box { display: flex; gap: .75rem; align-items: flex-start; border: 1px solid var(--border); background: var(--bg-elevated); border-radius: .9rem; padding: .9rem; color: var(--text-secondary); }
 .crm-qualification{border:1px solid var(--border);border-radius:.8rem;padding:.85rem}.crm-qualification summary{cursor:pointer;font-size:.82rem;font-weight:800;color:var(--text-primary)}.crm-timeline{border-top:1px solid var(--border);padding-top:1rem}.crm-timeline-head h4{font-weight:800}.crm-timeline-head p{font-size:.75rem;color:var(--text-muted)}.crm-activity-form{display:grid;grid-template-columns:110px 1fr 180px 110px auto;gap:.5rem;margin:1rem 0}.crm-timeline-list{max-height:260px;overflow:auto}.crm-timeline-list article{display:flex;gap:.75rem;align-items:flex-start;border-left:1px solid var(--border);padding:0 0 1rem 1rem;margin-left:.3rem}.crm-timeline-list i{width:9px;height:9px;border-radius:50%;background:#64748b;margin-left:-1.32rem;margin-top:.35rem;box-shadow:0 0 0 4px var(--bg-surface)}.crm-timeline-list i.pendente{background:#f59e0b}.crm-timeline-list i.concluida{background:#10b981}.crm-timeline-list article>div{flex:1}.crm-timeline-list b,.crm-timeline-list small{display:block}.crm-timeline-list small{font-size:.7rem;color:var(--text-muted);margin-top:.2rem}.crm-timeline-list p{font-size:.75rem;color:var(--text-secondary);margin-top:.25rem}.crm-forecast{grid-column:1/-1}.crm-forecast>div{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}.crm-forecast span{padding:1rem;border-radius:.75rem;background:var(--bg-surface);color:var(--text-muted);font-size:.75rem}.crm-forecast strong{display:block;color:var(--text-primary);font-size:1.2rem;margin-top:.35rem}.crm-productivity{grid-column:1/-1}.crm-productivity-row{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:1rem;padding:.65rem;border-bottom:1px solid var(--border-subtle);font-size:.8rem}.crm-productivity-row.head{font-weight:800;color:var(--text-muted)}.crm-management{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}.crm-config-card{border:1px solid var(--border);background:var(--bg-elevated);border-radius:1rem;padding:1rem;display:flex;flex-direction:column;gap:.7rem}.crm-config-card h3,.crm-products h4{font-weight:800}.crm-config-card>p{font-size:.78rem;color:var(--text-muted)}.crm-rule{display:flex;align-items:center;justify-content:space-between;padding:.65rem;border:1px solid var(--border-subtle);border-radius:.6rem}.crm-rule small{display:block;color:var(--text-muted);font-size:.68rem}.crm-tags{display:flex;gap:.4rem;flex-wrap:wrap}.crm-tags span{padding:.35rem .6rem;border-radius:999px;background:var(--bg-surface);font-size:.72rem}.crm-products{border-top:1px solid var(--border);padding-top:1rem}.crm-products form{display:grid;grid-template-columns:1fr 90px 140px auto;gap:.5rem;margin:.8rem 0}.crm-product-row{display:flex;justify-content:space-between;padding:.55rem;border-bottom:1px solid var(--border-subtle);font-size:.78rem}.crm-empty-state{min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.65rem;text-align:center;color:var(--text-muted);border:1px dashed var(--border);border-radius:1rem;padding:2rem}.crm-empty-state h3{color:var(--text-primary);font-weight:800}.crm-empty-state p{max-width:540px;font-size:.82rem}.crm-day strong small{color:var(--text-muted);font-weight:500;margin-left:.25rem}
 @media (max-width: 1200px) { .crm-kpis, .crm-automation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .crm-dashboard { grid-template-columns: 1fr; } }
-@media (max-width: 760px) { .crm-hero, .crm-board-header { flex-direction: column; align-items: stretch; } .crm-kpis, .crm-automation-grid,.crm-management { grid-template-columns: 1fr; } .crm-help { right: 1rem; bottom: 1rem; }.crm-activity-form,.crm-products form{grid-template-columns:1fr}.crm-forecast>div{grid-template-columns:1fr 1fr} }
+@media (max-width: 760px) {
+  .crm-monday-shell { gap: .75rem; padding-bottom: calc(4.5rem + env(safe-area-inset-bottom)); }
+  .crm-hero { padding: 1rem; border-radius: .85rem; }
+  .crm-hero, .crm-board-header { flex-direction: column; align-items: stretch; }
+  .crm-hero h1 { font-size: 1.25rem; line-height: 1.25; }
+  .crm-hero p { font-size: .78rem; line-height: 1.45; }
+  .crm-hero__actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .crm-hero__actions > * { min-height: 44px; justify-content: center; }
+  .crm-kpis { display: flex; gap: .65rem; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 .05rem .35rem; scrollbar-width: none; }
+  .crm-kpis::-webkit-scrollbar, .crm-tabs::-webkit-scrollbar, .crm-kanban::-webkit-scrollbar { display: none; }
+  .crm-kpi { min-width: 76vw; scroll-snap-align: start; padding: .85rem; }
+  .crm-workspace { min-height: 0; padding: .8rem; overflow: hidden; border-radius: .85rem; }
+  .crm-board-header { margin-bottom: .65rem; }
+  .crm-board-header h2 { font-size: 1.08rem; }
+  .crm-toolbar-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .crm-toolbar-actions > * { min-height: 42px; justify-content: center; }
+  .crm-tabs { margin: 0 -.8rem; padding: 0 .8rem; scroll-snap-type: x proximity; overscroll-behavior-x: contain; }
+  .crm-tab { min-height: 48px; padding: .72rem .8rem; scroll-snap-align: start; }
+  .crm-tools { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; padding: .75rem 0; }
+  .crm-tools > button, .crm-tools > select { width: 100%; min-height: 44px; max-width: none; justify-content: center; }
+  .crm-search { grid-column: 1 / -1; grid-row: 1; min-width: 0; max-width: none; width: 100%; height: 46px; }
+  .crm-tools > :nth-last-child(-n+3) { display: none; }
+  .crm-kanban { margin: 0 -.8rem; padding: 0 .8rem .75rem; gap: .75rem; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; }
+  .crm-kanban-column { min-width: calc(100vw - 3.25rem); max-width: calc(100vw - 3.25rem); scroll-snap-align: center; border-radius: .85rem; }
+  .crm-kanban-list { min-height: 280px; }
+  .crm-card-lead { padding: 1rem; min-height: 104px; }
+  .crm-kanban-add { min-height: 46px; }
+  .crm-table-board { overflow: visible; }
+  .crm-group { min-width: 0; width: 100%; }
+  .crm-grid-head { display: none; }
+  .crm-grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: .7rem; border: 1px solid var(--border); border-radius: .85rem; overflow: hidden; }
+  .crm-grid-row > span { min-height: 54px; padding: .65rem; border: 0; border-bottom: 1px solid var(--border-subtle); display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+  .crm-grid-row > span::before { content: attr(data-label); display: block; margin-bottom: .25rem; color: var(--text-muted); font-size: .64rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+  .crm-grid-row .crm-lead-cell { grid-column: 1 / -1; min-height: 74px; }
+  .crm-grid-row .crm-select-cell, .crm-grid-row .crm-more { display: none; }
+  .crm-status { width: auto; min-width: 110px; }
+  .crm-add-row { min-height: 46px; padding: .7rem; text-align: center; border-radius: .75rem; }
+  .crm-dashboard, .crm-automation-grid, .crm-management { grid-template-columns: 1fr; }
+  .crm-chart-card { padding: .85rem; overflow: hidden; }
+  .crm-forecast > div { display: flex; overflow-x: auto; gap: .65rem; scroll-snap-type: x mandatory; }
+  .crm-forecast span { min-width: 70%; scroll-snap-align: start; }
+  .crm-bar-line { grid-template-columns: 90px 1fr 85px; gap: .45rem; font-size: .72rem; }
+  .crm-ai-card { flex-direction: column; align-items: flex-start; }
+  .crm-productivity { overflow-x: auto; }
+  .crm-productivity-row { min-width: 560px; }
+  .crm-calendar-grid { display: flex; overflow-x: auto; border-radius: .8rem; scroll-snap-type: x mandatory; }
+  .crm-day { min-width: 76vw; min-height: 280px; scroll-snap-align: start; border-right: 1px solid var(--border); }
+  .crm-gantt { min-width: 0; overflow-x: auto; }
+  .crm-gantt-head, .crm-gantt-row { min-width: 820px; }
+  .crm-activity-form, .crm-products form { grid-template-columns: 1fr; }
+  .crm-activity-form > *, .crm-products form > * { min-height: 44px; }
+  .crm-timeline-list article { padding-right: .25rem; }
+  .crm-product-row { gap: .75rem; }
+  .crm-help { right: .75rem; bottom: calc(.75rem + env(safe-area-inset-bottom)); width: 46px; height: 46px; padding: 0; justify-content: center; border-radius: 999px; font-size: 0; }
+  .crm-help:before { border-radius: 999px; }
+  .crm-empty-state { min-height: 220px; padding: 1.25rem; }
+  :global(.crm-modal-overlay) { padding: 0; align-items: flex-end; }
+  :global(.crm-modal) { width: 100%; max-width: none; max-height: 100dvh; height: 100dvh; border-radius: 0; display: flex; flex-direction: column; }
+  :global(.crm-modal .modal-body) { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 1rem; }
+  :global(.crm-modal .modal-header) { padding: calc(.85rem + env(safe-area-inset-top)) 1rem .85rem; }
+  :global(.crm-modal .modal-footer) { position: sticky; bottom: 0; padding: .8rem 1rem calc(.8rem + env(safe-area-inset-bottom)); background: var(--bg-surface); flex-wrap: wrap; }
+  :global(.crm-modal .modal-footer button) { min-height: 44px; }
+  :global(.crm-modal .form-row-2), :global(.crm-modal .form-row-3) { grid-template-columns: 1fr; }
+  :global(.crm-modal .input), :global(.crm-modal .select) { min-height: 44px; font-size: 16px; }
+}
 </style>
