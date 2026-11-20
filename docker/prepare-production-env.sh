@@ -34,8 +34,8 @@ APP_ENV=production
 APP_KEY=$APP_KEY
 APP_DEBUG=false
 APP_TIMEZONE=America/Sao_Paulo
-APP_URL=http://187.127.49.251
-FRONTEND_URL=http://187.127.49.251
+APP_URL=https://intelbrastech.com.br
+FRONTEND_URL=https://intelbrastech.com.br
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 LOG_CHANNEL=stack
@@ -78,8 +78,8 @@ RABBITMQ_USER=intelbrastech
 RABBITMQ_PASS=$RABBITMQ_PASS
 RABBITMQ_PASSWORD=$RABBITMQ_PASS
 
-CORS_ALLOWED_ORIGINS=http://187.127.49.251
-SANCTUM_STATEFUL_DOMAINS=187.127.49.251
+CORS_ALLOWED_ORIGINS=https://intelbrastech.com.br,https://www.intelbrastech.com.br
+SANCTUM_STATEFUL_DOMAINS=intelbrastech.com.br,www.intelbrastech.com.br
 BCRYPT_ROUNDS=12
 
 PORTAL_AUTORIZACAO_INTELBRAS=false
