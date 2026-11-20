@@ -20,6 +20,7 @@
           <option value="mes">Mês atual</option>
           <option value="12m">Últimos 12 meses</option>
           <option value="24m">Últimos 24 meses</option>
+          <option value="todo">Todo o histórico</option>
         </select>
         <button class="btn-secondary" @click="atualizar">
           <ArrowPathIcon class="w-4 h-4" :class="carregando && 'animate-spin'"/>

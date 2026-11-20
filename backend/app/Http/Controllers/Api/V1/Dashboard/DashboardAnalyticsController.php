@@ -81,6 +81,7 @@ class DashboardAnalyticsController extends Controller
             'mes' => now()->startOfMonth(),
             '12m' => now()->subMonths(11)->startOfMonth(),
             '24m' => now()->subMonths(23)->startOfMonth(),
+            'todo' => Carbon::create(2000, 1, 1)->startOfDay(),
             default => now()->subDays(29)->startOfDay(),
         };
 
