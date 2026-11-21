@@ -94,7 +94,16 @@
                 <span>{{ produto.sku || produto.codigo || produto.ean || 'Sem código' }}</span>
                 <small>Estoque: {{ numero(produto.estoque_disponivel, 3) }} {{ produto.unidade }}</small>
               </div>
-              <div class="product-price">{{ Number(produto.preco) > 0 ? moeda(produto.preco) : 'Definir no caixa' }}</div>
+              <div class="product-prices">
+                <span class="purchase-price">
+                  <small>Compra</small>
+                  <strong>{{ Number(produto.custo_compra) > 0 ? moeda(produto.custo_compra) : 'Não informado' }}</strong>
+                </span>
+                <span class="sale-price">
+                  <small>Venda</small>
+                  <strong>{{ Number(produto.preco) > 0 ? moeda(produto.preco) : 'Definir no caixa' }}</strong>
+                </span>
+              </div>
             </button>
             <div ref="pdvProductSentinel" class="pdv-load-more">
               <button v-if="paginaProdutos < ultimaPaginaProdutos" :disabled="loadingMoreProducts" @click="carregarMaisProdutos">
@@ -1020,7 +1029,11 @@ kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.
 .product-copy{min-width:0;display:flex;flex-direction:column}
 .product-copy strong{font-size:.76rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .product-copy span,.product-copy small{font-size:.65rem;color:var(--text-muted);margin-top:2px}
-.product-price{font-weight:800;color:var(--text-primary)}
+.product-prices{display:flex;flex-direction:column;align-items:flex-end;gap:5px;text-align:right;white-space:nowrap}
+.product-prices>span{display:flex;flex-direction:column;align-items:flex-end;line-height:1.12}
+.product-prices small{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;opacity:.8}
+.product-prices strong{font-size:.8rem;font-weight:850}
+.purchase-price{color:#ef4444}.sale-price{color:#22c55e}
 .cart-panel{display:flex;flex-direction:column}
 .cart-top,.client-box{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--border)}
 .cart-top h2{font-size:.86rem;font-weight:700}.cart-top p,.client-box span{font-size:.65rem;color:var(--text-muted)}
@@ -1131,7 +1144,7 @@ kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.
   .catalog-empty{min-height:42dvh;margin:0 10px;padding:24px 18px;align-items:center;justify-content:center;text-align:center;font-size:.82rem}
   .product-results{flex:none;padding:0 10px 16px;gap:9px;overflow:visible!important;max-height:none!important;touch-action:pan-y;overscroll-behavior-y:auto}
   .product-result{grid-template-columns:62px minmax(0,1fr) auto;min-height:84px;padding:10px;gap:10px}
-  .product-image{width:62px;height:62px}.product-copy strong{font-size:.82rem}.product-copy span,.product-copy small{font-size:.7rem}.product-price{font-size:.85rem}
+  .product-image{width:62px;height:62px}.product-copy strong{font-size:.82rem}.product-copy span,.product-copy small{font-size:.7rem}.product-prices strong{font-size:.85rem}
   .catalog-footer{display:grid;position:sticky;bottom:calc(70px + env(safe-area-inset-bottom));z-index:3}
 
   .cart-top,.client-box{min-height:58px;padding:11px 13px}
@@ -1173,7 +1186,7 @@ kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.
   .pdv-header{flex-direction:column}.pdv-header-actions{max-width:none;width:100%;display:grid;grid-template-columns:repeat(4,1fr)}
   .pdv-header-actions button{padding:5px 4px;font-size:.58rem}
   .pdv-grid,.catalog-panel,.cart-panel{min-height:calc(100dvh - 194px)!important}
-  .product-result{grid-template-columns:52px minmax(0,1fr)}.product-image{width:52px;height:52px}.product-price{grid-column:2}
+  .product-result{grid-template-columns:52px minmax(0,1fr)}.product-image{width:52px;height:52px}.product-prices{grid-column:2;display:grid;grid-template-columns:1fr 1fr;align-items:start;gap:10px}.product-prices>span{align-items:flex-start;text-align:left}
 }
 
 </style>
