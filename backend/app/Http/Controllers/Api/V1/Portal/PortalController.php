@@ -102,6 +102,16 @@ class PortalController extends Controller
             $arquivo = Storage::disk('public')->path(ltrim(Str::after($caminhoUrl, '/storage/'), '/'));
 
             if (is_file($arquivo)) {
+                $cartao = $this->criarCartaoCompartilhamento($arquivo);
+
+                if ($cartao !== null) {
+                    return response($cartao, 200, [
+                        'Content-Type' => 'image/png',
+                        'Cache-Control' => 'public, max-age=300',
+                        'Content-Disposition' => 'inline; filename="intelbrastech-compartilhamento.png"',
+                    ]);
+                }
+
                 return response()->file($arquivo, [
                     'Cache-Control' => 'public, max-age=300',
                     'Content-Disposition' => 'inline',
@@ -114,6 +124,58 @@ class PortalController extends Controller
         }
 
         return redirect('/pwa-icon.svg', 302, ['Cache-Control' => 'public, max-age=300']);
+    }
+
+    /**
+     * Cria um cartão Open Graph 1200x630 a partir da logo da empresa.
+     * Esse formato é o mais aceito por WhatsApp, Meta, LinkedIn e X.
+     */
+    private function criarCartaoCompartilhamento(string $arquivo): ?string
+    {
+        if (!function_exists('imagecreatetruecolor') || !function_exists('imagecreatefromstring')) {
+            return null;
+        }
+
+        $conteudo = @file_get_contents($arquivo);
+        $logo = $conteudo ? @imagecreatefromstring($conteudo) : false;
+
+        if ($logo === false) {
+            return null;
+        }
+
+        $cartao = imagecreatetruecolor(1200, 630);
+        $verde = imagecolorallocate($cartao, 0, 163, 53);
+        $verdeEscuro = imagecolorallocate($cartao, 0, 120, 41);
+        $fundo = imagecolorallocate($cartao, 246, 251, 247);
+        $moldura = imagecolorallocate($cartao, 229, 241, 233);
+        $branco = imagecolorallocate($cartao, 255, 255, 255);
+
+        imagefill($cartao, 0, 0, $fundo);
+        imagefilledrectangle($cartao, 0, 0, 475, 629, $verde);
+        imagefilledrectangle($cartao, 0, 560, 475, 629, $verdeEscuro);
+        imagefilledrectangle($cartao, 475, 0, 1199, 15, $verde);
+        imagefilledrectangle($cartao, 620, 65, 1125, 565, $moldura);
+        imagefilledrectangle($cartao, 642, 87, 1103, 543, $branco);
+
+        $larguraOriginal = imagesx($logo);
+        $alturaOriginal = imagesy($logo);
+        $escala = min(390 / $larguraOriginal, 390 / $alturaOriginal);
+        $largura = max(1, (int) round($larguraOriginal * $escala));
+        $altura = max(1, (int) round($alturaOriginal * $escala));
+        $x = 872 - (int) floor($largura / 2);
+        $y = 315 - (int) floor($altura / 2);
+
+        imagealphablending($cartao, true);
+        imagecopyresampled($cartao, $logo, $x, $y, 0, 0, $largura, $altura, $larguraOriginal, $alturaOriginal);
+
+        ob_start();
+        imagepng($cartao, null, 6);
+        $png = ob_get_clean();
+
+        imagedestroy($logo);
+        imagedestroy($cartao);
+
+        return is_string($png) ? $png : null;
     }
 
     public function solicitar(Request $request): JsonResponse
