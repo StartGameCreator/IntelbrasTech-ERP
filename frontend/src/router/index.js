@@ -74,7 +74,7 @@ const router = createRouter({
           path: 'dashboards/diario',
           name: 'dashboards.diario',
           component: () => import('@/views/dashboards/DashboardAnaliticoView.vue'),
-          meta: { title: 'Dashboard DiÃ¡rio', dashboardKey: 'diario', dashboardPeriodo: 'hoje' },
+          meta: { title: 'Dashboard Diário', dashboardKey: 'diario', dashboardPeriodo: 'hoje' },
         },
         {
           path: 'dashboards/vendas',
@@ -104,7 +104,7 @@ const router = createRouter({
           path: 'dashboards/previsao-estoque',
           name: 'dashboards.previsao',
           component: () => import('@/views/dashboards/DashboardAnaliticoView.vue'),
-          meta: { title: 'PrevisÃ£o de Estoque', dashboardKey: 'previsao', dashboardPeriodo: '12m' },
+          meta: { title: 'Previsão de Estoque', dashboardKey: 'previsao', dashboardPeriodo: '12m' },
         },
         {
           path: 'dashboards/produtos',
@@ -122,13 +122,13 @@ const router = createRouter({
           path: 'dashboards/sugestao-compras',
           name: 'dashboards.compras',
           component: () => import('@/views/dashboards/DashboardAnaliticoView.vue'),
-          meta: { title: 'SugestÃ£o de Compras', dashboardKey: 'compras', dashboardPeriodo: '12m' },
+          meta: { title: 'Sugestão de Compras', dashboardKey: 'compras', dashboardPeriodo: '12m' },
         },
         {
           path: 'dashboards/sem-movimentacao',
           name: 'dashboards.sem-movimento',
           component: () => import('@/views/dashboards/DashboardAnaliticoView.vue'),
-          meta: { title: 'Produtos sem MovimentaÃ§Ã£o', dashboardKey: 'semMovimento', dashboardPeriodo: '12m' },
+          meta: { title: 'Produtos sem Movimentação', dashboardKey: 'semMovimento', dashboardPeriodo: '12m' },
         },
         {
           path: 'dashboards/clientes',
@@ -182,7 +182,7 @@ const router = createRouter({
           path: 'pdv/devolucoes',
           name: 'pdv-devolucoes',
           component: () => import('@/views/pdv/PdvDevolucoesView.vue'),
-          meta: { title: 'DevoluÃ§Ãµes e PÃ³s-venda' },
+          meta: { title: 'Devoluções e Pós-venda' },
         },
 
         {
@@ -311,13 +311,13 @@ const router = createRouter({
           path: 'estoque/movimentacoes',
           name: 'estoque.movimentacoes',
           component: () => import('@/views/estoque/MovimentacoesView.vue'),
-          meta: { title: 'MovimentaÃƒÂ§ÃƒÂµes', permissao: 'estoque.view' },
+          meta: { title: 'Movimentações', permissao: 'estoque.view' },
         },
         {
           path: 'estoque/inventario',
           name: 'estoque.inventario',
           component: () => import('@/views/estoque/InventarioView.vue'),
-          meta: { title: 'InventÃƒÂ¡rio', permissao: 'estoque.edit' },
+          meta: { title: 'Inventário', permissao: 'estoque.edit' },
         },
 
         // Ã¢â€â‚¬Ã¢â€â‚¬ Compras Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
@@ -377,7 +377,7 @@ const router = createRouter({
           path: 'fiscal/contador',
           name: 'fiscal.contador',
           component: () => import('@/views/fiscal/ContadorView.vue'),
-          meta: { title: 'EspaÃ§o do Contador', permissao: 'fiscal.view' },
+          meta: { title: 'Espaço do Contador', permissao: 'fiscal.view' },
         },
         {
           path: 'fiscal/central',
@@ -401,7 +401,7 @@ const router = createRouter({
           path: 'fiscal/nfe/configuracoes',
           name: 'fiscal.nfe.configuracoes',
           component: () => import('@/views/fiscal/NFeConfiguracoesView.vue'),
-          meta: { title: 'ConfiguraÃƒÂ§ÃƒÂµes NF-e e NFC-e', permissao: 'fiscal.view' },
+          meta: { title: 'Configurações NF-e e NFC-e', permissao: 'fiscal.view' },
         },        {
           path: 'fiscal/nfe/:id',
           name: 'fiscal.nfe.show',
@@ -452,7 +452,7 @@ const router = createRouter({
           path: 'os',
           name: 'os',
           component: () => import('@/views/os/OSView.vue'),
-          meta: { title: 'AssistÃƒÂªncia TÃƒÂ©cnica', permissao: 'os.view' },
+          meta: { title: 'Assistência Técnica', permissao: 'os.view' },
         },
         {
           path: 'chamados-clientes',
@@ -470,26 +470,26 @@ const router = createRouter({
           path: 'os/:id',
           name: 'os.show',
           component: () => import('@/views/os/OSShowView.vue'),
-          meta: { title: 'Ordem de ServiÃƒÂ§o', permissao: 'os.view' },
+          meta: { title: 'Ordem de Serviço', permissao: 'os.view' },
         },
         {
           path: 'marketplace-catalogo',
           redirect: '/marketplaces/mercado-livre/catalogo',
-          meta: { title: 'CatÃ¡logo Mercado Livre' },
+          meta: { title: 'Catálogo Mercado Livre' },
         },
 
         {
           path: 'marketplaces/mercado-livre/catalogo',
           name: 'mercado-livre-catalogo',
           component: () => import('@/views/marketplaces/MercadoLivreCatalogoView.vue'),
-          meta: { title: 'CatÃ¡logo Mercado Livre' },
+          meta: { title: 'Catálogo Mercado Livre' },
         },
 
         {
           path: 'marketplaces/emissao-fiscal',
           name: 'marketplace-emissao-fiscal',
           component: () => import('@/views/marketplaces/MarketplaceFiscalEmissionView.vue'),
-          meta: { title: 'EmissÃ£o Fiscal Omnichannel' },
+          meta: { title: 'Emissão Fiscal Omnichannel' },
         },
 
         {
@@ -503,7 +503,7 @@ const router = createRouter({
           path: 'marketplaces/automacao',
           name: 'automacao-omnichannel',
           component: () => import('@/views/marketplaces/OmnichannelAutomationView.vue'),
-          meta: { title: 'AutomaÃ§Ã£o Omnichannel' },
+          meta: { title: 'Automação Omnichannel' },
         },
 
         {
@@ -530,7 +530,7 @@ const router = createRouter({
           path: 'marketplace-hub',
           name: 'marketplace-hub',
           component: () => import('@/views/marketplaces/MarketplaceHubView.vue'),
-          meta: { title: 'Central de ExtensÃµes e Marketplaces' },
+          meta: { title: 'Central de Extensões e Marketplaces' },
         },
 
         {
@@ -551,7 +551,7 @@ const router = createRouter({
           path: 'expedicao',
           name: 'expedicao',
           component: () => import('@/views/expedicao/ExpedicaoView.vue'),
-          meta: { title: 'ExpediÃ§Ã£o Inteligente' },
+          meta: { title: 'Expedição Inteligente' },
         },
 
         // â”€â”€ Central de ExtensÃµes IntelbrasTech
@@ -559,7 +559,7 @@ const router = createRouter({
           path: 'extensoes',
           name: 'extensoes',
           component: () => import('@/views/extensoes/CentralExtensoesView.vue'),
-          meta: { title: 'Central de ExtensÃµes IntelbrasTech', permissao: 'integracoes.view' },
+          meta: { title: 'Central de Extensões IntelbrasTech', permissao: 'integracoes.view' },
         },
 
         // Ã¢â€â‚¬Ã¢â€â‚¬ Marketplaces Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
