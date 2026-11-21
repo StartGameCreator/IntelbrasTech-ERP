@@ -28,7 +28,7 @@
             <Copy :size="17" />
             {{ linkAtendimentoCopiado ? 'Link copiado!' : 'Copiar link de atendimento' }}
           </button>
-          <a class="portal-store" :href="portal.canais?.loja_url || 'https://www.loja.intelbrastech.com.br'" target="_blank" rel="noopener" @click="close">Acessar loja</a>
+          <a class="portal-store" :href="portal.canais?.loja_url || 'https://www.loja.intelbrastech.com.br'" target="_blank" rel="noopener" @click="abrirLoja">Acessar loja</a>
         </nav>
       </div>
     </header>
@@ -67,6 +67,13 @@ const consentimento = ref(localStorage.getItem('intelbrastech_analytics_consent'
 const possuiRastreadores = computed(() => ['google_analytics_ativo','google_tag_manager_ativo','microsoft_clarity_ativo','meta_pixel_ativo','tiktok_pixel_ativo'].some(key => portal.site?.[key]))
 provide('portal', portal)
 const close = () => { menuOpen.value = false }
+function abrirLoja(event) {
+  close()
+  if (window.matchMedia('(min-width: 981px)').matches) {
+    event.preventDefault()
+    window.location.assign(event.currentTarget.href)
+  }
+}
 const linkAtendimento = 'https://intelbrastech.com.br/atendimento'
 async function copiarLinkAtendimento() {
   try {
