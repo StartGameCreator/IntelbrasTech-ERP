@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Usuario;
 use Illuminate\Http\{Request, JsonResponse};
-use Illuminate\Support\Facades\{Hash, RateLimiter};
+use Illuminate\Support\Facades\{DB, Hash, RateLimiter};
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -175,6 +175,12 @@ class AuthController extends Controller
 
     private function formatarUsuario(Usuario $usuario): array
     {
+        $perfilOperacional = DB::table('platform_perfis_usuario')
+            ->where('usuario_id', $usuario->id)
+            ->where('status', 'ativo')
+            ->orderByRaw("case when tipo_perfil = 'tecnico' then 0 else 1 end")
+            ->value('tipo_perfil');
+
         return [
             'id'          => $usuario->id,
             'nome'        => $usuario->nome,
@@ -187,6 +193,7 @@ class AuthController extends Controller
             'permissoes'  => $usuario->perfil?->permissoes
                 ->map(fn($p) => "{$p->modulo}.{$p->acao}")
                 ->toArray() ?? [],
+            'perfil_operacional' => $perfilOperacional,
             'empresa' => [
                 'id'           => $usuario->empresa->id,
                 'razao_social' => $usuario->empresa->razao_social,

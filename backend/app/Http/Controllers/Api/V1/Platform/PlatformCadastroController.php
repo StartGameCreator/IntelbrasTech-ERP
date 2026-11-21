@@ -159,7 +159,10 @@ class PlatformCadastroController extends Controller
 
         return DB::transaction(function () use ($data, $senha, $tipo): JsonResponse {
             $empresaId = $this->empresaPrincipalId();
-            $ativo = $tipo !== 'colaborador';
+            // Vendedores parceiros só entram na operação comercial após o aceite da equipe.
+            // Técnicos mantêm o cadastro aprovado, mas começam indisponíveis até ativarem
+            // conscientemente a operação de campo no aplicativo técnico.
+            $ativo = ! in_array($tipo, ['colaborador', 'vendedor'], true);
             $status = $ativo ? 'aprovado' : 'pendente';
 
             $usuarioId = $this->salvarUsuario(

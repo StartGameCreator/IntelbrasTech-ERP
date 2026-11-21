@@ -26,7 +26,7 @@ export const useAuthStore = defineStore('auth', () => {
       usuario.value = data.usuario
       localStorage.setItem('erp_token', data.token)
       api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`
-      router.push('/dashboard')
+      router.push(data.usuario?.perfil_operacional === 'tecnico' ? '/tecnico/operacao' : '/dashboard')
     } finally {
       loading.value = false
     }

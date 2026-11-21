@@ -301,6 +301,7 @@ import {
   ArrowUturnLeftIcon,
   WrenchScrewdriverIcon,
   MapIcon,
+  MapPinIcon,
   Squares2X2Icon,
   BuildingStorefrontIcon,
   UserGroupIcon,
@@ -582,6 +583,7 @@ const menuGrupos = computed(() => [
   {
     label: 'ServiÃ§os',
     items: [
+      { to: '/tecnico/operacao', label: 'Minha Operação Técnica', icon: MapPinIcon, name: 'tecnico.operacao' },
       { to: '/os', label: 'AssistÃªncia TÃ©cnica', icon: WrenchScrewdriverIcon, name: 'os' },
       { to: '/gestao-equipe', label: 'Gestão de Equipe', icon: UserGroupIcon, name: 'gestao-equipe' },
       { to: '/marketplace-tecnicos', label: 'Marketplace de TÃ©cnicos', icon: UserGroupIcon, name: 'marketplace-tecnicos' },

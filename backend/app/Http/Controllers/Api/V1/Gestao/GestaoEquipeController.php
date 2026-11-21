@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1\Gestao;
 
 use App\Http\Controllers\Controller;
-use App\Models\Lead;
 use App\Models\OrdemServico;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,21 +11,17 @@ use Illuminate\Validation\ValidationException;
 
 class GestaoEquipeController extends Controller
 {
+    /**
+     * Este painel é operacional: aprova vendedores e organiza somente a equipe de campo.
+     * Leads comerciais permanecem no CRM, onde o vendedor trabalha seu funil.
+     */
     public function index(Request $request): JsonResponse
     {
         $empresaId = (int) $request->user()->empresa_id;
-        $equipe = $this->equipe($empresaId);
+        $equipe = $this->equipeTecnica($empresaId);
         $categoriaPorId = DB::table('platform_categorias_tecnicas')->pluck('nome', 'id')->all();
-        $visitas = $this->visitasPendentes($empresaId, $categoriaPorId);
+        $visitas = collect($this->visitas($empresaId, $categoriaPorId));
         $ids = $equipe->pluck('usuario_id')->filter()->values();
-
-        $leadsPorResponsavel = Lead::query()
-            ->where('empresa_id', $empresaId)
-            ->where('status', Lead::STATUS_ABERTO)
-            ->when($ids->isNotEmpty(), fn ($query) => $query->whereIn('responsavel_id', $ids))
-            ->selectRaw('responsavel_id, count(*) as total')
-            ->groupBy('responsavel_id')
-            ->pluck('total', 'responsavel_id');
 
         $osPorTecnico = OrdemServico::query()
             ->where('empresa_id', $empresaId)
@@ -36,40 +31,16 @@ class GestaoEquipeController extends Controller
             ->groupBy('tecnico_id')
             ->pluck('total', 'tecnico_id');
 
-        $visitasPorResponsavel = collect($visitas)
+        $visitasPorTecnico = $visitas
             ->filter(fn (array $visita) => filled($visita['responsavel_id']))
             ->countBy('responsavel_id');
 
-        $equipe = $equipe->map(function (array $membro) use ($leadsPorResponsavel, $osPorTecnico, $visitasPorResponsavel) {
+        $equipe = $equipe->map(function (array $membro) use ($osPorTecnico, $visitasPorTecnico) {
             $usuarioId = $membro['usuario_id'];
-            $membro['carga_comercial'] = (int) ($leadsPorResponsavel[$usuarioId] ?? 0);
-            $membro['carga_tecnica'] = (int) ($osPorTecnico[$usuarioId] ?? 0) + (int) ($visitasPorResponsavel[$usuarioId] ?? 0);
-            $membro['carga_total'] = $membro['carga_comercial'] + $membro['carga_tecnica'];
+            $membro['carga_tecnica'] = (int) ($osPorTecnico[$usuarioId] ?? 0) + (int) ($visitasPorTecnico[$usuarioId] ?? 0);
 
             return $membro;
         })->values();
-
-        $leads = Lead::query()
-            ->with('responsavel:id,nome')
-            ->where('empresa_id', $empresaId)
-            ->where('status', Lead::STATUS_ABERTO)
-            ->latest('updated_at')
-            ->limit(120)
-            ->get()
-            ->map(fn (Lead $lead) => [
-                'id' => $lead->id,
-                'origem' => 'lead',
-                'tipo' => 'comercial',
-                'titulo' => $lead->titulo ?: ($lead->nome ?: 'Oportunidade comercial'),
-                'cliente' => $lead->empresa_nome ?: $lead->nome,
-                'descricao' => $lead->necessidade ?: $lead->origem,
-                'status' => $lead->status,
-                'prioridade' => $lead->prioridade ?: 'normal',
-                'responsavel_id' => $lead->responsavel_id,
-                'responsavel_nome' => $lead->responsavel?->nome,
-                'criada_em' => optional($lead->created_at)->toIso8601String(),
-                'url' => '/crm',
-            ]);
 
         $ordens = OrdemServico::query()
             ->with(['cliente:id,razao_social,nome_fantasia', 'tecnico:id,nome', 'status:id,nome'])
@@ -81,7 +52,6 @@ class GestaoEquipeController extends Controller
             ->map(fn (OrdemServico $ordem) => [
                 'id' => $ordem->id,
                 'origem' => 'os',
-                'tipo' => 'tecnica',
                 'titulo' => 'OS #' . $ordem->numero . ' — ' . ($ordem->equipamento_modelo ?: $ordem->equipamento_tipo ?: 'Atendimento técnico'),
                 'cliente' => $ordem->cliente?->razao_social ?: $ordem->cliente?->nome_fantasia ?: 'Cliente não identificado',
                 'descricao' => $ordem->defeito_relatado,
@@ -93,47 +63,37 @@ class GestaoEquipeController extends Controller
                 'url' => '/os/' . $ordem->id,
             ]);
 
-        $demandas = collect($visitas)
-            ->concat($leads)
+        $demandas = $visitas
             ->concat($ordens)
             ->sortBy([['responsavel_id', 'asc'], ['criada_em', 'desc']])
             ->values();
+        $vendedoresPendentes = $this->vendedoresPendentes($empresaId);
 
         return response()->json([
             'resumo' => [
-                'membros_ativos' => $equipe->where('disponivel', true)->count(),
                 'tecnicos' => $equipe->where('tipo_perfil', 'tecnico')->count(),
-                'vendedores' => $equipe->where('tipo_perfil', 'vendedor')->count(),
+                'tecnicos_disponiveis' => $equipe->where('tipo_perfil', 'tecnico')->where('disponivel', true)->count(),
                 'sem_responsavel' => $demandas->whereNull('responsavel_id')->count(),
+                'vendedores_pendentes' => $vendedoresPendentes->count(),
             ],
             'equipe' => $equipe,
             'demandas' => $demandas,
+            'vendedores_pendentes' => $vendedoresPendentes,
         ]);
     }
 
     public function atribuir(Request $request, string $origem, int $id): JsonResponse
     {
         $origem = strtolower($origem);
-        abort_unless(in_array($origem, ['lead', 'os', 'visita'], true), 404);
+        abort_unless(in_array($origem, ['os', 'visita'], true), 404);
 
         $dados = $request->validate(['usuario_id' => 'nullable|integer|exists:usuarios,id']);
         $empresaId = (int) $request->user()->empresa_id;
         $usuarioId = $dados['usuario_id'] ?? null;
-        $membro = $usuarioId ? $this->membro($empresaId, (int) $usuarioId) : null;
+        $membro = $usuarioId ? $this->membroTecnico($empresaId, (int) $usuarioId) : null;
 
         if ($usuarioId && ! $membro) {
-            throw ValidationException::withMessages(['usuario_id' => ['Selecione um membro ativo da equipe.']]);
-        }
-
-        $perfisPermitidos = $origem === 'lead' ? ['vendedor', 'colaborador'] : ['tecnico', 'colaborador'];
-
-        if ($membro && ! in_array($membro->tipo_perfil, $perfisPermitidos, true)) {
-            throw ValidationException::withMessages(['usuario_id' => ['Este perfil não pode receber essa demanda.']]);
-        }
-
-        if ($origem === 'lead') {
-            $lead = Lead::query()->where('empresa_id', $empresaId)->findOrFail($id);
-            $lead->update(['responsavel_id' => $usuarioId]);
+            throw ValidationException::withMessages(['usuario_id' => ['Selecione um técnico ou colaborador de campo ativo.']]);
         }
 
         if ($origem === 'os') {
@@ -164,21 +124,22 @@ class GestaoEquipeController extends Controller
             ]);
         }
 
-        return response()->json(['message' => $usuarioId ? 'Demanda atribuída com sucesso.' : 'Responsável removido da demanda.']);
+        return response()->json(['message' => $usuarioId ? 'Demanda técnica atribuída com sucesso.' : 'Responsável removido da demanda.']);
     }
 
-    private function equipe(int $empresaId)
+    private function equipeTecnica(int $empresaId)
     {
         return DB::table('platform_cadastros as cadastro')
             ->join('usuarios as usuario', 'usuario.id', '=', 'cadastro.usuario_id')
             ->where('cadastro.empresa_id', $empresaId)
             ->whereNull('cadastro.deleted_at')
-            ->whereIn('cadastro.tipo_perfil', ['tecnico', 'vendedor', 'colaborador'])
+            ->whereIn('cadastro.tipo_perfil', ['tecnico', 'colaborador'])
             ->orderBy('cadastro.tipo_perfil')
             ->orderBy('cadastro.nome')
             ->get([
                 'cadastro.id as cadastro_id', 'cadastro.tipo_perfil', 'cadastro.nome', 'cadastro.email',
                 'cadastro.telefone', 'cadastro.whatsapp', 'cadastro.cidade', 'cadastro.estado', 'cadastro.status',
+                'cadastro.disponivel_para_atendimento', 'cadastro.localizacao_atualizada_em',
                 'usuario.id as usuario_id', 'usuario.ativo as usuario_ativo',
             ])
             ->map(fn ($membro) => [
@@ -191,11 +152,14 @@ class GestaoEquipeController extends Controller
                 'cidade' => $membro->cidade,
                 'estado' => $membro->estado,
                 'status' => $membro->status,
-                'disponivel' => $membro->status === 'aprovado' && (bool) $membro->usuario_ativo,
+                'disponivel' => $membro->tipo_perfil === 'tecnico'
+                    ? $membro->status === 'aprovado' && (bool) $membro->usuario_ativo && (bool) $membro->disponivel_para_atendimento
+                    : $membro->status === 'aprovado' && (bool) $membro->usuario_ativo,
+                'localizacao_atualizada_em' => $membro->localizacao_atualizada_em,
             ]);
     }
 
-    private function membro(int $empresaId, int $usuarioId): ?object
+    private function membroTecnico(int $empresaId, int $usuarioId): ?object
     {
         return DB::table('platform_cadastros as cadastro')
             ->join('usuarios as usuario', 'usuario.id', '=', 'cadastro.usuario_id')
@@ -204,12 +168,34 @@ class GestaoEquipeController extends Controller
             ->whereNull('cadastro.deleted_at')
             ->where('cadastro.status', 'aprovado')
             ->where('usuario.ativo', true)
-            ->whereIn('cadastro.tipo_perfil', ['tecnico', 'vendedor', 'colaborador'])
+            ->whereIn('cadastro.tipo_perfil', ['tecnico', 'colaborador'])
             ->select('cadastro.tipo_perfil', 'cadastro.nome')
             ->first();
     }
 
-    private function visitasPendentes(int $empresaId, array $categoriaPorId): array
+    private function vendedoresPendentes(int $empresaId)
+    {
+        return DB::table('platform_cadastros')
+            ->where('empresa_id', $empresaId)
+            ->where('tipo_perfil', 'vendedor')
+            ->where('status', 'pendente')
+            ->whereNull('deleted_at')
+            ->orderByDesc('created_at')
+            ->get(['id', 'nome', 'email', 'telefone', 'whatsapp', 'empresa', 'cargo', 'cidade', 'estado', 'created_at'])
+            ->map(fn ($vendedor) => [
+                'id' => $vendedor->id,
+                'nome' => $vendedor->nome,
+                'email' => $vendedor->email,
+                'telefone' => $vendedor->whatsapp ?: $vendedor->telefone,
+                'empresa' => $vendedor->empresa,
+                'cargo' => $vendedor->cargo,
+                'cidade' => $vendedor->cidade,
+                'estado' => $vendedor->estado,
+                'solicitado_em' => $vendedor->created_at,
+            ]);
+    }
+
+    private function visitas(int $empresaId, array $categoriaPorId): array
     {
         return DB::table('platform_cadastros')
             ->where('empresa_id', $empresaId)
@@ -232,7 +218,6 @@ class GestaoEquipeController extends Controller
                 return [
                     'id' => $cadastro->id,
                     'origem' => 'visita',
-                    'tipo' => 'tecnica',
                     'titulo' => $solicitacao['servico'] ?: ($categoria ?: 'Solicitação de visita técnica'),
                     'cliente' => $cadastro->empresa ?: $cadastro->nome,
                     'descricao' => $solicitacao['descricao'] ?? $solicitacao['observacoes'] ?? null,
@@ -255,11 +240,7 @@ class GestaoEquipeController extends Controller
             return $value;
         }
 
-        if (! is_string($value) || $value === '') {
-            return [];
-        }
-
-        $decoded = json_decode($value, true);
+        $decoded = is_string($value) ? json_decode($value, true) : null;
 
         return is_array($decoded) ? $decoded : [];
     }

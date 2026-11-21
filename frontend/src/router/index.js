@@ -444,6 +444,12 @@ const router = createRouter({
           component: () => import('@/views/gestao/GestaoEquipeView.vue'),
           meta: { title: 'Gestão de Equipe' },
         },
+        {
+          path: 'tecnico/operacao',
+          name: 'tecnico.operacao',
+          component: () => import('@/views/tecnico/OperacaoTecnicaView.vue'),
+          meta: { title: 'Operação Técnica' },
+        },
         // Ã¢â€â‚¬Ã¢â€â‚¬ AssistÃƒÂªncia TÃƒÂ©cnica Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         {
           path: 'os',
@@ -636,7 +642,7 @@ router.beforeEach(async (to) => {
   document.title = to.meta.title ? `${to.meta.title} — IntelbrasTech` : 'IntelbrasTech'
 
   if (to.meta.requiresAuth && !auth.logado) return { name: 'login' }
-  if (to.meta.guest && auth.logado) return { name: 'dashboard' }
+  if (to.meta.guest && auth.logado) return { name: auth.usuario?.perfil_operacional === 'tecnico' ? 'tecnico.operacao' : 'dashboard' }
 
   if (to.meta.requiresAuth && auth.logado && !auth.usuario) {
     await auth.carregarUsuario()
