@@ -16,7 +16,13 @@
       ]"
     >
       <div class="flex items-center h-14 px-4 border-b border-[var(--border)] flex-shrink-0">
-        <div class="flex items-center gap-3 overflow-hidden">
+        <RouterLink
+          to="/dashboard"
+          class="erp-home-link flex items-center gap-3 overflow-hidden w-full"
+          aria-label="Ir para o início do ERP"
+          title="Início do ERP"
+          @click="topMenuAberto = null"
+        >
           <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center flex-shrink-0 shadow-glow-sm">
             <span class="text-white font-bold text-sm">IT</span>
           </div>
@@ -26,7 +32,7 @@
               <p class="text-[10px] text-[var(--text-muted)] leading-none mt-0.5">ERP v1.0</p>
             </div>
           </Transition>
-        </div>
+        </RouterLink>
       </div>
 
       <nav class="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
@@ -154,8 +160,8 @@
     </aside>
 
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
-      <header class="border-b border-[var(--border)] bg-[var(--bg-surface)] flex-shrink-0">
-        <div class="min-h-12 flex items-center gap-3 px-5 py-1.5">
+      <header class="app-header border-b border-[var(--border)] bg-[var(--bg-surface)] flex-shrink-0">
+        <div class="app-topbar min-h-14 flex items-center gap-4 px-5 py-2">
           <button
             type="button"
             class="mobile-menu-button btn-ghost btn-icon"
@@ -170,16 +176,20 @@
               <button
                 type="button"
                 :class="['top-menu-button', topMenuAberto === menu.id && 'active']"
+                :aria-expanded="topMenuAberto === menu.id"
+                :aria-controls="`top-menu-${menu.id}`"
                 @click.stop="alternarMenuSuperior(menu.id)"
               >
                 {{ menu.label }}
-                <ChevronDownIcon class="w-3.5 h-3.5" />
+                <ChevronDownIcon :class="['top-menu-chevron', topMenuAberto === menu.id && 'open']" />
               </button>
 
               <Transition name="slide-down">
                 <div
                   v-if="topMenuAberto === menu.id"
-                  class="top-menu-dropdown"
+                  :id="`top-menu-${menu.id}`"
+                  :class="['top-menu-dropdown', ['servicos', 'intelbras'].includes(menu.id) && 'align-right']"
+                  role="menu"
                   @click.stop
                 >
                   <div class="top-menu-title">{{ menu.label }}</div>
@@ -190,6 +200,7 @@
                       target="_blank"
                       rel="noopener noreferrer"
                       class="top-menu-item"
+                      role="menuitem"
                       @click="topMenuAberto = null"
                     >
                       <component :is="item.icon" class="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -202,6 +213,7 @@
                       v-else
                       :to="item.to"
                       class="top-menu-item"
+                      role="menuitem"
                       @click="topMenuAberto = null"
                     >
                       <component :is="item.icon" class="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -475,6 +487,7 @@ const topMenus = computed(() => [
     ],
   },
   {
+    id: 'intelbras',
     label: 'Ambiente Intelbras',
     items: [
       { href: 'https://projetos-solar.intelbras.com.br', label: 'Intelbras Solar', icon: GlobeAltIcon, name: 'intelbras-solar' },
@@ -632,62 +645,142 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.erp-home-link {
+  margin: 0 -8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 7px 8px;
+  color: inherit;
+  transition: background-color .16s ease, border-color .16s ease, transform .16s ease;
+}
+.erp-home-link:hover {
+  border-color: var(--border);
+  background: var(--bg-elevated);
+}
+.erp-home-link:active {
+  transform: translateY(1px);
+}
+.erp-home-link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.app-header {
+  position: relative;
+  z-index: 150;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .02);
+}
+.desktop-top-menus {
+  align-content: center;
+}
 .top-menu-button {
   display: flex;
   align-items: center;
-  gap: 5px;
-  border-radius: 7px;
-  padding: 6px 8px;
-  font-size: .7rem;
+  min-height: 36px;
+  gap: 7px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 8px 10px;
+  font-size: .78rem;
+  font-weight: 650;
+  letter-spacing: .005em;
   color: var(--text-secondary);
   white-space: nowrap;
+  transition: color .16s ease, background-color .16s ease, border-color .16s ease, box-shadow .16s ease;
 }
 .top-menu-button:hover,
 .top-menu-button.active {
   background: var(--bg-elevated);
   color: var(--text-primary);
+  border-color: var(--border);
+}
+.top-menu-button.active {
+  box-shadow: inset 0 -2px 0 var(--primary);
+}
+.top-menu-button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.top-menu-chevron {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  opacity: .78;
+  transition: transform .18s ease;
+}
+.top-menu-chevron.open {
+  transform: rotate(180deg);
 }
 .top-menu-dropdown {
   position: absolute;
-  z-index: 120;
-  top: calc(100% + 4px);
+  z-index: 320;
+  top: calc(100% + 8px);
+  left: 0;
   margin-top: 0;
-  min-width: 290px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg-card);
-  padding: 8px;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, .32);
+  width: max-content;
+  min-width: 340px;
+  max-width: min(390px, calc(100vw - 32px));
+  border: 1px solid color-mix(in srgb, var(--border) 84%, white 16%);
+  border-radius: 13px;
+  background: var(--bg-surface);
+  padding: 10px;
+  opacity: 1;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .62), 0 8px 24px rgba(0, 0, 0, .28);
+  isolation: isolate;
+}
+.top-menu-dropdown.align-right {
+  right: 0;
+  left: auto;
 }
 .top-menu-title {
-  padding: 7px 9px;
-  font-size: .66rem;
-  font-weight: 700;
+  padding: 8px 10px 10px;
+  font-size: .71rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: .08em;
-  color: var(--text-muted);
+  letter-spacing: .1em;
+  color: var(--text-secondary);
 }
 .top-menu-item {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  border-radius: 8px;
-  padding: 9px;
+  min-height: 54px;
+  gap: 12px;
+  margin-top: 3px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 11px;
+  background: color-mix(in srgb, var(--bg-elevated) 48%, transparent);
   color: var(--text-secondary);
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
 }
 .top-menu-item:hover {
   background: var(--bg-elevated);
   color: var(--text-primary);
+  border-color: var(--border);
+  transform: translateX(2px);
+}
+.top-menu-item:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+.top-menu-item > svg {
+  width: 19px;
+  height: 19px;
+  color: var(--primary);
 }
 .top-menu-item strong {
   display: block;
-  font-size: .74rem;
+  font-size: .81rem;
+  line-height: 1.25;
+  font-weight: 750;
+  color: var(--text-primary);
 }
 .top-menu-item span {
   display: block;
-  margin-top: 2px;
-  font-size: .64rem;
-  color: var(--text-muted);
+  margin-top: 4px;
+  font-size: .7rem;
+  line-height: 1.35;
+  color: var(--text-secondary);
 }
 
 .sidebar-submenu {
