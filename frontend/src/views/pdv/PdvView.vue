@@ -1147,7 +1147,7 @@ kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.
   .product-results{flex:1;min-height:0;padding:0 10px 16px;gap:9px;overflow-y:auto!important;overflow-x:hidden!important;max-height:none!important;touch-action:pan-y;overscroll-behavior-y:contain}
   .product-result{grid-template-columns:62px minmax(0,1fr) auto;min-height:84px;padding:10px;gap:10px}
   .product-image{width:62px;height:62px}.product-copy strong{font-size:.82rem}.product-copy span,.product-copy small{font-size:.7rem}.product-prices strong{font-size:.85rem}
-  .catalog-footer{display:grid;position:sticky;bottom:calc(70px + env(safe-area-inset-bottom));z-index:3}
+  .catalog-footer{display:grid;position:relative;bottom:auto;z-index:3;flex:none}
 
   .cart-top,.client-box{min-height:58px;padding:11px 13px}
   .cart-top h2{font-size:.92rem}.client-box strong{max-width:58vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.78rem}
