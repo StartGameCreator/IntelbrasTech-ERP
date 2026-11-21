@@ -158,6 +158,9 @@
             <p v-if="fiscalPerfil==='automatico'" class="fiscal-rule">Regra ativa: mesma UF usa modelo 65; outra UF usa modelo 55 automaticamente.</p>
             <p v-if="fiscalTipo==='nfe' && !clienteSelecionado" class="fiscal-warning">Selecione um cliente com CPF/CNPJ para emitir a NF-e.</p>
             <p v-else-if="fiscalTipo==='nfce'" class="fiscal-hint">Consumidor final. O CPF/CNPJ pode ser identificado pelo botão Selecionar.</p>
+            <button class="nfse-service-action" type="button" @click="$router.push('/fiscal/nfse')">
+              <span>Emitir nota de serviços</span><small>NFS-e Nacional</small>
+            </button>
           </div>
 
           <div class="cart-items">
@@ -1044,6 +1047,7 @@ kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.
 .fiscal-profile{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:10px;margin-top:8px}.fiscal-profile>span{font-size:.64rem;color:var(--text-muted)}.fiscal-profile .select{min-height:32px;padding:5px 9px;font-size:.68rem}
 .fiscal-options{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}.fiscal-options button{padding:7px;border:1px solid var(--border);border-radius:7px;font-size:.68rem}.fiscal-options button.active{border-color:var(--primary);background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--text-primary)}
 .fiscal-hint,.fiscal-warning,.fiscal-rule{margin-top:7px;font-size:.62rem}.fiscal-hint{color:var(--text-muted)}.fiscal-warning{color:var(--warning)}.fiscal-rule{color:var(--success)}
+.nfse-service-action{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;padding:9px 10px;border:1px solid rgba(34,169,90,.55);border-radius:8px;background:rgba(34,169,90,.10);color:#22a95a;font-size:.72rem;font-weight:800}.nfse-service-action small{font-size:.62rem;font-weight:700;color:var(--text-muted)}
 .cart-items{flex:1;overflow:auto;padding:8px}
 .cart-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);font-size:.75rem;gap:8px}
 .cart-item{padding:10px;border-bottom:1px solid var(--border-subtle)}

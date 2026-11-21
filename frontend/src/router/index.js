@@ -395,6 +395,12 @@ const router = createRouter({
           meta: { title: 'NF-e', permissao: 'fiscal.view' },
         },
         {
+          path: 'fiscal/nfse',
+          name: 'fiscal.nfse',
+          component: () => import('@/views/fiscal/NfseView.vue'),
+          meta: { title: 'NFS-e de Serviços', permissao: 'fiscal.view' },
+        },
+        {
           path: 'fiscal/nfe/configuracoes',
           name: 'fiscal.nfe.configuracoes',
           component: () => import('@/views/fiscal/NFeConfiguracoesView.vue'),

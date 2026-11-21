@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\Cadastros\CadastrosAuxiliaresController;
 use App\Http\Controllers\Api\V1\Dashboard\DashboardMapaVendasController;
 use App\Http\Controllers\Api\V1\Fiscal\ContadorController;
 use App\Http\Controllers\Api\V1\Fiscal\NcmCatalogoController;
+use App\Http\Controllers\Api\V1\Fiscal\NfseController;
 use App\Http\Controllers\Api\V1\Logistica\LogisticaController;
 use App\Http\Controllers\Api\V1\Logistica\TransportadoraController;
 use App\Http\Controllers\Api\V1\Expedicao\ExpedicaoController;
@@ -498,6 +499,10 @@ Route::post('{id}/assistente-conteudo', [ProdutoController::class, 'assistenteCo
             Route::get('{id}/danfe',             [NFeController::class, 'downloadDanfe']);
             Route::get('{id}/danfe-arquivo',     [NFeController::class, 'downloadDanfeFile'])->name('fiscal.danfe.file');
             Route::post('{id}/enviar-email',     [NFeController::class, 'enviarEmail']);
+        });
+        Route::prefix('nfse')->group(function () {
+            Route::get('/', [NfseController::class, 'index']);
+            Route::post('/', [NfseController::class, 'store']);
         });
 
         // Ã¢â€â‚¬Ã¢â€â‚¬ Status de Ordem de ServiÃƒÂ§o (colunas do Kanban)

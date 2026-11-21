@@ -8,6 +8,7 @@
         </p>
       </div>
       <RouterLink to="/pdv/vendas" class="btn-secondary">Voltar</RouterLink>
+      <RouterLink to="/fiscal/nfse" class="btn-primary">Emitir nota de serviços</RouterLink>
     </div>
 
     <div class="card p-5 space-y-4">
