@@ -448,7 +448,7 @@ const router = createRouter({
           path: 'tecnico/operacao',
           name: 'tecnico.operacao',
           component: () => import('@/views/tecnico/OperacaoTecnicaView.vue'),
-          meta: { title: 'Operação Técnica' },
+          meta: { title: 'Operação Técnica', tecnicoOnly: true },
         },
         // Ã¢â€â‚¬Ã¢â€â‚¬ AssistÃƒÂªncia TÃƒÂ©cnica Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         {
@@ -646,6 +646,10 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAuth && auth.logado && !auth.usuario) {
     await auth.carregarUsuario()
+  }
+
+  if (to.meta.tecnicoOnly && auth.usuario?.perfil_operacional !== 'tecnico') {
+    return { name: 'gestao-equipe' }
   }
 
   if (to.meta.permissao && !auth.pode(to.meta.permissao)) {
