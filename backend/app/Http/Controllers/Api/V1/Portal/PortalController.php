@@ -7,6 +7,7 @@ use App\Models\{Empresa, Lead, Pipeline, PipelineEtapa, PortalSolicitacao, Produ
 use App\Services\Crm\CrmLeadIntakeService;
 use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PortalController extends Controller
@@ -91,6 +92,22 @@ class PortalController extends Controller
         $empresa = $this->empresa();
         $site = DB::table('portal_site_settings')->where('empresa_id', $empresa->id)->first();
         $imagem = $site?->seo_og_image_url ?: $site?->logo_url ?: $empresa->logo_url;
+
+        // Os rastreadores do WhatsApp e de redes sociais são mais confiáveis
+        // quando recebem o binário da imagem em vez de um redirecionamento.
+        // Arquivos do próprio portal (armazenamento público) são enviados aqui
+        // diretamente; URLs externas permanecem compatíveis via redirecionamento.
+        $caminhoUrl = $imagem ? parse_url($imagem, PHP_URL_PATH) : null;
+        if ($caminhoUrl && Str::startsWith($caminhoUrl, '/storage/')) {
+            $arquivo = Storage::disk('public')->path(ltrim(Str::after($caminhoUrl, '/storage/'), '/'));
+
+            if (is_file($arquivo)) {
+                return response()->file($arquivo, [
+                    'Cache-Control' => 'public, max-age=300',
+                    'Content-Disposition' => 'inline',
+                ]);
+            }
+        }
 
         if ($imagem && filter_var($imagem, FILTER_VALIDATE_URL)) {
             return redirect()->away($imagem, 302, ['Cache-Control' => 'public, max-age=300']);
