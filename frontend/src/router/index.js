@@ -17,6 +17,8 @@ const router = createRouter({
         { path: 'projetos', name: 'portal.projects', component: () => import('@/views/portal/PortalProjectsView.vue'), meta: { title: 'Projetos' } },
         { path: 'sobre', name: 'portal.about', component: () => import('@/views/portal/PortalAboutView.vue'), meta: { title: 'Sobre' } },
         { path: 'contato', name: 'portal.contact', component: () => import('@/views/portal/PortalContactView.vue'), meta: { title: 'Contato' } },
+        { path: 'atendimento', name: 'portal.atendimento', component: () => import('@/views/portal/PortalAtendimentoView.vue'), meta: { title: 'Abrir chamado' } },
+        { path: 'atendimento/:token', name: 'portal.atendimento.acompanhar', component: () => import('@/views/portal/PortalChamadoAcompanhamentoView.vue'), meta: { title: 'Acompanhar chamado' } },
         { path: 'privacidade', name: 'portal.privacy', component: () => import('@/views/portal/PortalPrivacyView.vue'), meta: { title: 'Privacidade' } },
       ],
     },
@@ -26,12 +28,7 @@ const router = createRouter({
       component: () => import('@/views/marketplace-tecnicos/CadastroMarketplaceView.vue'),
       meta: { title: 'Cadastre-se â€” IntelbrasTech', public: true },
     },
-    {
-      path: '/solicite-um-tecnico',
-      name: 'marketplace.solicite-tecnico',
-      component: () => import('@/views/marketplace-tecnicos/CadastroMarketplaceView.vue'),
-      meta: { title: 'Solicite um Técnico — IntelbrasTech', public: true, cadastroCliente: true },
-    },
+    { path: '/solicite-um-tecnico', redirect: '/atendimento' },
     
     // Ã¢â€â‚¬Ã¢â€â‚¬ Auth Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     {
@@ -456,6 +453,12 @@ const router = createRouter({
           name: 'os',
           component: () => import('@/views/os/OSView.vue'),
           meta: { title: 'AssistÃƒÂªncia TÃƒÂ©cnica', permissao: 'os.view' },
+        },
+        {
+          path: 'chamados-clientes',
+          name: 'chamados-clientes',
+          component: () => import('@/views/os/ChamadosClientesView.vue'),
+          meta: { title: 'Chamados de Clientes', permissao: 'os.view' },
         },
         {
           path: 'os/nova',

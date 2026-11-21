@@ -10,7 +10,7 @@
         <label class="wide"><span>Descrição SEO</span><textarea v-model="form.seo_descricao" maxlength="500" rows="3" placeholder="Descrição que aparecerá nos resultados de busca"></textarea><small>{{ (form.seo_descricao || '').length }}/500</small></label>
         <label class="wide"><span>Palavras-chave</span><input v-model="form.seo_palavras_chave" placeholder="energia solar, tecnologia, assistência técnica" /></label>
         <label><span>URL canônica</span><input v-model="form.seo_canonical_url" type="url" placeholder="https://seudominio.com.br" /></label>
-        <label><span>Imagem de compartilhamento (Open Graph)</span><input v-model="form.seo_og_image_url" type="url" placeholder="https://.../imagem.jpg" /></label>
+        <label><span>Imagem de compartilhamento (Open Graph)</span><input v-model="form.seo_og_image_url" type="url" placeholder="https://.../imagem.jpg" /><small>Use uma imagem pública em PNG/JPG (ideal: 1200 × 630). Ela aparecerá em WhatsApp, Facebook, LinkedIn e outros compartilhamentos.</small></label>
         <label class="toggle wide"><input v-model="form.indexar_site" type="checkbox" /><span><b>Permitir indexação</b><small>Autoriza mecanismos de busca a indexarem o portal.</small></span></label>
       </div></section>
 
@@ -26,7 +26,7 @@
         <article><div class="brand tiktok">♪</div><div><h3>TikTok Pixel</h3><p>TikTok Ads Manager</p></div><label><span>ID do Pixel</span><input v-model="form.tiktok_pixel_id" placeholder="CXXXXXXXXXXXXXX" /></label><label class="toggle"><input v-model="form.tiktok_pixel_ativo" type="checkbox" :disabled="!form.tiktok_pixel_id" /><span><b>Pixel ativo</b></span></label></article>
       </div></section>
 
-      <section><div class="section-title"><PhotoIcon /><div><h2>Logo e favicon</h2><p>Identidade visual exibida no portal e na aba do navegador.</p></div></div><div class="grid">
+      <section><div class="section-title"><PhotoIcon /><div><h2>Logo e favicon</h2><p>Identidade visual exibida no portal e na aba do navegador. Para os compartilhamentos, configure também a imagem Open Graph acima: as redes sociais leem o HTML inicial e podem manter o cartão anterior em cache.</p></div></div><div class="grid">
         <label><span>URL da logo</span><input v-model="form.logo_url" type="url" placeholder="https://.../logo.png" /><div v-if="form.logo_url" class="logo-preview"><img :src="form.logo_url" alt="Prévia da logo" /></div></label>
         <label><span>URL do favicon</span><input v-model="form.favicon_url" type="url" placeholder="https://.../favicon.png" /><div v-if="form.favicon_url" class="favicon-preview"><img :src="form.favicon_url" alt="Prévia do favicon" /></div></label>
       </div></section>

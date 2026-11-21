@@ -459,6 +459,7 @@ const topMenus = computed(() => [
     label: 'ServiÃ§os',
     items: [
       { to: '/os', label: 'Ordens de serviÃ§o', description: 'AssistÃªncia tÃ©cnica', icon: WrenchScrewdriverIcon },
+      { to: '/chamados-clientes', label: 'Chamados de clientes', description: 'Portal, WhatsApp e orçamentos', icon: DocumentTextIcon },
       { to: '/marketplace-hub', label: 'Central de ExtensÃµes', description: 'Todos os conectores e marketplaces', icon: BuildingStorefrontIcon },
       { to: '/marketplaces', label: 'Marketplaces conectados', description: 'Contas e canais ativos', icon: BuildingStorefrontIcon },
       { to: '/expedicao', label: 'ExpediÃ§Ã£o', description: 'Picking, packing e volumes', icon: TruckIcon },
@@ -587,6 +588,7 @@ const menuGrupos = computed(() => [
         ? [{ to: '/tecnico/operacao', label: 'Minha Operação Técnica', icon: MapPinIcon, name: 'tecnico.operacao' }]
         : []),
       { to: '/os', label: 'AssistÃªncia TÃ©cnica', icon: WrenchScrewdriverIcon, name: 'os' },
+      { to: '/chamados-clientes', label: 'Chamados de Clientes', icon: DocumentTextIcon, name: 'chamados-clientes' },
       { to: '/gestao-equipe', label: 'Gestão de Equipe', icon: UserGroupIcon, name: 'gestao-equipe' },
       { to: '/configuracoes/empresa', label: 'Empresa', icon: BuildingStorefrontIcon, name: 'configuracoes.empresa' },
       { to: '/marketplaces', label: 'Marketplaces', icon: BuildingStorefrontIcon, name: 'marketplaces' },

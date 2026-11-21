@@ -82,6 +82,23 @@ class PortalController extends Controller
         return response()->json(['data' => $produtos]);
     }
 
+    /**
+     * Redes sociais não executam o JavaScript da SPA. Esta URL estável resolve
+     * para a imagem configurada no ERP antes de o cartão ser montado.
+     */
+    public function imagemCompartilhamento()
+    {
+        $empresa = $this->empresa();
+        $site = DB::table('portal_site_settings')->where('empresa_id', $empresa->id)->first();
+        $imagem = $site?->seo_og_image_url ?: $site?->logo_url ?: $empresa->logo_url;
+
+        if ($imagem && filter_var($imagem, FILTER_VALIDATE_URL)) {
+            return redirect()->away($imagem, 302, ['Cache-Control' => 'public, max-age=300']);
+        }
+
+        return redirect('/pwa-icon.svg', 302, ['Cache-Control' => 'public, max-age=300']);
+    }
+
     public function solicitar(Request $request): JsonResponse
     {
         if ($request->filled('portal_guard') || $request->filled('website')) {

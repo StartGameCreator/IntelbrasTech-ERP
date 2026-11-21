@@ -65,6 +65,7 @@ use App\Http\Controllers\Api\V1\Portal\PortalController;
 use App\Http\Controllers\Api\V1\Portal\LocalidadeController;
 use App\Http\Controllers\Api\V1\Portal\PortalCarouselController;
 use App\Http\Controllers\Api\V1\Portal\PortalSiteSettingsController;
+use App\Http\Controllers\Api\V1\Portal\PortalChamadoController;
 use App\Http\Controllers\Api\V1\EmailMarketing\EmailMarketingController;
 
 // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
@@ -74,12 +75,17 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('portal')->group(function () {
         Route::get('configuracao', [PortalController::class, 'configuracao']);
+        Route::get('compartilhamento/imagem', [PortalController::class, 'imagemCompartilhamento']);
         Route::get('catalogo', [PortalController::class, 'catalogo']);
         Route::get('carrossel', [PortalCarouselController::class, 'publico']);
         Route::get('localidades/ufs', [LocalidadeController::class, 'ufs']);
         Route::get('localidades/ufs/{uf}/municipios', [LocalidadeController::class, 'municipios']);
         Route::get('cep/{cep}', [LocalidadeController::class, 'cep'])->where('cep', '[0-9\-]+');
         Route::post('solicitacoes', [PortalController::class, 'solicitar'])->middleware('throttle:10,1');
+        Route::post('chamados', [PortalChamadoController::class, 'abrir'])->middleware('throttle:8,1');
+        Route::get('chamados/{token}', [PortalChamadoController::class, 'acompanhar'])->middleware('throttle:30,1');
+        Route::post('chamados/{token}/autorizar', [PortalChamadoController::class, 'autorizar'])->middleware('throttle:6,1');
+        Route::get('chamados/{token}/contrato', [PortalChamadoController::class, 'contrato'])->middleware('throttle:12,1');
     });
 
     // Cadastro pÃºblico do Marketplace de TÃ©cnicos
@@ -131,6 +137,12 @@ Route::prefix('v1')->group(function () {
         });
         Route::get('portal/configuracoes/site', [PortalSiteSettingsController::class, 'show']);
         Route::put('portal/configuracoes/site', [PortalSiteSettingsController::class, 'update']);
+
+        Route::prefix('chamados-clientes')->group(function () {
+            Route::get('/', [PortalChamadoController::class, 'index']);
+            Route::get('{id}', [PortalChamadoController::class, 'show']);
+            Route::put('{id}/orcamento', [PortalChamadoController::class, 'orcamento']);
+        });
 
         // Ã¢â€â‚¬Ã¢â€â‚¬ Auth
 

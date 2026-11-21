@@ -23,7 +23,7 @@
           <RouterLink to="/projetos" @click="close">Projetos</RouterLink>
           <RouterLink to="/sobre" @click="close">Sobre</RouterLink>
           <RouterLink to="/contato" @click="close">Contato</RouterLink>
-          <RouterLink class="portal-service-request" to="/solicite-um-tecnico" @click="close">Solicite um Técnico</RouterLink>
+          <RouterLink class="portal-service-request" to="/atendimento" @click="close">Solicite um Técnico</RouterLink>
           <a class="portal-store" :href="portal.canais?.loja_url || 'https://www.loja.intelbrastech.com.br'" target="_blank" rel="noopener" @click="close">Acessar loja</a>
         </nav>
       </div>
@@ -41,7 +41,7 @@
         <div><div class="portal-brand footer-brand"><img v-if="portal.empresa?.logo_url" class="portal-brand-logo" :src="portal.empresa.logo_url" alt="IntelbrasTech" /><span v-else class="portal-brand-mark">IT</span><span><b>IntelbrasTech</b><small>Tecnologia e energia</small></span></div><p>Soluções conectadas para residências, empresas e operações que querem evoluir.</p></div>
         <div><b>Soluções</b><RouterLink to="/energia-solar">Energia solar</RouterLink><RouterLink to="/solucoes/mercado-livre-energia-geracao-distribuida">Mercado Livre de Energia</RouterLink><RouterLink to="/assistencia-tecnica">Assistência técnica e informática</RouterLink><RouterLink to="/solucoes/infraestrutura-de-redes">Infraestrutura de redes</RouterLink><RouterLink to="/solucoes/computacao-em-nuvem">Computação em nuvem</RouterLink><RouterLink to="/solucoes/marketing-digital-empresas">Marketing digital</RouterLink></div>
         <div><b>IntelbrasTech</b><RouterLink to="/sobre">Sobre nós</RouterLink><RouterLink to="/projetos">Projetos</RouterLink><RouterLink to="/contato">Contato</RouterLink><RouterLink to="/cadastre-se">Trabalhe conosco</RouterLink><RouterLink to="/privacidade">Privacidade</RouterLink></div>
-        <div><b>Atendimento</b><span>{{ portal.empresa?.telefone || 'Consulte nossos canais' }}</span><span>{{ portal.empresa?.email }}</span><span>{{ [portal.empresa?.cidade, portal.empresa?.uf].filter(Boolean).join(' - ') }}</span><RouterLink class="portal-admin" to="/login">Acesso ao ERP</RouterLink></div>
+        <div><b>Atendimento</b><span>{{ portal.empresa?.telefone || 'Consulte nossos canais' }}</span><span>{{ portal.empresa?.email }}</span><span>{{ [portal.empresa?.cidade, portal.empresa?.uf].filter(Boolean).join(' - ') }}</span><RouterLink to="/atendimento">Abrir chamado</RouterLink><RouterLink class="portal-admin" to="/login">Acesso ao ERP</RouterLink></div>
       </div>
       <div class="portal-container portal-footer-bottom">© {{ new Date().getFullYear() }} IntelbrasTech. Todos os direitos reservados.</div>
     </footer>
@@ -76,7 +76,7 @@ function meta(name, content, property = false) {
 function aplicarSite(site) {
   if (site.titulo) document.title = site.titulo
   meta('description', site.descricao); meta('keywords', site.palavras_chave); meta('robots', site.indexar_site ? 'index,follow' : 'noindex,nofollow')
-  meta('google-site-verification', site.google_site_verification); meta('og:title', site.titulo, true); meta('og:description', site.descricao, true); meta('og:image', site.og_image_url, true)
+  meta('google-site-verification', site.google_site_verification); meta('og:title', site.titulo, true); meta('og:description', site.descricao, true); meta('og:image', site.og_image_url, true); meta('twitter:title', site.titulo); meta('twitter:description', site.descricao); meta('twitter:image', site.og_image_url)
   if (site.canonical_url) { let link=document.head.querySelector('link[rel="canonical"]'); if(!link){link=document.createElement('link');link.rel='canonical';document.head.appendChild(link)} link.href=site.canonical_url }
   if (site.favicon_url) { let icon=document.head.querySelector('link[rel~="icon"]'); if(!icon){icon=document.createElement('link');icon.rel='icon';document.head.appendChild(icon)} icon.href=site.favicon_url }
 }
