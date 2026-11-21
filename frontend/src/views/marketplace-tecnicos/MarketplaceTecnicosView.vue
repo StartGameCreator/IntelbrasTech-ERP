@@ -306,7 +306,9 @@ async function carregar() {
   try {
     const { data } = await api.get('/platform/cadastros', { params: { lixeira: lixeira.value ? 1 : 0 } })
     resumo.value = data.resumo || {}
-    cadastros.value = data.cadastros || []
+    // Vendedores são analisados exclusivamente em Gestão de Equipe. Este módulo
+    // permanece focado na base técnica, nos clientes e nos colaboradores.
+    cadastros.value = (data.cadastros || []).filter(item => item.tipo_perfil !== 'vendedor')
   } catch (e) {
     toast.error(e.response?.data?.message || 'Falha ao carregar.')
   }
