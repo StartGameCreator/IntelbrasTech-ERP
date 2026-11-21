@@ -5,7 +5,7 @@
         <RouterLink class="portal-brand" to="/">
           <img v-if="portal.empresa?.logo_url" class="portal-brand-logo" :src="portal.empresa.logo_url" alt="IntelbrasTech" />
           <span v-else class="portal-brand-mark">IT</span>
-          <span><b>IntelbrasTech</b><small>Tecnologia e energia</small></span>
+          <span><b>IntelbrasTech</b><small>-Tecnologia e Energia</small></span>
         </RouterLink>
         <button class="portal-menu-button" aria-label="Abrir menu" :aria-expanded="menuOpen" @click="menuOpen = !menuOpen">
           <Menu v-if="!menuOpen" /><X v-else />
@@ -38,7 +38,7 @@
     </aside>
     <footer class="portal-footer">
       <div class="portal-container portal-footer-grid">
-        <div><div class="portal-brand footer-brand"><img v-if="portal.empresa?.logo_url" class="portal-brand-logo" :src="portal.empresa.logo_url" alt="IntelbrasTech" /><span v-else class="portal-brand-mark">IT</span><span><b>IntelbrasTech</b><small>Tecnologia e energia</small></span></div><p>Soluções conectadas para residências, empresas e operações que querem evoluir.</p></div>
+        <div><div class="portal-brand footer-brand"><img v-if="portal.empresa?.logo_url" class="portal-brand-logo" :src="portal.empresa.logo_url" alt="IntelbrasTech" /><span v-else class="portal-brand-mark">IT</span><span><b>IntelbrasTech</b><small>-Tecnologia e Energia</small></span></div><p>Revenda Certificada e Serviço Autorizado Intelbras</p></div>
         <div><b>Soluções</b><RouterLink to="/energia-solar">Energia solar</RouterLink><RouterLink to="/solucoes/mercado-livre-energia-geracao-distribuida">Mercado Livre de Energia</RouterLink><RouterLink to="/assistencia-tecnica">Assistência técnica e informática</RouterLink><RouterLink to="/solucoes/infraestrutura-de-redes">Infraestrutura de redes</RouterLink><RouterLink to="/solucoes/computacao-em-nuvem">Computação em nuvem</RouterLink><RouterLink to="/solucoes/marketing-digital-empresas">Marketing digital</RouterLink></div>
         <div><b>IntelbrasTech</b><RouterLink to="/sobre">Sobre nós</RouterLink><RouterLink to="/projetos">Projetos</RouterLink><RouterLink to="/contato">Contato</RouterLink><RouterLink to="/cadastre-se">Trabalhe conosco</RouterLink><RouterLink to="/privacidade">Privacidade</RouterLink></div>
         <div><b>Atendimento</b><span>{{ portal.empresa?.telefone || 'Consulte nossos canais' }}</span><span>{{ portal.empresa?.email }}</span><span>{{ [portal.empresa?.cidade, portal.empresa?.uf].filter(Boolean).join(' - ') }}</span><RouterLink to="/atendimento">Abrir chamado</RouterLink><RouterLink class="portal-admin" to="/login">Acesso ao ERP</RouterLink></div>
