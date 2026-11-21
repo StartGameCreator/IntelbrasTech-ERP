@@ -15,7 +15,7 @@
     </div>
 
     <div class="mapa-kpis grid grid-cols-2 lg:grid-cols-4 gap-3">
-      <div class="card p-3"><p class="kpi-value text-lg">{{ resumo.total || 0 }}</p><p class="kpi-label">Registros na ANEEL</p></div>
+      <div class="card p-3"><p class="kpi-value text-lg">{{ resumo.total || 0 }}</p><p class="kpi-label">Registros encontrados</p></div>
       <div class="card p-3"><p class="kpi-value text-lg text-green-400">{{ registros.length }}</p><p class="kpi-label">Resultados carregados</p></div>
       <div class="card p-3"><p class="kpi-value text-lg text-amber-400">{{ comCoordenadas }}</p><p class="kpi-label">Com coordenadas</p></div>
       <div class="card p-3"><p class="kpi-value text-lg">{{ formatarNumero(potenciaTotal) }} MW</p><p class="kpi-label">Potência da consulta</p></div>
@@ -206,8 +206,8 @@ async function carregarFiltros() {
       const cidades = opcoes.cidades.length
       const origem = data.cache ? 'cache local' : 'ANEEL'
       cidadeStatus.value = data.parcial
-        ? `Lista parcial: ${cidades} cidades, ${varridos}/${total || varridos} registros lidos.`
-        : `${cidades} cidades carregadas (${varridos || total} registros, ${origem}).`
+        ? `Lista parcial: ${cidades} cidades e ${total} registros compatíveis em ${varridos} analisados.`
+        : `${cidades} cidades e ${total} registros compatíveis (${origem}).`
     } else {
       cidadeStatus.value = ''
     }
@@ -222,6 +222,10 @@ async function carregar() {
   try {
     const { data } = await api.get('/mapa-aneel/microgeracao', { params: filtros })
     registros.value = data.data || []
+    resumo.value = {
+      ...resumo.value,
+      total: Number(data.total_remoto ?? data.total ?? registros.value.length),
+    }
     resourceId.value = data.resource_id || resourceId.value
     await nextTick()
     if (!map) inicializarMapa()
