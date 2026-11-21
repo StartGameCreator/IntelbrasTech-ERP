@@ -10,7 +10,7 @@ const router = createRouter({
       component: () => import('@/components/portal/PortalLayout.vue'),
       meta: { public: true },
       children: [
-        { path: '', name: 'portal.home', component: () => import('@/views/portal/PortalHomeView.vue'), meta: { title: 'Tecnologia e energia' } },
+        { path: '', name: 'portal.home', component: () => import('@/views/portal/PortalHomeView.vue'), meta: { title: 'Tecnologia e Energia' } },
         { path: 'energia-solar', name: 'portal.solar', component: () => import('@/views/portal/PortalSolarView.vue'), meta: { title: 'Energia Solar' } },
         { path: 'solucoes/:slug', name: 'portal.solution', component: () => import('@/views/portal/PortalSolutionView.vue'), meta: { title: 'Soluções' } },
         { path: 'assistencia-tecnica', name: 'portal.assistance', component: () => import('@/views/portal/PortalAssistanceView.vue'), meta: { title: 'Assistência Técnica' } },
