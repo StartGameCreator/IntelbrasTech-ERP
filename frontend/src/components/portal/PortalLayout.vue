@@ -24,6 +24,10 @@
           <RouterLink to="/sobre" @click="close">Sobre</RouterLink>
           <RouterLink to="/contato" @click="close">Contato</RouterLink>
           <RouterLink class="portal-service-request" to="/atendimento" @click="close">Solicite um Técnico</RouterLink>
+          <button class="portal-copy-attendance" type="button" @click="copiarLinkAtendimento">
+            <Copy :size="17" />
+            {{ linkAtendimentoCopiado ? 'Link copiado!' : 'Copiar link de atendimento' }}
+          </button>
           <a class="portal-store" :href="portal.canais?.loja_url || 'https://www.loja.intelbrastech.com.br'" target="_blank" rel="noopener" @click="close">Acessar loja</a>
         </nav>
       </div>
@@ -51,17 +55,39 @@
 <script setup>
 import { computed, onMounted, provide, reactive, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import { ChevronDown, Menu, MessageCircle, X } from 'lucide-vue-next'
+import { ChevronDown, Copy, Menu, MessageCircle, X } from 'lucide-vue-next'
 import { carregarPortal } from '@/services/portal'
 import { solutions } from '@/data/portalContent'
 
 const menuOpen = ref(false)
+const linkAtendimentoCopiado = ref(false)
 const route = useRoute()
 const portal = reactive({ empresa: {}, canais: {}, credenciais: {}, site: {} })
 const consentimento = ref(localStorage.getItem('intelbrastech_analytics_consent') === null ? null : localStorage.getItem('intelbrastech_analytics_consent') === 'aceito')
 const possuiRastreadores = computed(() => ['google_analytics_ativo','google_tag_manager_ativo','microsoft_clarity_ativo','meta_pixel_ativo','tiktok_pixel_ativo'].some(key => portal.site?.[key]))
 provide('portal', portal)
 const close = () => { menuOpen.value = false }
+const linkAtendimento = 'https://intelbrastech.com.br/atendimento'
+async function copiarLinkAtendimento() {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(linkAtendimento)
+    } else {
+      const campo = document.createElement('textarea')
+      campo.value = linkAtendimento
+      campo.setAttribute('readonly', '')
+      campo.style.cssText = 'position:fixed;opacity:0;pointer-events:none'
+      document.body.appendChild(campo)
+      campo.select()
+      document.execCommand('copy')
+      campo.remove()
+    }
+    linkAtendimentoCopiado.value = true
+    window.setTimeout(() => { linkAtendimentoCopiado.value = false }, 2500)
+  } catch {
+    window.prompt('Copie o link de atendimento:', linkAtendimento)
+  }
+}
 const whatsappUrl = computed(() => {
   const phone = String(portal.canais?.whatsapp || '').replace(/\D/g, '')
   return phone ? `https://wa.me/${phone.startsWith('55') ? phone : `55${phone}`}` : null
