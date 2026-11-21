@@ -1152,14 +1152,15 @@ kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.
 /* Operação móvel: uma etapa por tela, controles táteis e recebimento sempre acessível. */
 @media(max-width:767px){
   .pdv-shell{height:calc(100dvh - 76px);min-height:0;margin:-12px;border:0;border-radius:0;overflow:hidden;padding-bottom:calc(78px + env(safe-area-inset-bottom));box-shadow:none}
-  .pdv-header{position:relative;z-index:3;min-height:auto;align-items:flex-start;flex-wrap:wrap;padding:12px 14px;gap:10px}
+  .pdv-header{position:relative;z-index:3;min-height:auto;align-items:flex-start;flex-wrap:wrap;padding:9px 10px;gap:6px}
   .pdv-header h1{font-size:1.05rem}.pdv-header p{font-size:.68rem}
-  .pdv-header-identity{min-width:0;flex:1 1 auto}
-  .pdv-header-actions{max-width:58%;justify-content:flex-end;gap:5px}
-  .pdv-header-actions button{min-height:36px;padding:6px 9px;font-size:.65rem}
+  .pdv-header-identity{min-width:0;flex:0 0 100%}
+  .pdv-header-actions{order:2;display:grid;width:100%;max-width:none;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+  .pdv-header-actions button{width:100%;min-height:32px;padding:4px 2px;font-size:.61rem;line-height:1.05;white-space:nowrap}
   .pdv-mode-switch{order:3;width:100%;grid-template-columns:1fr 1fr}
-  .pdv-mode-switch button{min-height:44px;padding:7px 10px}
-  .pdv-mode-switch span{font-size:.75rem}.pdv-mode-switch small{font-size:.6rem}
+  .pdv-mode-switch button{min-height:38px;padding:5px 8px}
+  .pdv-mode-switch svg{width:17px;height:17px}
+  .pdv-mode-switch span{font-size:.7rem}.pdv-mode-switch small{margin-top:2px;font-size:.56rem}
 
   .pdv-grid{display:flex;flex:1;min-height:0;background:var(--bg-card)}
   .catalog-panel,.cart-panel{min-height:0!important;border:0!important}
