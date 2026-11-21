@@ -1,10 +1,21 @@
 <template>
   <div class="pdv-shell">
     <header class="pdv-header">
-      <div>
+      <div class="pdv-header-identity">
         <h1>Frente de Caixa</h1>
         <p v-if="caixa">Caixa {{ caixa.numero }} · {{ caixa.deposito?.nome || 'Sem depósito' }}</p>
         <p v-else>Nenhum caixa aberto</p>
+      </div>
+
+      <div class="pdv-mode-switch" role="group" aria-label="Selecionar o tipo de operação do PDV">
+        <button type="button" class="active" aria-pressed="true">
+          <CubeIcon />
+          <span>Produtos<small>NF-e / NFC-e</small></span>
+        </button>
+        <button type="button" aria-pressed="false" @click="abrirPdvServicos">
+          <DocumentTextIcon />
+          <span>Serviços<small>NFS-e</small></span>
+        </button>
       </div>
 
       <div class="pdv-header-actions">
@@ -158,9 +169,6 @@
             <p v-if="fiscalPerfil==='automatico'" class="fiscal-rule">Regra ativa: mesma UF usa modelo 65; outra UF usa modelo 55 automaticamente.</p>
             <p v-if="fiscalTipo==='nfe' && !clienteSelecionado" class="fiscal-warning">Selecione um cliente com CPF/CNPJ para emitir a NF-e.</p>
             <p v-else-if="fiscalTipo==='nfce'" class="fiscal-hint">Consumidor final. O CPF/CNPJ pode ser identificado pelo botão Selecionar.</p>
-            <button class="nfse-service-action" type="button" @click="$router.push('/fiscal/nfse')">
-              <span>Emitir nota de serviços</span><small>NFS-e Nacional</small>
-            </button>
           </div>
 
           <div class="cart-items">
@@ -429,6 +437,7 @@
 
 <script setup>
 import { ref, computed, nextTick, onBeforeUnmount, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import api from '@/services/api'
 import {
@@ -438,6 +447,7 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const toast = useToast()
+const router = useRouter()
 const loading = ref(true)
 const caixa = ref(null)
 const empresaUf = ref('')
@@ -507,6 +517,14 @@ const fiscalStatus = computed(() => fiscalTipo.value === 'nfe' ? 'SEFAZ' : fisca
 function moeda(v){ return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v||0)) }
 function numero(v,c=2){ return new Intl.NumberFormat('pt-BR',{minimumFractionDigits:c,maximumFractionDigits:c}).format(Number(v||0)) }
 function totalItem(item){ return Math.max(0, Number(item.quantidade||0)*Number(item.preco_unitario||0)-Number(item.desconto||0)) }
+
+function abrirPdvServicos(){
+  if(carrinho.value.length){
+    toast.warning('Finalize ou exclua a venda atual antes de mudar para o PDV de serviços.')
+    return
+  }
+  router.push({name:'fiscal.nfse'})
+}
 
 async function carregar(){
   loading.value=true
@@ -1011,8 +1029,18 @@ onBeforeUnmount(()=>{clearTimeout(searchTimer);clearTimeout(clientTimer);window.
 <style scoped>
 .pdv-shell{height:calc(100dvh - 120px);min-height:0;display:flex;flex-direction:column;gap:12px;overflow:hidden}
 .pdv-header{display:flex;flex:none;align-items:center;justify-content:space-between;gap:12px}
+.pdv-header-identity{flex:0 0 auto;min-width:160px}
 .pdv-header h1{font-size:1.2rem;font-weight:800;color:var(--text-primary)}
 .pdv-header p{font-size:.7rem;color:var(--text-muted)}
+.pdv-mode-switch{display:grid;grid-template-columns:repeat(2,minmax(138px,1fr));gap:4px;padding:4px;border:1px solid rgba(255,255,255,.28);border-radius:11px;background:rgba(7,61,31,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.pdv-mode-switch button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:6px 12px;border:1px solid transparent;border-radius:8px;color:rgba(255,255,255,.76);transition:background-color .16s ease,border-color .16s ease,color .16s ease,transform .16s ease}
+.pdv-mode-switch button:hover{border-color:rgba(255,255,255,.25);color:#fff;background:rgba(255,255,255,.1)}
+.pdv-mode-switch button.active{background:#fff;color:#166534;box-shadow:0 5px 16px rgba(0,0,0,.2)}
+.pdv-mode-switch button:active{transform:translateY(1px)}
+.pdv-mode-switch button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.pdv-mode-switch svg{width:19px;height:19px;flex:0 0 auto}
+.pdv-mode-switch span{display:flex;flex-direction:column;align-items:flex-start;font-size:.73rem;font-weight:850;line-height:1.05}
+.pdv-mode-switch small{margin-top:4px;font-size:.58rem;font-weight:700;opacity:.72}
 .pdv-header-actions{display:flex;gap:8px;flex-wrap:wrap}
 .open-box{min-height:65vh;display:flex;align-items:center;justify-content:center}
 .pdv-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(380px,.65fr);gap:12px;flex:1;min-height:0}
@@ -1047,7 +1075,6 @@ kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.
 .fiscal-profile{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:10px;margin-top:8px}.fiscal-profile>span{font-size:.64rem;color:var(--text-muted)}.fiscal-profile .select{min-height:32px;padding:5px 9px;font-size:.68rem}
 .fiscal-options{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}.fiscal-options button{padding:7px;border:1px solid var(--border);border-radius:7px;font-size:.68rem}.fiscal-options button.active{border-color:var(--primary);background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--text-primary)}
 .fiscal-hint,.fiscal-warning,.fiscal-rule{margin-top:7px;font-size:.62rem}.fiscal-hint{color:var(--text-muted)}.fiscal-warning{color:var(--warning)}.fiscal-rule{color:var(--success)}
-.nfse-service-action{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;padding:9px 10px;border:1px solid rgba(34,169,90,.55);border-radius:8px;background:rgba(34,169,90,.10);color:#22a95a;font-size:.72rem;font-weight:800}.nfse-service-action small{font-size:.62rem;font-weight:700;color:var(--text-muted)}
 .cart-items{flex:1;overflow:auto;padding:8px}
 .cart-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);font-size:.75rem;gap:8px}
 .cart-item{padding:10px;border-bottom:1px solid var(--border-subtle)}
@@ -1125,10 +1152,14 @@ kbd{border:1px solid var(--border);border-radius:5px;padding:2px 5px;font-size:.
 /* Operação móvel: uma etapa por tela, controles táteis e recebimento sempre acessível. */
 @media(max-width:767px){
   .pdv-shell{height:calc(100dvh - 76px);min-height:0;margin:-12px;border:0;border-radius:0;overflow:hidden;padding-bottom:calc(78px + env(safe-area-inset-bottom));box-shadow:none}
-  .pdv-header{position:relative;z-index:3;min-height:auto;align-items:flex-start;padding:12px 14px;gap:10px}
+  .pdv-header{position:relative;z-index:3;min-height:auto;align-items:flex-start;flex-wrap:wrap;padding:12px 14px;gap:10px}
   .pdv-header h1{font-size:1.05rem}.pdv-header p{font-size:.68rem}
+  .pdv-header-identity{min-width:0;flex:1 1 auto}
   .pdv-header-actions{max-width:58%;justify-content:flex-end;gap:5px}
   .pdv-header-actions button{min-height:36px;padding:6px 9px;font-size:.65rem}
+  .pdv-mode-switch{order:3;width:100%;grid-template-columns:1fr 1fr}
+  .pdv-mode-switch button{min-height:44px;padding:7px 10px}
+  .pdv-mode-switch span{font-size:.75rem}.pdv-mode-switch small{font-size:.6rem}
 
   .pdv-grid{display:flex;flex:1;min-height:0;background:var(--bg-card)}
   .catalog-panel,.cart-panel{min-height:0!important;border:0!important}

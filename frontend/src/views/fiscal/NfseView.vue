@@ -1,11 +1,19 @@
 <template>
   <div class="nfse-page animate-fade-in">
     <div class="page-header">
-      <div>
-        <h1 class="page-title">NFS-e de Serviços</h1>
-        <p class="text-xs text-[var(--text-muted)] mt-1">Crie a nota de serviço separadamente das vendas de mercadorias.</p>
+      <div class="nfse-heading">
+        <h1 class="page-title">PDV de Serviços</h1>
+        <p class="text-xs text-[var(--text-muted)] mt-1">Prestação de serviços e emissão de Nota Fiscal de Serviço eletrônica.</p>
       </div>
-      <RouterLink to="/pdv" class="btn-secondary">Voltar ao PDV</RouterLink>
+
+      <div class="nfse-mode-switch" role="group" aria-label="Selecionar o tipo de operação do PDV">
+        <RouterLink to="/pdv">
+          <span>Produtos<small>NF-e / NFC-e</small></span>
+        </RouterLink>
+        <span class="active" aria-current="page">
+          <span>Serviços<small>NFS-e</small></span>
+        </span>
+      </div>
     </div>
 
     <div class="nfse-grid">
@@ -79,5 +87,5 @@ onMounted(carregar)
 </script>
 
 <style scoped>
-.nfse-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.42fr);gap:16px}.nfse-note{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid rgba(34,169,90,.35);border-radius:9px;background:rgba(34,169,90,.08);font-size:.78rem}.nfse-note span{color:var(--text-muted);line-height:1.45}.nfse-list{display:flex;flex-direction:column;gap:8px;margin-top:16px}.nfse-list article{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}.nfse-list strong,.nfse-list span{display:block}.nfse-list strong{font-size:.78rem}.nfse-list span,.nfse-list small{font-size:.68rem;color:var(--text-muted);margin-top:3px}@media(max-width:800px){.nfse-grid{grid-template-columns:1fr}}
+.page-header{display:flex;align-items:center;justify-content:space-between;gap:16px}.nfse-heading{min-width:0}.nfse-mode-switch{display:grid;grid-template-columns:repeat(2,minmax(140px,1fr));gap:4px;padding:4px;border:1px solid var(--border);border-radius:11px;background:var(--bg-elevated)}.nfse-mode-switch>a,.nfse-mode-switch>span{display:flex;align-items:center;justify-content:center;min-height:42px;padding:7px 13px;border:1px solid transparent;border-radius:8px;color:var(--text-secondary);transition:background-color .16s ease,border-color .16s ease,color .16s ease}.nfse-mode-switch>a:hover{border-color:var(--border);background:var(--bg-input);color:var(--text-primary)}.nfse-mode-switch .active{border-color:rgba(34,169,90,.48);background:#22a95a;color:#fff;box-shadow:0 5px 16px rgba(34,169,90,.2)}.nfse-mode-switch span span,.nfse-mode-switch>a span{display:flex;flex-direction:column;align-items:flex-start;font-size:.75rem;font-weight:850;line-height:1.05}.nfse-mode-switch small{margin-top:4px;font-size:.6rem;font-weight:700;opacity:.72}.nfse-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.42fr);gap:16px}.nfse-note{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid rgba(34,169,90,.35);border-radius:9px;background:rgba(34,169,90,.08);font-size:.78rem}.nfse-note span{color:var(--text-muted);line-height:1.45}.nfse-list{display:flex;flex-direction:column;gap:8px;margin-top:16px}.nfse-list article{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}.nfse-list strong,.nfse-list span{display:block}.nfse-list strong{font-size:.78rem}.nfse-list span,.nfse-list small{font-size:.68rem;color:var(--text-muted);margin-top:3px}@media(max-width:800px){.page-header{align-items:stretch;flex-direction:column}.nfse-mode-switch{grid-template-columns:1fr 1fr;width:100%}.nfse-mode-switch>a,.nfse-mode-switch>span{min-height:46px}.nfse-grid{grid-template-columns:1fr}}
 </style>
