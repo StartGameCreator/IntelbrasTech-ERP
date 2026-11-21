@@ -1,79 +1,74 @@
 # IntelbrasTech ERP
 
-Sistema integrado de gestão empresarial desenvolvido com **Laravel 13**, **Vue 3** e API REST. O checkpoint documentado corresponde aos arquivos `backend(15).zip` e `frontend(14).zip`, recebidos em julho de 2026.
+> Plataforma integrada para operação comercial, fiscal, técnica, logística e de relacionamento da IntelbrasTech.
 
-> **Situação:** desenvolvimento ativo. Esta documentação descreve a estrutura encontrada no checkpoint e diferencia funcionalidades implementadas de integrações ainda dependentes de credenciais, homologação ou implantação.
+O IntelbrasTech ERP reúne o portal institucional e o ambiente operacional da empresa em uma única plataforma. O projeto usa uma API Laravel, uma aplicação Vue 3 e serviços de suporte para persistência, filas, cache e mensageria.
 
-## Principais áreas
+[![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?logo=laravel&logoColor=white)](https://laravel.com)
+[![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](https://vuejs.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![License](https://img.shields.io/badge/licença-proprietária-334155)](LICENSE)
 
-- Cadastros: empresas, clientes, fornecedores, produtos, categorias, marcas e unidades.
-- Comercial: pedidos, recibos, tabelas de preço e Kanban.
-- CRM: leads, pipelines, enriquecimento CNPJ, Google Business e reuniões.
-- Estoque: depósitos, saldos, movimentações, inventários e entrada por XML.
-- Financeiro: contas a pagar, contas a receber, fluxo de caixa, plano de contas e DRE.
-- Fiscal: NF-e, NFC-e, DANFE, certificado A1, CSC, numeração, cancelamento, carta de correção e devolução fiscal.
-- PDV: vendas, pagamentos, histórico, emissão NFC-e, cancelamento e devoluções.
-- Marketplace: hub, Mercado Livre, Shopee, Nuvemshop, catálogo, pedidos, fiscal e automações.
-- Expedição e logística: separação, volumes, etiquetas, transportadoras e rastreamento.
-- Ordens de serviço: cadastro, peças, fotos, histórico e status.
-- Energia: mapas e captação de oportunidades ONS, ANEEL e CCEE.
+## O que a plataforma atende
 
-## Stack confirmada
+| Área | Capacidades principais |
+| --- | --- |
+| Portal | Site institucional, simulador solar, solicitação de técnico, cadastro de parceiros, SEO e rastreamento. |
+| CRM | Leads, pipelines, Kanban, atividades, metas, automações, propostas e distribuição comercial. |
+| Comercial e estoque | Clientes, fornecedores, catálogo, preços, compras, pedidos, depósitos e inventário. |
+| PDV | Abertura/fechamento de caixa, vendas, pagamentos, NFC-e/NF-e e histórico. |
+| Fiscal | NF-e, NFC-e, DANFE, certificado A1, CSC, sequencial, contingências e integração SEFAZ. |
+| Serviços | Ordens de serviço, visitas, equipe técnica, disponibilidade, geolocalização e distribuição de demandas. |
+| Inteligência territorial | Mapas ONS, ANEEL e CCEE para pesquisa e geração de oportunidades. |
+| Integrações | Mercado Livre, Shopee, Nuvemshop, CEP/IBGE, CNPJ, e-mail marketing e ferramentas analíticas. |
 
-### Backend
+## Arquitetura em um minuto
 
-- PHP `^8.3`
-- Laravel `^13.0`
-- Laravel Sanctum `^4.0`
-- PHPUnit `^12.0`
-- NFePHP SPED-NFe `~5.2.6`
-- DomPDF, Guzzle, Redis/Predis, AWS S3, QR Code e código de barras
+```mermaid
+flowchart LR
+  U[Usuários, parceiros e clientes] --> P[Portal e ERP Vue 3]
+  P -->|/api/v1| A[Laravel 13]
+  A --> DB[(PostgreSQL)]
+  A --> R[(Redis)]
+  A --> Q[Workers e agendador]
+  Q --> I[SEFAZ, NFS-e, marketplaces, CEP/CNPJ]
+  A --> S[Armazenamento local persistente]
+```
 
-### Frontend
+## Comece pela documentação
 
-- Vue `^3.4`
-- Vue Router `^4.3`
-- Pinia `^2.1`
-- Vite `^5.2`
-- Axios, Tailwind CSS, Leaflet, Chart.js, ApexCharts e XLSX
+- [Índice da documentação](docs/README.md)
+- [Arquitetura e fluxos](docs/architecture.md)
+- [Instalação e ambiente local](docs/getting-started.md)
+- [Módulos e jornadas de negócio](docs/modules.md)
+- [Fiscal e NFS-e](docs/fiscal.md)
+- [Operação em produção](docs/operations.md)
+- [API e integrações](docs/api.md)
 
-## Documentação
-
-- [Índice completo](docs/README.md)
-- [Arquitetura](docs/01-Arquitetura/README.md)
-- [Instalação](docs/02-Instalacao/README.md)
-- [Banco de dados](docs/03-Banco-de-Dados/README.md)
-- [API](docs/04-API/README.md)
-- [Módulos](docs/05-Modulos/README.md)
-- [Fiscal](docs/06-Fiscal/README.md)
-- [Marketplace](docs/07-Marketplace/README.md)
-- [Logística e expedição](docs/08-Logistica/README.md)
-- [CRM](docs/09-CRM/README.md)
-- [PDV](docs/10-PDV/README.md)
-- [OS](docs/11-OS/README.md)
-- [Administração](docs/12-Administrador/README.md)
-- [Manual do usuário](docs/13-Usuario/README.md)
-- [Guia do desenvolvedor](docs/14-Desenvolvedor/README.md)
-- [Diagramas](docs/diagrams/README.md)
+> A pasta [`Documentação/`](Documentação/README.md) contém material histórico produzido durante as fases iniciais. Para implantação, operação e evolução, utilize os documentos em [`docs/`](docs/README.md).
 
 ## Execução local resumida
 
-```powershell
-# Backend
-cd D:\Skill\IntelbrasTech-ERP\backend
-composer install
-copy .env.example .env
-php artisan key:generate
-php artisan migrate
-php artisan serve
+Pré-requisitos: Docker Desktop/Engine, Docker Compose v2, Git e, para execução sem Docker, PHP 8.3+ e Node.js 20+.
 
-# Frontend (outro terminal)
-cd D:\Skill\IntelbrasTech-ERP\frontend
-npm install
-npm run dev
+```bash
+git clone git@github.com:StartGameCreator/IntelbrasTech-ERP.git
+cd IntelbrasTech-ERP
+cp backend/.env.example backend/.env
+
+# Ajuste backend/.env antes de continuar.
+cd docker
+docker compose --env-file ../backend/.env up -d --build
 ```
 
-Revise os arquivos `.env` antes de executar. Nunca publique certificados, tokens, senhas ou chaves no GitHub.
+Com a pilha de desenvolvimento em execução, o front-end fica em `http://localhost:5173`. Consulte o guia completo antes de configurar fiscal, e-mail, integrações ou dados reais.
+
+## Princípios de segurança
+
+- Nunca versione `.env`, certificados A1/PFX, CSC, senhas, tokens OAuth ou backups de banco.
+- Produção usa PostgreSQL e armazenamento persistente local; SQLite e driver fiscal simulado são somente opções de desenvolvimento.
+- Emissão fiscal real deve permanecer desabilitada até a validação de certificado, CSC, séries, numeração e ambiente da SEFAZ.
+- Faça backup testado antes de migrations, atualização de containers ou alteração de configuração fiscal.
 
 ## Licença
 
