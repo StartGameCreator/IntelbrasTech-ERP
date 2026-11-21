@@ -438,6 +438,12 @@ const router = createRouter({
           component: () => import('@/views/marketplace-tecnicos/MarketplaceTecnicosView.vue'),
           meta: { title: 'Marketplace de TÃ©cnicos' },
         },
+        {
+          path: 'gestao-equipe',
+          name: 'gestao-equipe',
+          component: () => import('@/views/gestao/GestaoEquipeView.vue'),
+          meta: { title: 'Gestão de Equipe' },
+        },
         // Ã¢â€â‚¬Ã¢â€â‚¬ AssistÃƒÂªncia TÃƒÂ©cnica Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         {
           path: 'os',
