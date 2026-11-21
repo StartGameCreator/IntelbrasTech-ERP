@@ -2,8 +2,9 @@
   <div class="platform-admin">
     <header class="page-header">
       <div>
-        <h1 class="page-title">Marketplace de Tecnicos</h1>
-        <p class="mt-1 text-xs text-[var(--text-muted)]">Gestao dos usuarios da IntelbrasTech Platform.</p>
+        <h1 v-if="!embedded" class="page-title">Marketplace de Tecnicos</h1>
+        <h2 v-else class="page-title">Cobertura e base tecnica</h2>
+        <p class="mt-1 text-xs text-[var(--text-muted)]">{{ embedded ? 'Localize, organize e administre os tecnicos em um unico lugar.' : 'Gestao dos usuarios da IntelbrasTech Platform.' }}</p>
       </div>
       <div class="toolbar">
         <RouterLink to="/cadastre-se" target="_blank" class="btn-secondary">Abrir cadastro</RouterLink>
@@ -249,6 +250,10 @@ import {
   UserCircleIcon,
   XMarkIcon,
 } from '@heroicons/vue/24/outline'
+
+defineProps({
+  embedded: { type: Boolean, default: false },
+})
 
 const toast = useToast()
 const resumo = ref({})

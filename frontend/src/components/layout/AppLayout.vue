@@ -586,7 +586,6 @@ const menuGrupos = computed(() => [
       { to: '/tecnico/operacao', label: 'Minha Operação Técnica', icon: MapPinIcon, name: 'tecnico.operacao' },
       { to: '/os', label: 'AssistÃªncia TÃ©cnica', icon: WrenchScrewdriverIcon, name: 'os' },
       { to: '/gestao-equipe', label: 'Gestão de Equipe', icon: UserGroupIcon, name: 'gestao-equipe' },
-      { to: '/marketplace-tecnicos', label: 'Marketplace de TÃ©cnicos', icon: UserGroupIcon, name: 'marketplace-tecnicos' },
       { to: '/configuracoes/empresa', label: 'Empresa', icon: BuildingStorefrontIcon, name: 'configuracoes.empresa' },
       { to: '/marketplaces', label: 'Marketplaces', icon: BuildingStorefrontIcon, name: 'marketplaces' },
       { to: '/expedicao', label: 'ExpediÃ§Ã£o', icon: TruckIcon, name: 'expedicao' },

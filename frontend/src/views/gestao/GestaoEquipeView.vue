@@ -20,6 +20,7 @@
       <div class="tabs" role="tablist" aria-label="Gestão de equipe">
         <button :class="{ active: aba === 'demandas' }" role="tab" @click="aba = 'demandas'">Demandas técnicas <span>{{ demandasFiltradas.length }}</span></button>
         <button :class="{ active: aba === 'tecnicos' }" role="tab" @click="aba = 'tecnicos'">Técnicos <span>{{ equipeFiltrada.length }}</span></button>
+        <button :class="{ active: aba === 'cobertura' }" role="tab" @click="aba = 'cobertura'">Mapa e base técnica</button>
         <button :class="{ active: aba === 'vendedores' }" role="tab" @click="aba = 'vendedores'">Aprovar vendedores <span>{{ vendedoresFiltrados.length }}</span></button>
       </div>
       <input v-model.trim="busca" class="input" type="search" placeholder="Buscar técnico, vendedor ou demanda">
@@ -58,6 +59,8 @@
       </div>
     </section>
 
+    <TecnicosMarketplacePanel v-else-if="aba === 'cobertura'" embedded />
+
     <section v-else class="card painel">
       <div class="section-head"><div><h2>Aprovação de vendedores</h2><p>Depois do aceite, o vendedor passa a trabalhar exclusivamente no CRM e deixa esta fila.</p></div></div>
       <div v-if="carregando" class="empty">Carregando solicitações…</div>
@@ -75,14 +78,17 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import api from '@/services/api'
+import TecnicosMarketplacePanel from '@/views/marketplace-tecnicos/MarketplaceTecnicosView.vue'
 
 const toast = useToast()
+const route = useRoute()
 const carregando = ref(false)
 const salvando = ref('')
 const salvandoVendedor = ref(null)
-const aba = ref('demandas')
+const aba = ref(route.query.aba === 'cobertura' ? 'cobertura' : 'demandas')
 const busca = ref('')
 const resumo = ref({})
 const equipe = ref([])

@@ -435,8 +435,8 @@ const router = createRouter({
         {
           path: 'marketplace-tecnicos',
           name: 'marketplace-tecnicos',
-          component: () => import('@/views/marketplace-tecnicos/MarketplaceTecnicosView.vue'),
-          meta: { title: 'Marketplace de TÃ©cnicos' },
+          redirect: { name: 'gestao-equipe', query: { aba: 'cobertura' } },
+          meta: { title: 'Gestão de Equipe' },
         },
         {
           path: 'gestao-equipe',
