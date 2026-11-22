@@ -95,7 +95,8 @@ class PortalController extends Controller
             ],
         ], 200, [
             'Content-Type' => 'application/manifest+json; charset=utf-8',
-            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Cache-Control' => 'public, max-age=300, stale-while-revalidate=86400',
+            'ETag' => '"' . $version . '-manifest"',
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
@@ -112,7 +113,7 @@ class PortalController extends Controller
             'Content-Disposition' => 'inline; filename="intelbrastech-pwa-' . $size . '.png"',
             'Cache-Control' => $request->filled('v')
                 ? 'public, max-age=31536000, immutable'
-                : 'no-cache, no-store, must-revalidate',
+                : 'public, max-age=300, stale-while-revalidate=86400',
             'ETag' => '"' . $version . '-' . $size . '-' . ($maskable ? 'maskable' : 'any') . '"',
         ]);
     }

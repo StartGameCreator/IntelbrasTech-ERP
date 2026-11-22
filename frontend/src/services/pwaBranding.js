@@ -8,6 +8,8 @@ function ensureLink(rel, selector = `link[rel="${rel}"]`) {
   return link
 }
 
+let sincronizacaoEmAndamento = null
+
 export function aplicarIdentidadePwa(pwa = {}) {
   if (pwa.manifest_url) {
     ensureLink('manifest').href = pwa.manifest_url
@@ -35,19 +37,29 @@ export function aplicarIdentidadePwa(pwa = {}) {
 }
 
 export async function sincronizarIdentidadePwa() {
+  if (sincronizacaoEmAndamento) return sincronizacaoEmAndamento
+
   const apiBase = String(import.meta.env.VITE_API_URL || '/api/v1').replace(/\/$/, '')
-  const response = await fetch(`${apiBase}/portal/configuracao?pwa_refresh=${Date.now()}`, {
-    cache: 'no-store',
-    headers: { Accept: 'application/json' },
-  })
-  if (!response.ok) throw new Error('Identidade PWA indisponível')
-  const data = await response.json()
+  sincronizacaoEmAndamento = (async () => {
+    const response = await fetch(`${apiBase}/portal/configuracao?pwa_refresh=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    })
+    if (!response.ok) throw new Error('Identidade PWA indisponível')
+    const data = await response.json()
 
-  aplicarIdentidadePwa(data.pwa || {})
+    aplicarIdentidadePwa(data.pwa || {})
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistration().then(registration => registration?.update()).catch(() => {})
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(registration => registration?.update()).catch(() => {})
+    }
+
+    return data.pwa || {}
+  })()
+
+  try {
+    return await sincronizacaoEmAndamento
+  } finally {
+    sincronizacaoEmAndamento = null
   }
-
-  return data.pwa || {}
 }

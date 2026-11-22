@@ -18,6 +18,7 @@ COPY backend/composer.json backend/composer.lock ./
 RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --no-scripts
 
 COPY backend/ ./
+COPY docker/php/php-fpm.prod.conf /usr/local/etc/php-fpm.d/zz-intelbrastech.conf
 RUN composer dump-autoload --no-dev --optimize --no-interaction \
     && mkdir -p storage/app/public storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
     && ln -sfn ../storage/app/public public/storage \

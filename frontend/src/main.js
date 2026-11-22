@@ -28,7 +28,21 @@ document.documentElement.classList.remove('light')
 
 app.mount('#app')
 
-sincronizarIdentidadePwa().catch(() => {})
+function agendarSincronizacaoPwa() {
+  const sincronizar = () => {
+    if (document.documentElement.dataset.pwaLogoVersion) return
+    sincronizarIdentidadePwa().catch(() => {})
+  }
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(sincronizar, { timeout: 3000 })
+  } else {
+    window.setTimeout(sincronizar, 750)
+  }
+}
+
+if (document.readyState === 'complete') agendarSincronizacaoPwa()
+else window.addEventListener('load', agendarSincronizacaoPwa, { once: true })
+
 window.addEventListener('pwa-branding-refresh', () => {
   sincronizarIdentidadePwa().catch(() => {})
 })

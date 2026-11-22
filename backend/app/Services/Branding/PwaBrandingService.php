@@ -3,6 +3,7 @@
 namespace App\Services\Branding;
 
 use App\Models\Empresa;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
@@ -29,6 +30,17 @@ class PwaBrandingService
             throw new RuntimeException('Tamanho de ícone PWA não suportado.');
         }
 
+        $version = $this->version($empresa);
+        $variant = $maskable ? 'maskable' : 'any';
+
+        return Cache::rememberForever(
+            "pwa-icon:{$version}:{$size}:{$variant}",
+            fn (): string => $this->renderIconWithoutCache($empresa, $size, $maskable),
+        );
+    }
+
+    private function renderIconWithoutCache(Empresa $empresa, int $size, bool $maskable): string
+    {
         $canvas = imagecreatetruecolor($size, $size);
         if ($canvas === false) {
             throw new RuntimeException('Não foi possível criar o ícone PWA.');
