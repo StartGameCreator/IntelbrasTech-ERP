@@ -75,6 +75,8 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('portal')->group(function () {
         Route::get('configuracao', [PortalController::class, 'configuracao']);
+        Route::get('pwa/manifest.webmanifest', [PortalController::class, 'pwaManifest']);
+        Route::get('pwa/icon/{size}.png', [PortalController::class, 'pwaIcon'])->whereNumber('size');
         Route::get('compartilhamento/imagem', [PortalController::class, 'imagemCompartilhamento']);
         Route::get('catalogo', [PortalController::class, 'catalogo']);
         Route::get('carrossel', [PortalCarouselController::class, 'publico']);

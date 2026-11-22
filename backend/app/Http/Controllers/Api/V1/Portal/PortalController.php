@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Portal;
 
 use App\Http\Controllers\Controller;
 use App\Models\{Empresa, Lead, Pipeline, PipelineEtapa, PortalSolicitacao, Produto};
+use App\Services\Branding\PwaBrandingService;
 use App\Services\Crm\CrmLeadIntakeService;
 use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\Support\Facades\DB;
@@ -12,10 +13,11 @@ use Illuminate\Support\Str;
 
 class PortalController extends Controller
 {
-    public function configuracao(): JsonResponse
+    public function configuracao(PwaBrandingService $branding): JsonResponse
     {
         $empresa = $this->empresa();
         $site = DB::table('portal_site_settings')->where('empresa_id', $empresa->id)->first();
+        $pwaVersion = $branding->version($empresa);
 
         return response()->json([
             'empresa' => [
@@ -57,7 +59,79 @@ class PortalController extends Controller
                 'favicon_url' => $site?->favicon_url,
                 'indexar_site' => (bool) ($site?->indexar_site ?? true),
             ],
+            'pwa' => $this->pwaConfig($pwaVersion),
         ]);
+    }
+
+    public function pwaManifest(PwaBrandingService $branding): JsonResponse
+    {
+        $empresa = $this->empresa();
+        $version = $branding->version($empresa);
+        $name = trim((string) ($empresa->nome_fantasia ?: $empresa->razao_social)) ?: 'IntelbrasTech';
+
+        return response()->json([
+            'id' => '/',
+            'name' => $name . ' - Tecnologia e Energia',
+            'short_name' => $name,
+            'description' => 'Portal, atendimento e ERP IntelbrasTech em um aplicativo instalável.',
+            'lang' => 'pt-BR',
+            'start_url' => '/?source=pwa',
+            'scope' => '/',
+            'display' => 'standalone',
+            'display_override' => ['window-controls-overlay', 'standalone', 'minimal-ui'],
+            'orientation' => 'any',
+            'background_color' => '#080a12',
+            'theme_color' => '#00a335',
+            'categories' => ['business', 'productivity', 'utilities'],
+            'icons' => [
+                ['src' => $this->pwaIconUrl(192, 'any', $version), 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any'],
+                ['src' => $this->pwaIconUrl(512, 'any', $version), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any'],
+                ['src' => $this->pwaIconUrl(512, 'maskable', $version), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
+            ],
+            'shortcuts' => [
+                ['name' => 'Portal IntelbrasTech', 'short_name' => 'Portal', 'url' => '/'],
+                ['name' => 'Entrar no ERP', 'short_name' => 'ERP', 'url' => '/login'],
+                ['name' => 'Solicitar técnico', 'short_name' => 'Técnico', 'url' => '/solicite-um-tecnico'],
+            ],
+        ], 200, [
+            'Content-Type' => 'application/manifest+json; charset=utf-8',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+
+    public function pwaIcon(Request $request, int $size, PwaBrandingService $branding)
+    {
+        abort_unless(in_array($size, [32, 180, 192, 512], true), 404);
+
+        $empresa = $this->empresa();
+        $maskable = $request->query('variant') === 'maskable';
+        $version = $branding->version($empresa);
+
+        return response($branding->renderIcon($empresa, $size, $maskable), 200, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => 'inline; filename="intelbrastech-pwa-' . $size . '.png"',
+            'Cache-Control' => $request->filled('v')
+                ? 'public, max-age=31536000, immutable'
+                : 'no-cache, no-store, must-revalidate',
+            'ETag' => '"' . $version . '-' . $size . '-' . ($maskable ? 'maskable' : 'any') . '"',
+        ]);
+    }
+
+    private function pwaConfig(string $version): array
+    {
+        return [
+            'logo_version' => $version,
+            'manifest_url' => '/api/v1/portal/pwa/manifest.webmanifest?v=' . $version,
+            'apple_touch_icon_url' => $this->pwaIconUrl(180, 'any', $version),
+            'icon_32_url' => $this->pwaIconUrl(32, 'any', $version),
+            'icon_192_url' => $this->pwaIconUrl(192, 'any', $version),
+            'icon_512_url' => $this->pwaIconUrl(512, 'any', $version),
+        ];
+    }
+
+    private function pwaIconUrl(int $size, string $variant, string $version): string
+    {
+        return '/api/v1/portal/pwa/icon/' . $size . '.png?variant=' . $variant . '&v=' . $version;
     }
 
     public function catalogo(): JsonResponse

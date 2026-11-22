@@ -59,6 +59,7 @@ import { computed, onMounted, provide, reactive, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { ChevronDown, Copy, Menu, X } from 'lucide-vue-next'
 import { carregarPortal } from '@/services/portal'
+import { aplicarIdentidadePwa } from '@/services/pwaBranding'
 import { solutions } from '@/data/portalContent'
 
 const menuOpen = ref(false)
@@ -150,7 +151,7 @@ function definirConsentimento(valor) {
   if (valor) carregarRastreadores(portal.site || {})
 }
 onMounted(async () => {
-  try { Object.assign(portal, await carregarPortal()); aplicarSite(portal.site || {}); if(consentimento.value===true)carregarRastreadores(portal.site || {}) } catch { /* conteúdo público mantém fallback */ }
+  try { Object.assign(portal, await carregarPortal()); aplicarSite(portal.site || {}); aplicarIdentidadePwa(portal.pwa || {}); if(consentimento.value===true)carregarRastreadores(portal.site || {}) } catch { /* conteúdo público mantém fallback */ }
 })
 watch(()=>route.fullPath,()=>{if(consentimento.value===true)registrarPagina()})
 </script>

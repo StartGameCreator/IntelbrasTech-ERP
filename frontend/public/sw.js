@@ -1,4 +1,4 @@
-const VERSION='intelbrastech-pwa-v2',STATIC_CACHE=`${VERSION}-static`,PAGE_CACHE=`${VERSION}-pages`,APP_SHELL=['/','/offline.html','/manifest.webmanifest','/favicon-32x32.png?v=20261121-6','/favicon-192x192.png?v=20261121-6','/favicon-512x512.png?v=20261121-6','/apple-touch-icon.png?v=20261121-6'];
+const VERSION='intelbrastech-pwa-v3',STATIC_CACHE=`${VERSION}-static`,PAGE_CACHE=`${VERSION}-pages`,APP_SHELL=['/','/offline.html'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(STATIC_CACHE).then(cache=>cache.addAll(APP_SHELL))));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>![STATIC_CACHE,PAGE_CACHE].includes(key)).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('message',event=>{if(event.data==='SKIP_WAITING')self.skipWaiting()});

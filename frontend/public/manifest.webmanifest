@@ -14,13 +14,13 @@
   "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
-      "src": "/favicon-192x192.png?v=20261121-6",
+      "src": "/api/v1/portal/pwa/icon/192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/favicon-512x512.png?v=20261121-6",
+      "src": "/api/v1/portal/pwa/icon/512.png?variant=maskable",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

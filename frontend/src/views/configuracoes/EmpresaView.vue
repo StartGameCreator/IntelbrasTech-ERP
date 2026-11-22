@@ -403,6 +403,7 @@ async function enviarLogo(event) {
 
     logoCacheKey.value = Date.now()
     logoFalhou.value = false
+    window.dispatchEvent(new CustomEvent('pwa-branding-refresh'))
     toast.success(data.message)
   } catch (e) {
     form.logo_url = previewAnterior
@@ -423,6 +424,7 @@ async function removerLogo() {
     form.logo_url = null
     logoFalhou.value = false
     logoCacheKey.value = Date.now()
+    window.dispatchEvent(new CustomEvent('pwa-branding-refresh'))
     toast.success('Logo removida.')
   } catch (e) {
     toast.error(e.response?.data?.message || 'Falha ao remover a logo.')

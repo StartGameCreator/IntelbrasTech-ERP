@@ -6,6 +6,7 @@ import VueApexCharts from 'vue3-apexcharts'
 
 import App    from './App.vue'
 import router from './router'
+import { sincronizarIdentidadePwa } from './services/pwaBranding'
 import './assets/main.css'
 
 const app = createApp(App)
@@ -26,6 +27,11 @@ app.use(VueApexCharts)
 document.documentElement.classList.remove('light')
 
 app.mount('#app')
+
+sincronizarIdentidadePwa().catch(() => {})
+window.addEventListener('pwa-branding-refresh', () => {
+  sincronizarIdentidadePwa().catch(() => {})
+})
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
