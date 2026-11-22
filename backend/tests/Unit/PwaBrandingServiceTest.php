@@ -40,8 +40,10 @@ class PwaBrandingServiceTest extends TestCase
     private function png(int $width, int $height, array $rgb): string
     {
         $image = imagecreatetruecolor($width, $height);
+        $white = imagecolorallocate($image, 255, 255, 255);
         $color = imagecolorallocate($image, ...$rgb);
-        imagefill($image, 0, 0, $color);
+        imagefill($image, 0, 0, $white);
+        imagefilledrectangle($image, 12, 12, $width - 13, $height - 13, $color);
         ob_start();
         imagepng($image);
         $contents = ob_get_clean();

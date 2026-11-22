@@ -8,14 +8,14 @@ use RuntimeException;
 
 class PwaBrandingService
 {
-    private const RENDER_VERSION = 'full-bleed-v2';
+    private const RENDER_VERSION = 'full-bleed-v3-trim';
 
     public function version(Empresa $empresa): string
     {
         $path = $this->logoPath($empresa);
 
         if ($path === null) {
-            return 'fallback-full-bleed-v2';
+            return 'fallback-full-bleed-v3-trim';
         }
 
         $logoHash = hash_file('sha256', $path) ?: 'fallback';
@@ -38,16 +38,17 @@ class PwaBrandingService
         if ($source !== null) {
             $sourceWidth = imagesx($source);
             $sourceHeight = imagesy($source);
-            [$red, $green, $blue] = $this->sourceBackgroundColor($source, $sourceWidth, $sourceHeight);
+            [$sourceX, $sourceY, $contentWidth, $contentHeight] = $this->contentBounds($source, $sourceWidth, $sourceHeight);
+            [$red, $green, $blue] = $this->sourceBackgroundColor($source, $sourceX, $sourceY);
             $background = imagecolorallocate($canvas, $red, $green, $blue);
             imagefill($canvas, 0, 0, $background);
 
             // O ícone comum ocupa toda a área. No maskable, o respiro usa a
             // própria cor da logo para evitar bordas brancas após o recorte.
             $safeArea = $maskable ? 0.78 : 1.0;
-            $scale = min(($size * $safeArea) / $sourceWidth, ($size * $safeArea) / $sourceHeight);
-            $targetWidth = max(1, (int) round($sourceWidth * $scale));
-            $targetHeight = max(1, (int) round($sourceHeight * $scale));
+            $scale = min(($size * $safeArea) / $contentWidth, ($size * $safeArea) / $contentHeight);
+            $targetWidth = max(1, (int) round($contentWidth * $scale));
+            $targetHeight = max(1, (int) round($contentHeight * $scale));
             $targetX = (int) floor(($size - $targetWidth) / 2);
             $targetY = (int) floor(($size - $targetHeight) / 2);
 
@@ -57,12 +58,12 @@ class PwaBrandingService
                 $source,
                 $targetX,
                 $targetY,
-                0,
-                0,
+                $sourceX,
+                $sourceY,
                 $targetWidth,
                 $targetHeight,
-                $sourceWidth,
-                $sourceHeight,
+                $contentWidth,
+                $contentHeight,
             );
             imagedestroy($source);
         } else {
@@ -113,10 +114,46 @@ class PwaBrandingService
         return $image === false ? null : $image;
     }
 
-    private function sourceBackgroundColor(mixed $source, int $width, int $height): array
+    private function contentBounds(mixed $source, int $width, int $height): array
     {
-        $sampleX = min(1, max(0, $width - 1));
-        $sampleY = min(1, max(0, $height - 1));
+        $corner = imagecolorsforindex($source, imagecolorat($source, 0, 0));
+        $trimTransparent = ($corner['alpha'] ?? 0) >= 100;
+        $trimWhite = $corner['red'] >= 245 && $corner['green'] >= 245 && $corner['blue'] >= 245;
+
+        if (! $trimTransparent && ! $trimWhite) {
+            return [0, 0, $width, $height];
+        }
+
+        $minX = $width;
+        $minY = $height;
+        $maxX = -1;
+        $maxY = -1;
+
+        for ($y = 0; $y < $height; $y++) {
+            for ($x = 0; $x < $width; $x++) {
+                $pixel = imagecolorsforindex($source, imagecolorat($source, $x, $y));
+                $transparent = ($pixel['alpha'] ?? 0) >= 100;
+                $nearWhite = $pixel['red'] >= 245 && $pixel['green'] >= 245 && $pixel['blue'] >= 245;
+                if (($trimTransparent && $transparent) || ($trimWhite && $nearWhite)) {
+                    continue;
+                }
+
+                $minX = min($minX, $x);
+                $minY = min($minY, $y);
+                $maxX = max($maxX, $x);
+                $maxY = max($maxY, $y);
+            }
+        }
+
+        if ($maxX < $minX || $maxY < $minY) {
+            return [0, 0, $width, $height];
+        }
+
+        return [$minX, $minY, $maxX - $minX + 1, $maxY - $minY + 1];
+    }
+
+    private function sourceBackgroundColor(mixed $source, int $sampleX, int $sampleY): array
+    {
         $color = imagecolorsforindex($source, imagecolorat($source, $sampleX, $sampleY));
 
         // Logos transparentes recebem o verde institucional em vez do branco.
