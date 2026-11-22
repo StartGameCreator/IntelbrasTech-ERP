@@ -28,6 +28,8 @@ class PwaBrandingServiceTest extends TestCase
         $this->assertNotFalse($rendered);
         $this->assertSame(192, imagesx($rendered));
         $this->assertSame(192, imagesy($rendered));
+        $corner = imagecolorsforindex($rendered, imagecolorat($rendered, 0, 0));
+        $this->assertSame([0, 163, 53], [$corner['red'], $corner['green'], $corner['blue']]);
 
         Storage::disk('public')->put($path, $this->png(240, 120, [0, 120, 40]));
         $this->assertNotSame($firstVersion, $service->version($empresa));

@@ -8,15 +8,19 @@ use RuntimeException;
 
 class PwaBrandingService
 {
+    private const RENDER_VERSION = 'full-bleed-v2';
+
     public function version(Empresa $empresa): string
     {
         $path = $this->logoPath($empresa);
 
         if ($path === null) {
-            return 'fallback-v1';
+            return 'fallback-full-bleed-v2';
         }
 
-        return substr(hash_file('sha256', $path) ?: 'fallback-v1', 0, 20);
+        $logoHash = hash_file('sha256', $path) ?: 'fallback';
+
+        return substr(hash('sha256', self::RENDER_VERSION . '|' . $logoHash), 0, 20);
     }
 
     public function renderIcon(Empresa $empresa, int $size, bool $maskable = false): string
@@ -30,14 +34,17 @@ class PwaBrandingService
             throw new RuntimeException('Não foi possível criar o ícone PWA.');
         }
 
-        $white = imagecolorallocate($canvas, 255, 255, 255);
-        imagefill($canvas, 0, 0, $white);
-
         $source = $this->loadSource($empresa);
         if ($source !== null) {
             $sourceWidth = imagesx($source);
             $sourceHeight = imagesy($source);
-            $safeArea = $maskable ? 0.66 : 0.88;
+            [$red, $green, $blue] = $this->sourceBackgroundColor($source, $sourceWidth, $sourceHeight);
+            $background = imagecolorallocate($canvas, $red, $green, $blue);
+            imagefill($canvas, 0, 0, $background);
+
+            // O ícone comum ocupa toda a área. No maskable, o respiro usa a
+            // própria cor da logo para evitar bordas brancas após o recorte.
+            $safeArea = $maskable ? 0.78 : 1.0;
             $scale = min(($size * $safeArea) / $sourceWidth, ($size * $safeArea) / $sourceHeight);
             $targetWidth = max(1, (int) round($sourceWidth * $scale));
             $targetHeight = max(1, (int) round($sourceHeight * $scale));
@@ -104,6 +111,20 @@ class PwaBrandingService
         $image = @imagecreatefromstring($contents);
 
         return $image === false ? null : $image;
+    }
+
+    private function sourceBackgroundColor(mixed $source, int $width, int $height): array
+    {
+        $sampleX = min(1, max(0, $width - 1));
+        $sampleY = min(1, max(0, $height - 1));
+        $color = imagecolorsforindex($source, imagecolorat($source, $sampleX, $sampleY));
+
+        // Logos transparentes recebem o verde institucional em vez do branco.
+        if (($color['alpha'] ?? 0) >= 100) {
+            return [0, 163, 53];
+        }
+
+        return [(int) $color['red'], (int) $color['green'], (int) $color['blue']];
     }
 
     private function drawFallback(mixed $canvas, int $size): void
