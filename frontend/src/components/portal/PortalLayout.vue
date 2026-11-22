@@ -35,7 +35,9 @@
 
     <main><RouterView /></main>
 
-    <a v-if="whatsappUrl" class="portal-whatsapp" :href="whatsappUrl" target="_blank" rel="noopener" aria-label="Falar pelo WhatsApp"><MessageCircle /></a>
+    <a v-if="whatsappUrl" class="portal-whatsapp" :href="whatsappUrl" target="_blank" rel="noopener" aria-label="Falar pelo WhatsApp">
+      <img src="/social/whatsapp-atendimento-botao.png" alt="" aria-hidden="true" />
+    </a>
     <aside v-if="consentimento === null && possuiRastreadores" class="portal-cookie" aria-label="Preferências de cookies">
       <div><b>Privacidade e métricas</b><p>Usamos cookies de análise para entender o uso do site e melhorar sua experiência. Você pode aceitar ou continuar apenas com os cookies essenciais.</p><RouterLink to="/privacidade">Saiba mais</RouterLink></div>
       <div class="portal-cookie-actions"><button class="secondary" @click="definirConsentimento(false)">Somente essenciais</button><button @click="definirConsentimento(true)">Aceitar análise</button></div>
@@ -55,7 +57,7 @@
 <script setup>
 import { computed, onMounted, provide, reactive, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import { ChevronDown, Copy, Menu, MessageCircle, X } from 'lucide-vue-next'
+import { ChevronDown, Copy, Menu, X } from 'lucide-vue-next'
 import { carregarPortal } from '@/services/portal'
 import { solutions } from '@/data/portalContent'
 
