@@ -6,14 +6,14 @@ import { fileURLToPath } from 'node:url'
 const scriptDirectory = dirname(fileURLToPath(import.meta.url))
 const imagePath = resolve(
   scriptDirectory,
-  '../public/social/intelbrastech-atendimento-20261122.jpg',
+  '../public/social/whatsapp-atendimento-20261122.png',
 )
 const portalLayoutPath = resolve(
   scriptDirectory,
   '../src/components/portal/PortalLayout.vue',
 )
 
-const expectedImageHash = '61c850b01ea64d8b61443fc5b76bde694430058ebf060acd23a7e29b56059c7f'
+const expectedImageHash = '6d9378f335b0ff2068b1392341e788884917940ffc4e11511831c84e0d62acc9'
 const officialServiceUrl = "const linkAtendimento = 'https://intelbrastech.com.br/atendimento'"
 
 const imageHash = createHash('sha256')
@@ -36,4 +36,3 @@ if (!portalLayout.includes(officialServiceUrl)) {
 }
 
 console.log('Prévia social protegida de /atendimento validada.')
-
