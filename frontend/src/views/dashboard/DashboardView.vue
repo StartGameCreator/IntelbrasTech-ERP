@@ -22,6 +22,31 @@
       </div>
     </div>
 
+    <div class="dashboard-mobile-tabs" role="tablist" aria-label="Seções do dashboard">
+      <button
+        type="button"
+        role="tab"
+        :aria-selected="abaMobile === 'mapa'"
+        :class="['dashboard-mobile-tab', { active: abaMobile === 'mapa' }]"
+        @click="selecionarAbaMobile('mapa')"
+      >
+        <MapIcon class="w-4 h-4" />
+        Mapa e origens
+      </button>
+      <button
+        type="button"
+        role="tab"
+        :aria-selected="abaMobile === 'indicadores'"
+        :class="['dashboard-mobile-tab', { active: abaMobile === 'indicadores' }]"
+        @click="selecionarAbaMobile('indicadores')"
+      >
+        <ChartBarIcon class="w-4 h-4" />
+        Indicadores
+      </button>
+    </div>
+
+    <div :class="['dashboard-indicators', { 'is-mobile-hidden': abaMobile !== 'indicadores' }]">
+
     <!-- ── Alertas ──────────────────────────────────────────── -->
     <div v-if="alertas.length" class="grid gap-2">
       <div
@@ -251,9 +276,10 @@
       </div>
 
     </div>
+    </div>
 
     <!-- ── Mapa de origem das vendas ─────────────────────────── -->
-    <div class="card p-5 dashboard-map-section">
+    <div :class="['card p-5 dashboard-map-section', { 'is-mobile-hidden': abaMobile !== 'mapa' }]">
       <div class="mb-4 dashboard-map-title">
         <div>
           <h3 class="text-sm font-semibold text-[var(--text-primary)]">Origem geográfica das vendas</h3>
@@ -307,7 +333,7 @@
       </div>
     </div>
 
-    <div class="dashboard-map-ranking">
+    <div :class="['dashboard-map-ranking', { 'is-mobile-hidden': abaMobile !== 'mapa' }]">
           <div class="flex items-center justify-between mb-3">
             <div>
               <h4 class="text-xs font-semibold">Principais origens</h4>
@@ -404,12 +430,25 @@ const loadingMapa = ref(false)
 const sincronizandoMapa = ref(false)
 const mapError = ref('')
 const mapaMobileVisivel = ref(true)
+const abaMobile = ref('mapa')
 const mapaPontos = ref([])
 const mapaResumo = ref({ clientes: 0, pedidos: 0, valor: 0, estados: 0 })
 const mapaPagina = ref(1)
 const mapaTemMais = ref(false)
 const mapaTotalResultados = ref(0)
 const carregandoMaisMapa = ref(false)
+
+async function selecionarAbaMobile(aba) {
+  abaMobile.value = aba
+  await nextTick()
+
+  if (aba === 'mapa') {
+    salesMap?.invalidateSize(true)
+    return
+  }
+
+  window.dispatchEvent(new Event('resize'))
+}
 
 async function mostrarMapaMobile() {
   mapaMobileVisivel.value = true
@@ -845,6 +884,14 @@ onBeforeUnmount(() => destruirMapaVendas())
   background: #171724 !important;
   color: #f8fafc !important;
 }
+.dashboard-indicators {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.dashboard-mobile-tabs {
+  display: none;
+}
 @media (max-width: 1100px) {
   .dashboard-map-grid {
     grid-template-columns: 1fr;
@@ -857,20 +904,22 @@ onBeforeUnmount(() => destruirMapaVendas())
 @media (max-width: 767px) {
   .dashboard-page {
     display: flex;
+    height: 100%;
+    max-height: 100%;
     min-height: 0;
     flex-direction: column;
     gap: 8px;
+    overflow: hidden;
   }
   .dashboard-page > * {
-    order: 7;
     margin-top: 0 !important;
   }
   .dashboard-page > .dashboard-page-header {
-    position: sticky;
-    top: -14px;
-    z-index: 35;
+    position: relative;
+    z-index: 3;
     order: 0;
     min-height: 44px;
+    flex: 0 0 auto;
     margin-bottom: 0 !important;
     padding: 5px 0 7px;
     background: var(--bg-base);
@@ -899,43 +948,71 @@ onBeforeUnmount(() => destruirMapaVendas())
     min-height: 32px;
     padding: 5px;
   }
+  .dashboard-mobile-tabs {
+    display: grid;
+    z-index: 3;
+    order: 1;
+    min-height: 36px;
+    flex: 0 0 36px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 3px;
+    background: var(--bg-surface);
+  }
+  .dashboard-mobile-tab {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 7px;
+    padding: 5px 8px;
+    font-size: .65rem;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+  .dashboard-mobile-tab.active {
+    background: var(--brand-600, #4f46e5);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, .28);
+  }
+  .dashboard-indicators {
+    order: 2;
+    min-height: 0;
+    flex: 1 1 auto;
+    gap: 8px;
+    overflow-y: auto;
+    padding-right: 2px;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .is-mobile-hidden {
+    display: none !important;
+  }
   .dashboard-page > .dashboard-map-section {
     display: flex;
-    position: sticky;
-    top: 30px;
-    z-index: 34;
-    order: 1;
+    position: relative;
+    z-index: 2;
+    order: 2;
     height: auto;
     min-height: 0;
-    max-height: calc(100dvh - 158px);
+    max-height: none;
+    flex: 0 0 auto;
     flex-direction: column;
     overflow: hidden;
     padding: 8px;
     background: var(--bg-surface);
     box-shadow: 0 10px 24px rgba(0, 0, 0, .32);
   }
-  .dashboard-page > .dashboard-kpi-row {
-    order: 2;
-  }
-  .dashboard-page > .dashboard-primary-chart-row {
-    display: contents;
-  }
-  .dashboard-sales-chart {
-    order: 3;
-  }
   .dashboard-page > .dashboard-map-ranking {
-    order: 4;
-  }
-  .dashboard-top-products {
-    order: 5;
-  }
-  .dashboard-page > .dashboard-secondary-row {
-    order: 6;
+    order: 3;
   }
   .dashboard-page > .dashboard-map-attribution {
     display: none;
   }
-  .dashboard-page > .dashboard-kpi-row {
+  .dashboard-indicators > .dashboard-kpi-row {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 4px;
   }
@@ -1015,14 +1092,14 @@ onBeforeUnmount(() => destruirMapaVendas())
     z-index: 1;
     order: initial;
     width: 100%;
-    height: clamp(160px, 22dvh, 190px);
-    min-height: 160px;
-    flex: 0 0 clamp(160px, 22dvh, 190px);
+    height: clamp(145px, 20dvh, 170px);
+    min-height: 145px;
+    flex: 0 0 clamp(145px, 20dvh, 170px);
     border-radius: 10px;
     box-shadow: 0 7px 20px rgba(0, 0, 0, .3);
   }
   .dashboard-sales-map {
-    min-height: 160px;
+    min-height: 145px;
   }
   .dashboard-map-close {
     position: absolute;
@@ -1092,10 +1169,10 @@ onBeforeUnmount(() => destruirMapaVendas())
   }
   .dashboard-map-ranking {
     display: flex;
-    height: auto;
+    height: 0;
     min-height: 0;
-    max-height: min(62dvh, 520px);
-    flex: 0 0 auto;
+    max-height: none;
+    flex: 1 1 auto;
     flex-direction: column;
     overflow: hidden;
     padding: 7px;
@@ -1106,9 +1183,9 @@ onBeforeUnmount(() => destruirMapaVendas())
   }
   .dashboard-ranking-list {
     min-height: 0;
-    max-height: min(52dvh, 440px);
-    height: auto;
-    flex: 0 1 auto;
+    max-height: none;
+    height: 0;
+    flex: 1 1 auto;
     overflow-y: auto;
     padding-right: 0;
     overscroll-behavior-y: contain;
