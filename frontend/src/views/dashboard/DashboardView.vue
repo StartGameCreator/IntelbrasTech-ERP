@@ -41,7 +41,7 @@
     </div>
 
     <!-- ── KPIs Principais ──────────────────────────────────── -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="dashboard-kpi-row grid grid-cols-2 lg:grid-cols-4 gap-4">
       <StatCard
         label="Vendas Hoje"
         :value="fmt.moeda(dash?.vendas?.hoje_valor)"
@@ -77,7 +77,7 @@
     </div>
 
     <!-- ── Segunda linha de KPIs ────────────────────────────── -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="dashboard-kpi-row grid grid-cols-2 lg:grid-cols-4 gap-4">
       <StatCard
         label="Clientes"
         :value="fmt.numero(dash?.clientes?.total)"
@@ -289,7 +289,14 @@
           <button v-if="!mapaMobileVisivel" class="btn-secondary btn-sm dashboard-map-show" @click="mostrarMapaMobile">
             <MapIcon class="w-4 h-4"/> Exibir mapa
           </button>
-          <button class="btn-secondary btn-sm" :disabled="sincronizandoMapa" @click="sincronizarCeps">
+          <button
+            class="btn-secondary btn-sm dashboard-map-refresh"
+            type="button"
+            title="Atualizar CEPs"
+            aria-label="Atualizar CEPs"
+            :disabled="sincronizandoMapa"
+            @click="sincronizarCeps"
+          >
             <MapPinIcon class="w-4 h-4"/>
             {{ sincronizandoMapa ? 'Localizando...' : 'Atualizar CEPs' }}
           </button>
@@ -882,6 +889,47 @@ onBeforeUnmount(() => destruirMapaVendas())
     overflow: hidden;
     padding: 8px;
   }
+  .dashboard-page > .dashboard-kpi-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .dashboard-kpi-row :deep(.stat-card) {
+    min-width: 0;
+    min-height: 68px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    padding: 6px;
+  }
+  .dashboard-kpi-row :deep(.stat-icon) {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+  }
+  .dashboard-kpi-row :deep(.stat-icon svg) {
+    width: 13px;
+    height: 13px;
+  }
+  .dashboard-kpi-row :deep(.stat-card > .flex-1) {
+    width: 100%;
+  }
+  .dashboard-kpi-row :deep(.kpi-label) {
+    min-height: 1.55em;
+    overflow: hidden;
+    font-size: .46rem;
+    line-height: .78;
+    letter-spacing: .025em;
+  }
+  .dashboard-kpi-row :deep(.kpi-value) {
+    overflow: hidden;
+    font-size: .76rem;
+    line-height: 1.05;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .dashboard-kpi-row :deep(.kpi-value + div) {
+    display: none;
+  }
   .dashboard-map-title {
     flex: 0 0 auto;
     margin-bottom: 6px;
@@ -935,28 +983,46 @@ onBeforeUnmount(() => destruirMapaVendas())
   .dashboard-map-filters {
     display: grid;
     flex: 0 0 auto;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr)) 30px;
     align-items: stretch;
-    gap: 5px;
-    padding: 6px;
+    gap: 4px;
+    padding: 4px;
   }
   .map-filter-heading {
-    grid-column: 1 / -1;
-    margin: 0;
-  }
-  .map-filter-heading span {
     display: none;
   }
   .map-kpi {
     min-width: 0;
-    padding: 5px 6px;
+    padding: 3px 5px;
   }
-  .dashboard-map-filters > .btn-secondary {
+  .map-kpi strong {
+    overflow: hidden;
+    font-size: .58rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .map-kpi span {
+    font-size: .42rem;
+  }
+  .dashboard-map-refresh {
+    width: 30px;
+    min-width: 30px;
+    min-height: 28px;
+    justify-content: center;
+    overflow: hidden;
+    padding: 4px;
+    font-size: 0;
+  }
+  .dashboard-map-refresh svg {
+    width: 14px;
+    height: 14px;
+  }
+  .dashboard-map-filters > .dashboard-map-show {
     grid-column: 1 / -1;
     width: 100%;
-    min-height: 30px;
+    min-height: 28px;
     justify-content: center;
-    padding: 5px 8px;
+    padding: 4px 8px;
   }
   .dashboard-map-ranking {
     display: flex;
