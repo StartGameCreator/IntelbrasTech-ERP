@@ -1027,7 +1027,7 @@ onBeforeUnmount(()=>{clearTimeout(searchTimer);clearTimeout(clientTimer);window.
 </script>
 
 <style scoped>
-.pdv-shell{height:calc(100dvh - 120px);min-height:0;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.pdv-shell{height:100%;min-height:0;display:flex;flex-direction:column;gap:12px;overflow:hidden}
 .pdv-header{display:flex;flex:none;align-items:center;justify-content:space-between;gap:12px}
 .pdv-header-identity{flex:0 0 auto;min-width:160px}
 .pdv-header h1{font-size:1.2rem;font-weight:800;color:var(--text-primary)}

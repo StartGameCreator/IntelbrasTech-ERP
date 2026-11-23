@@ -1,5 +1,8 @@
 ﻿<template>
-  <div class="flex h-screen overflow-hidden" :class="temaClasse">
+  <div
+    class="app-frame flex h-screen overflow-hidden"
+    :class="[temaClasse, { 'pdv-kiosk': modoPdvDedicado }]"
+  >
     <button
       v-if="sidebarAberta"
       type="button"
@@ -287,7 +290,12 @@
         </div>
       </header>
 
-      <main class="app-content flex-1 overflow-y-auto bg-[var(--bg-base)] p-6">
+      <main
+        :class="[
+          'app-content flex-1 overflow-y-auto bg-[var(--bg-base)] p-6',
+          rotaFrenteCaixa && 'app-content-pdv',
+        ]"
+      >
         <RouterView v-slot="{ Component, route }">
           <Transition name="page" mode="out-in">
             <component :is="Component" :key="route.path" />
@@ -348,12 +356,29 @@ const notifAberta = ref(false)
 const topMenuAberto = ref(null)
 const menuLateralAberto = ref(null)
 const tema = ref(auth.usuario?.tema || 'dark')
+const emTelaCheia = ref(false)
+
+const rotaFrenteCaixa = computed(() => route.path === '/pdv')
+const modoPdvDedicado = computed(() => rotaFrenteCaixa.value && emTelaCheia.value && window.innerWidth >= 768)
+
+function atualizarEstadoTelaCheia() {
+  const telaCheiaDaApi = Boolean(document.fullscreenElement)
+  const telaCheiaDoDisplay = window.matchMedia?.('(display-mode: fullscreen)').matches ?? false
+  const tolerancia = 3
+  const telaCheiaDoNavegador =
+    Math.abs(window.innerWidth - window.screen.width) <= tolerancia &&
+    Math.abs(window.innerHeight - window.screen.height) <= tolerancia
+
+  emTelaCheia.value = telaCheiaDaApi || telaCheiaDoDisplay || telaCheiaDoNavegador
+}
 
 function configurarLayoutResponsivo() {
   if (window.innerWidth < 768) {
     sidebarAberta.value = false
     topMenuAberto.value = null
   }
+
+  atualizarEstadoTelaCheia()
 }
 
 watch(() => route.fullPath, () => {
@@ -645,14 +670,18 @@ function handleClickFora(event) {
 
 onMounted(() => {
   document.addEventListener('click', handleClickFora)
+  document.addEventListener('fullscreenchange', atualizarEstadoTelaCheia)
   window.addEventListener('resize', configurarLayoutResponsivo)
+  window.visualViewport?.addEventListener('resize', atualizarEstadoTelaCheia)
   configurarLayoutResponsivo()
   dashboard.carregarAlertas()
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickFora)
+  document.removeEventListener('fullscreenchange', atualizarEstadoTelaCheia)
   window.removeEventListener('resize', configurarLayoutResponsivo)
+  window.visualViewport?.removeEventListener('resize', atualizarEstadoTelaCheia)
 })
 </script>
 
@@ -675,6 +704,30 @@ onUnmounted(() => {
 .erp-home-link:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
+}
+
+.app-content-pdv {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* O F11 transforma o frente de caixa em uma estação dedicada. */
+.pdv-kiosk .app-sidebar,
+.pdv-kiosk .app-header,
+.pdv-kiosk .mobile-sidebar-backdrop {
+  display: none !important;
+}
+
+.pdv-kiosk .app-content {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.pdv-kiosk :deep(.pdv-shell) {
+  height: 100dvh;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .app-header {
