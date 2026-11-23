@@ -287,6 +287,7 @@ Route::prefix('v1')->group(function () {
         Route::get('mapa-aneel/resumo', [\App\Http\Controllers\Api\V1\Energia\MapaAneelController::class, 'resumo']);
         Route::get('mapa-aneel/filtros', [\App\Http\Controllers\Api\V1\Energia\MapaAneelController::class, 'filtros']);
         Route::get('mapa-aneel/filtros-residencial-comercial', [\App\Http\Controllers\Api\V1\Energia\MapaAneelController::class, 'filtrosResidencialComercial']);
+        Route::post('mapa-aneel/localizar', [\App\Http\Controllers\Api\V1\Energia\MapaAneelController::class, 'localizar']);
         Route::post('mapa-aneel/importar-lead', [\App\Http\Controllers\Api\V1\Energia\MapaAneelController::class, 'importarLead']);
         Route::get('mapa-ccee/datasets', [\App\Http\Controllers\Api\V1\Energia\MapaCceeController::class, 'datasets']);
         Route::get('mapa-ccee/catalogo', [\App\Http\Controllers\Api\V1\Energia\MapaCceeController::class, 'catalogo']);

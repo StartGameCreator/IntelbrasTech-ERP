@@ -62,10 +62,13 @@
           </div>
           <button class="btn-secondary btn-sm" @click="carregar" :disabled="loading"><ArrowPathIcon class="w-4 h-4" :class="loading && 'animate-spin'" /></button>
         </div>
-        <div v-if="selecionado" class="mapa-selection-mobile">
+        <div v-if="selecionado" class="mapa-selection-panel">
           <button type="button" @click="fecharSelecao" class="absolute right-3 top-3 text-[var(--text-muted)]" aria-label="Fechar detalhes"><XMarkIcon class="w-5 h-5" /></button>
           <p class="font-bold pr-8">{{ selecionado.nome }}</p>
           <p class="text-xs text-[var(--text-muted)] mt-1">Fonte: ANEEL · {{ selecionado.codigo || 'sem código' }}</p>
+          <p v-if="localizando" class="mt-2 text-xs text-blue-300">Localizando no mapa...</p>
+          <p v-else-if="localizacaoErro" class="mt-2 text-xs text-amber-400">{{ localizacaoErro }}</p>
+          <p v-else-if="selecionado.localizacao_precisao" class="mt-2 text-xs text-green-400">Localização {{ selecionado.localizacao_precisao === 'cep' ? 'aproximada pelo CEP' : 'aproximada pelo município' }}.</p>
           <div class="grid grid-cols-2 gap-2 mt-3 text-xs">
             <div><span class="text-[var(--text-muted)]">Município</span><p>{{ selecionado.municipio || '-' }}</p></div>
             <div><span class="text-[var(--text-muted)]">UF</span><p>{{ selecionado.uf || '-' }}</p></div>
@@ -78,7 +81,7 @@
           <div v-if="selecionado.distribuidora" class="mt-3"><span class="text-xs text-[var(--text-muted)]">Distribuidora</span><p class="text-xs mt-1">{{ selecionado.distribuidora }}</p></div>
           <p class="mt-3 text-xs text-amber-400">{{ selecionado.contato?.observacao || 'Contato direto não informado pela ANEEL.' }}</p>
           <div class="flex gap-2 mt-4">
-            <button type="button" class="btn-secondary btn-sm flex-1 justify-center" @click="verNoMapa(selecionado)">Ver no mapa</button>
+            <button type="button" class="btn-secondary btn-sm flex-1 justify-center" :disabled="localizando" @click="localizarNoMapa(selecionado)">{{ localizando ? 'Localizando...' : 'Ver no mapa' }}</button>
             <button type="button" class="btn-primary btn-sm flex-1 justify-center" :disabled="importando" @click="enviarCrm(selecionado)">{{ importando ? 'Enviando...' : 'Enviar ao CRM' }}</button>
           </div>
         </div>
@@ -116,26 +119,6 @@
             <button class="btn-primary mt-4" @click="reinicializarMapa">Tentar novamente</button>
           </div>
         </div>
-        <div v-if="selecionado" class="mapa-selection-desktop absolute z-[650] right-3 top-3 w-[360px] max-w-[calc(100%-24px)] card p-4 shadow-2xl">
-          <button @click="fecharSelecao" class="absolute right-3 top-3 text-[var(--text-muted)]"><XMarkIcon class="w-5 h-5" /></button>
-          <p class="font-bold pr-8">{{ selecionado.nome }}</p>
-          <p class="text-xs text-[var(--text-muted)] mt-1">Fonte: ANEEL · {{ selecionado.codigo || 'sem código' }}</p>
-          <div class="grid grid-cols-2 gap-2 mt-3 text-xs">
-            <div><span class="text-[var(--text-muted)]">Município</span><p>{{ selecionado.municipio || '-' }}</p></div>
-            <div><span class="text-[var(--text-muted)]">UF</span><p>{{ selecionado.uf || '-' }}</p></div>
-            <div><span class="text-[var(--text-muted)]">Potência</span><p>{{ formatarNumero(selecionado.potencia_mw) }} MW</p></div>
-            <div><span class="text-[var(--text-muted)]">Classe/Fonte</span><p>{{ selecionado.classe || selecionado.fonte || '-' }}</p></div>
-            <div><span class="text-[var(--text-muted)]">CNPJ</span><p>{{ formatarCnpj(selecionado.cnpj_principal) || '-' }}</p></div>
-            <div><span class="text-[var(--text-muted)]">Contato</span><p>Enriquecer pelo CRM</p></div>
-          </div>
-          <div v-if="selecionado.titular" class="mt-3"><span class="text-xs text-[var(--text-muted)]">Titular</span><p class="text-xs mt-1 line-clamp-3">{{ selecionado.titular }}</p></div>
-          <div v-if="selecionado.distribuidora" class="mt-3"><span class="text-xs text-[var(--text-muted)]">Distribuidora</span><p class="text-xs mt-1">{{ selecionado.distribuidora }}</p></div>
-          <p class="mt-3 text-xs text-amber-400">{{ selecionado.contato?.observacao || 'Contato direto não informado pela ANEEL.' }}</p>
-          <div class="flex gap-2 mt-4">
-            <button type="button" class="btn-secondary btn-sm flex-1 justify-center" @click="verNoMapa(selecionado)">Ver no mapa</button>
-            <button type="button" class="btn-primary btn-sm flex-1 justify-center" :disabled="importando" @click="enviarCrm(selecionado)">{{ importando ? 'Enviando...' : 'Enviar ao CRM' }}</button>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -153,6 +136,8 @@ import { ArrowsPointingInIcon, ArrowPathIcon, ExclamationTriangleIcon, Magnifyin
 const mapContainer = ref(null)
 const loading = ref(false)
 const importando = ref(false)
+const localizando = ref(false)
+const localizacaoErro = ref('')
 const registros = ref([])
 const selecionado = ref(null)
 const mapError = ref('')
@@ -190,7 +175,7 @@ function inicializarMapa() {
 
 function reinicializarMapa() { destruirMapa(); nextTick(() => inicializarMapa()) }
 function destruirMapa() { resizeObserver?.disconnect(); resizeObserver = null; markersById.clear(); if (map) { map.remove(); map = null } markersLayer = null }
-function coordenadasValidas(item) { const lat=Number(item?.latitude), lng=Number(item?.longitude); return Number.isFinite(lat)&&Number.isFinite(lng)&&lat>=-90&&lat<=90&&lng>=-180&&lng<=180 }
+function coordenadasValidas(item) { const lat=Number(item?.latitude), lng=Number(item?.longitude); return Number.isFinite(lat)&&Number.isFinite(lng)&&lat>=-34.5&&lat<=6&&lng>=-74&&lng<=-30 }
 function corMarcador(item) { if (String(item.fonte || '').toLowerCase().includes('solar')) return '#f59e0b'; return '#22c55e' }
 
 function desenharMarcadores() {
@@ -298,8 +283,28 @@ function preencherCidades(cidades) {
     .sort((a, b) => String(a).localeCompare(String(b), 'pt-BR'))
 }
 
-async function selecionar(item){selecionado.value=item; desenharMarcadores(); await nextTick(); setTimeout(()=>verNoMapa(item),80)}
-function fecharSelecao(){selecionado.value=null; desenharMarcadores()}
+async function selecionar(item){selecionado.value=item; localizacaoErro.value=''; await localizarNoMapa(item)}
+async function localizarNoMapa(item){
+  if(!item)return
+  if(!coordenadasValidas(item)){
+    localizando.value=true
+    localizacaoErro.value=''
+    try{
+      const {data}=await api.post('/mapa-aneel/localizar',{cep:item.cep,municipio:item.municipio,uf:item.uf})
+      item.latitude=data.latitude
+      item.longitude=data.longitude
+      item.localizacao_fonte=data.fonte
+      item.localizacao_precisao=data.precisao
+    }catch(e){
+      localizacaoErro.value=e.response?.data?.message||'Não foi possível localizar este registro.'
+      return
+    }finally{localizando.value=false}
+  }
+  desenharMarcadores()
+  await nextTick()
+  setTimeout(()=>verNoMapa(item),80)
+}
+function fecharSelecao(){selecionado.value=null; localizacaoErro.value=''; desenharMarcadores()}
 function verNoMapa(item){if(!map||!coordenadasValidas(item))return; const lat=Number(item.latitude),lng=Number(item.longitude); map.invalidateSize(true); map.flyTo([lat,lng],15,{animate:true,duration:1.1}); const marker=markersById.get(item.id); if(marker)setTimeout(()=>marker.openTooltip(),500)}
 function centralizarBrasil(){selecionado.value=null; if(!map){inicializarMapa();return} map.invalidateSize(true); map.flyTo([-15.78,-47.93],5,{animate:true,duration:.9}); desenharMarcadores()}
 function formatarNumero(v){return Number(v||0).toLocaleString('pt-BR',{maximumFractionDigits:2})}
@@ -317,7 +322,7 @@ onBeforeUnmount(()=>destruirMapa())
 .mapa-aneel-container{position:absolute;inset:0;width:100%;height:100%;min-height:540px;background:#0b0b12;z-index:0}
 .mapa-aneel-canvas .leaflet-container{z-index:0}
 .mapa-aneel-grid .overflow-y-auto{overscroll-behavior:contain}
-.mapa-selection-mobile{display:none}
+.mapa-selection-panel{position:absolute;inset:49px 0 0;z-index:50;overflow-y:auto;padding:12px;background:#12121f!important;opacity:1;backdrop-filter:none;border-top:1px solid var(--border);box-shadow:0 -8px 24px rgba(0,0,0,.45);overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .leaflet-control-zoom a{background:#171724!important;color:#f8fafc!important;border-color:#2b2b45!important}
 .leaflet-control-attribution{background:rgba(9,9,16,.82)!important;color:#94a3b8!important}
 .leaflet-control-attribution a{color:#a5b4fc!important}
@@ -352,8 +357,6 @@ onBeforeUnmount(()=>destruirMapa())
   .mapa-aneel-page .mapa-resultados{order:3;flex:1 1 auto;height:auto;min-height:0;overflow:hidden}
   .mapa-aneel-page .mapa-resultados>div:first-child{flex:0 0 auto;padding:7px 9px}
   .mapa-aneel-page .mapa-resultados .overflow-y-auto{min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-  .mapa-aneel-page .mapa-selection-desktop{display:none!important}
-  .mapa-aneel-page .mapa-selection-mobile{display:block;position:absolute;inset:49px 0 0;z-index:50;overflow-y:auto;padding:12px;background:var(--bg-card);box-shadow:0 -8px 24px rgba(0,0,0,.3);overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   .mapa-aneel-page .mapa-kpis,.mapa-aneel-page>p{display:none}
   .mapa-aneel-container{min-height:0}
   .mapa-close,.mapa-show{display:none!important}

@@ -39,7 +39,7 @@
           <div><p class="font-semibold text-sm">{{ usinas.length }} resultados</p><p class="text-[11px] text-[var(--text-muted)]">Clique para localizar e prospectar</p></div>
           <button class="btn-secondary btn-sm" @click="carregar" :disabled="loading"><ArrowPathIcon class="w-4 h-4" :class="loading && 'animate-spin'" /></button>
         </div>
-        <div v-if="selecionada" class="mapa-selection-mobile">
+        <div v-if="selecionada" class="mapa-selection-panel">
           <button type="button" @click="fecharSelecao" class="absolute right-3 top-3 text-[var(--text-muted)]" aria-label="Fechar detalhes"><XMarkIcon class="w-5 h-5" /></button>
           <p class="font-bold pr-8">{{ selecionada.nome }}</p>
           <p class="text-xs text-[var(--text-muted)] mt-1">{{ selecionada.codigo_ceg }}</p>
@@ -93,37 +93,6 @@
             <button class="btn-primary mt-4" @click="reinicializarMapa">Tentar novamente</button>
           </div>
         </div>
-        <div v-if="selecionada" class="mapa-selection-desktop absolute z-[650] right-3 top-3 w-[340px] max-w-[calc(100%-24px)] card p-4 shadow-2xl">
-          <button @click="fecharSelecao" class="absolute right-3 top-3 text-[var(--text-muted)]"><XMarkIcon class="w-5 h-5" /></button>
-          <p class="font-bold pr-8">{{ selecionada.nome }}</p>
-          <p class="text-xs text-[var(--text-muted)] mt-1">{{ selecionada.codigo_ceg }}</p>
-          <div v-if="selecionada.cnpjs_proprietarios?.length" class="mt-3">
-            <label class="text-xs text-[var(--text-muted)]">CNPJ do proprietário</label>
-            <select v-model="cnpjSelecionado" class="select mt-1 w-full">
-              <option
-                v-for="cnpj in selecionada.cnpjs_proprietarios"
-                :key="cnpj"
-                :value="cnpj"
-              >
-                {{ formatarCnpj(cnpj) }}
-              </option>
-            </select>
-          </div>
-          <div v-else class="mt-3 text-xs text-amber-400">
-            CNPJ não identificado na base pública. O Lead será criado para enriquecimento posterior.
-          </div>
-          <div class="grid grid-cols-2 gap-2 mt-3 text-xs">
-            <div><span class="text-[var(--text-muted)]">Município</span><p>{{ selecionada.municipio }}</p></div>
-            <div><span class="text-[var(--text-muted)]">UF</span><p>{{ selecionada.uf }}</p></div>
-            <div><span class="text-[var(--text-muted)]">Potência</span><p>{{ formatarNumero(selecionada.potencia_mw) }} MW</p></div>
-            <div><span class="text-[var(--text-muted)]">Fase</span><p>{{ selecionada.fase }}</p></div>
-          </div>
-          <div v-if="selecionada.proprietarios" class="mt-3"><span class="text-xs text-[var(--text-muted)]">Proprietários / participação</span><p class="text-xs mt-1 line-clamp-4">{{ selecionada.proprietarios }}</p></div>
-          <div class="flex gap-2 mt-4">
-            <button type="button" class="btn-secondary btn-sm flex-1 justify-center" @click="verNoMapa(selecionada)">Ver no mapa</button>
-            <button @click="importar(selecionada)" class="btn-primary btn-sm flex-1 justify-center" :disabled="selecionada.lead_id || importando">{{ selecionada.lead_id ? 'No CRM' : importando ? 'Salvando...' : 'Levar ao CRM' }}</button>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -173,7 +142,7 @@ function inicializarMapa() {
 }
 function reinicializarMapa() { destruirMapa(); nextTick(() => inicializarMapa()) }
 function destruirMapa() { resizeObserver?.disconnect(); resizeObserver = null; markersById.clear(); if (map) { map.remove(); map = null } markersLayer = null }
-function coordenadasValidas(usina) { const lat=Number(usina?.latitude), lng=Number(usina?.longitude); return Number.isFinite(lat)&&Number.isFinite(lng)&&lat>=-90&&lat<=90&&lng>=-180&&lng<=180 }
+function coordenadasValidas(usina) { const lat=Number(usina?.latitude), lng=Number(usina?.longitude); return Number.isFinite(lat)&&Number.isFinite(lng)&&lat>=-34.5&&lat<=6&&lng>=-74&&lng<=-30 }
 function corMarcador(usina) { if (usina.lead_id) return '#22c55e'; if (usina.fase === 'Operação') return '#3b82f6'; if (String(usina.fase||'').toLowerCase().includes('constru')) return '#f59e0b'; return '#a855f7' }
 function desenharMarcadores() {
   if (!map || !markersLayer) return
@@ -215,7 +184,7 @@ onBeforeUnmount(()=>destruirMapa())
 .mapa-close,.mapa-show{display:none}
 .mapa-ons-container{position:absolute;inset:0;width:100%;height:100%;min-height:540px;background:#0b0b12;z-index:0}
 .mapa-ons-canvas .leaflet-container{z-index:0}
-.mapa-selection-mobile{display:none}
+.mapa-selection-panel{position:absolute;inset:49px 0 0;z-index:50;overflow-y:auto;padding:12px;background:#12121f!important;opacity:1;backdrop-filter:none;border-top:1px solid var(--border);box-shadow:0 -8px 24px rgba(0,0,0,.45);overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .leaflet-control-zoom a{background:#171724!important;color:#f8fafc!important;border-color:#2b2b45!important}
 .leaflet-control-attribution{background:rgba(9,9,16,.82)!important;color:#94a3b8!important}
 .leaflet-control-attribution a{color:#a5b4fc!important}
@@ -245,8 +214,6 @@ onBeforeUnmount(()=>destruirMapa())
   .mapa-ons-page .mapa-resultados{order:3;flex:1 1 auto;height:auto;min-height:0;overflow:hidden}
   .mapa-ons-page .mapa-resultados>div:first-child{flex:0 0 auto;padding:7px 9px}
   .mapa-ons-page .mapa-resultados .overflow-y-auto{min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-  .mapa-ons-page .mapa-selection-desktop{display:none!important}
-  .mapa-ons-page .mapa-selection-mobile{display:block;position:absolute;inset:49px 0 0;z-index:50;overflow-y:auto;padding:12px;background:var(--bg-card);box-shadow:0 -8px 24px rgba(0,0,0,.3);overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   .mapa-ons-page .mapa-kpis,.mapa-ons-page>p{display:none}
   .mapa-ons-container{min-height:0}
   .mapa-close,.mapa-show{display:none!important}

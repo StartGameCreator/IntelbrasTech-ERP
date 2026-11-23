@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\Pipeline;
 use App\Models\PipelineEtapa;
+use App\Services\Dashboard\ClienteGeolocalizacaoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -273,6 +274,53 @@ class MapaAneelController extends Controller
         $request->merge(['perfil' => self::PERFIL_GD_RESIDENCIAL_COMERCIAL]);
 
         return $this->filtros($request);
+    }
+
+    public function localizar(Request $request, ClienteGeolocalizacaoService $geolocalizacao): JsonResponse
+    {
+        $this->authorize('crm.view');
+
+        $data = $request->validate([
+            'cep' => ['nullable', 'string', 'max:12'],
+            'municipio' => ['nullable', 'required_without:cep', 'string', 'max:180'],
+            'uf' => ['nullable', 'required_without:cep', 'string', 'size:2'],
+        ]);
+
+        $cep = preg_replace('/\D/', '', (string) ($data['cep'] ?? ''));
+        $municipio = trim((string) ($data['municipio'] ?? ''));
+        $uf = strtoupper(trim((string) ($data['uf'] ?? '')));
+        $cacheKey = 'aneel:localizacao:' . md5(implode('|', [$cep, Str::ascii($municipio), $uf]));
+
+        $coordenadas = Cache::remember($cacheKey, now()->addDays(30), function () use ($geolocalizacao, $cep, $municipio, $uf) {
+            if (strlen($cep) === 8) {
+                $porCep = $geolocalizacao->consultarCep($cep);
+                if ($porCep) {
+                    return $porCep + ['precisao' => 'cep'];
+                }
+            }
+
+            if ($municipio !== '' && $uf !== '') {
+                $porMunicipio = $geolocalizacao->consultarEndereco("{$municipio}, {$uf}, Brasil");
+                if ($porMunicipio) {
+                    return $porMunicipio + ['precisao' => 'municipio'];
+                }
+            }
+
+            return null;
+        });
+
+        if (! $coordenadas) {
+            return response()->json([
+                'message' => 'Não foi possível localizar este registro pelo CEP ou município informado pela ANEEL.',
+            ], 422);
+        }
+
+        return response()->json([
+            'latitude' => (float) $coordenadas['latitude'],
+            'longitude' => (float) $coordenadas['longitude'],
+            'fonte' => $coordenadas['fonte'] ?? 'geocodificacao',
+            'precisao' => $coordenadas['precisao'] ?? 'aproximada',
+        ]);
     }
 
     public function importarLead(Request $request): JsonResponse

@@ -126,6 +126,17 @@ class ClienteGeolocalizacaoService
         return null;
     }
 
+    public function consultarEndereco(string $endereco): ?array
+    {
+        $endereco = trim($endereco);
+
+        if ($endereco === '') {
+            return null;
+        }
+
+        return $this->consultarNominatim($endereco);
+    }
+
     private function consultarNominatim(string $endereco): ?array
     {
         $response = Http::timeout(15)
@@ -170,8 +181,8 @@ class ClienteGeolocalizacaoService
     {
         return $latitude !== null
             && $longitude !== null
-            && $latitude >= -90 && $latitude <= 90
-            && $longitude >= -180 && $longitude <= 180;
+            && $latitude >= -34.5 && $latitude <= 6
+            && $longitude >= -74 && $longitude <= -30;
     }
 
     private function primeiraColunaExistente(string $table, array $columns): ?string
