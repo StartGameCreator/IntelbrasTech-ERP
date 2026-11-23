@@ -1,12 +1,13 @@
 <?php
 namespace App\Models;
 use App\Traits\HasEmpresa;
+use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Lead extends Model
 {
-    use HasEmpresa;
+    use HasEmpresa, HasUuid;
     protected $table = 'leads';
     protected $fillable = [
         'razao_social',
