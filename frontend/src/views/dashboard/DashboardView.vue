@@ -265,6 +265,7 @@
       </div>
 
       <div class="dashboard-map-grid">
+        <div class="dashboard-map-fixed-zone">
         <div v-show="mapaMobileVisivel" class="dashboard-map-wrapper">
           <button class="dashboard-map-close" type="button" aria-label="Recolher mapa" @click="mapaMobileVisivel = false">
             <XMarkIcon class="w-5 h-5"/>
@@ -301,6 +302,7 @@
             {{ sincronizandoMapa ? 'Localizando...' : 'Atualizar CEPs' }}
           </button>
         </div>
+        </div>
 
         <div class="dashboard-map-ranking">
           <div class="flex items-center justify-between mb-3">
@@ -315,7 +317,7 @@
             <div v-for="i in 6" :key="i" class="skeleton h-12 rounded-lg"></div>
           </div>
 
-          <div v-else class="space-y-2 max-h-[360px] overflow-y-auto pr-1" @scroll.passive="rolarRankingMapa">
+          <div v-else class="dashboard-ranking-list space-y-2" @scroll.passive="rolarRankingMapa">
             <button
               v-for="(ponto,index) in mapaPontos"
               :key="ponto.id"
@@ -694,9 +696,14 @@ onBeforeUnmount(() => destruirMapaVendas())
 .dashboard-map-grid {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(280px, .8fr);
-  grid-template-areas:
-    "map ranking"
-    "filters ranking";
+  grid-template-areas: "fixed ranking";
+  gap: 14px;
+}
+.dashboard-map-fixed-zone {
+  grid-area: fixed;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
   gap: 14px;
 }
 .dashboard-map-wrapper {
@@ -769,6 +776,13 @@ onBeforeUnmount(() => destruirMapaVendas())
   padding: 13px;
   background: var(--bg-surface);
 }
+.dashboard-ranking-list {
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
 .map-ranking-item {
   width: 100%;
   display: flex;
@@ -829,7 +843,7 @@ onBeforeUnmount(() => destruirMapaVendas())
 @media (max-width: 1100px) {
   .dashboard-map-grid {
     grid-template-columns: 1fr;
-    grid-template-areas: "map" "filters" "ranking";
+    grid-template-areas: "fixed" "ranking";
   }
   .dashboard-map-ranking {
     min-height: auto;
@@ -955,11 +969,20 @@ onBeforeUnmount(() => destruirMapaVendas())
     gap: 6px;
     overflow: visible;
   }
-  .dashboard-map-wrapper {
+  .dashboard-map-fixed-zone {
     position: sticky;
     top: 68px;
     z-index: 33;
     order: 1;
+    gap: 6px;
+    padding-bottom: 1px;
+    background: var(--bg-card);
+  }
+  .dashboard-map-wrapper {
+    position: relative;
+    top: auto;
+    z-index: 1;
+    order: initial;
     width: 100%;
     height: clamp(160px, 22dvh, 190px);
     min-height: 160px;
@@ -989,11 +1012,11 @@ onBeforeUnmount(() => destruirMapaVendas())
     display: inline-flex;
   }
   .dashboard-map-filters {
-    position: sticky;
-    top: calc(74px + clamp(160px, 22dvh, 190px));
-    z-index: 32;
+    position: relative;
+    top: auto;
+    z-index: 1;
     display: grid;
-    order: 2;
+    order: initial;
     flex: 0 0 auto;
     grid-template-columns: repeat(3, minmax(0, 1fr)) 30px;
     align-items: stretch;
@@ -1038,7 +1061,7 @@ onBeforeUnmount(() => destruirMapaVendas())
   }
   .dashboard-map-ranking {
     display: block;
-    order: 3;
+    order: 2;
     height: auto;
     min-height: 0;
     max-height: none;
@@ -1050,14 +1073,14 @@ onBeforeUnmount(() => destruirMapaVendas())
     flex: 0 0 auto;
     margin-bottom: 5px;
   }
-  .dashboard-map-ranking .max-h-\[360px\] {
+  .dashboard-ranking-list {
     min-height: 0;
-    max-height: min(34dvh, 320px);
+    max-height: min(38dvh, 360px);
     height: auto;
     flex: 0 0 auto;
     overflow-y: auto;
     padding-right: 0;
-    overscroll-behavior-y: auto;
+    overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
   }
   .map-ranking-item {
