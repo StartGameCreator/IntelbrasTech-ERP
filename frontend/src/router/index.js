@@ -56,7 +56,7 @@ const router = createRouter({
       component: () => import('@/components/layout/AppLayout.vue'),
       meta: { requiresAuth: true },
       children: [
-        { path: '',        redirect: '/dashboard' },
+        { path: '',        redirect: '/pdv' },
         // â”€â”€ Dashboards analÃ­ticos
         {
           path: 'dashboards',
@@ -645,7 +645,7 @@ router.beforeEach(async (to) => {
   document.title = to.meta.title ? `${to.meta.title} — IntelbrasTech` : 'IntelbrasTech'
 
   if (to.meta.requiresAuth && !auth.logado) return { name: 'login' }
-  if (to.meta.guest && auth.logado) return { name: auth.usuario?.perfil_operacional === 'tecnico' ? 'tecnico.operacao' : 'dashboard' }
+  if (to.meta.guest && auth.logado) return { name: auth.usuario?.perfil_operacional === 'tecnico' ? 'tecnico.operacao' : 'pdv' }
 
   if (to.meta.requiresAuth && auth.logado && !auth.usuario) {
     await auth.carregarUsuario()
@@ -656,7 +656,7 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta.permissao && !auth.pode(to.meta.permissao)) {
-    return { name: 'dashboard' }
+    return { name: 'pdv' }
   }
 })
 

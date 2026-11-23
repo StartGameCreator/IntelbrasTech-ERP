@@ -17,7 +17,7 @@
     >
       <div class="flex items-center h-14 px-4 border-b border-[var(--border)] flex-shrink-0">
         <RouterLink
-          to="/dashboard"
+          to="/pdv"
           class="erp-home-link flex items-center gap-3 overflow-hidden w-full"
           aria-label="Ir para o início do ERP"
           title="Início do ERP"
