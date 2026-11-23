@@ -115,10 +115,10 @@
     </div>
 
     <!-- ── Gráficos ─────────────────────────────────────────── -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="dashboard-primary-chart-row grid grid-cols-1 lg:grid-cols-3 gap-4">
 
       <!-- Gráfico Vendas Mensal -->
-      <div class="card p-5 lg:col-span-2">
+      <div class="dashboard-sales-chart card p-5 lg:col-span-2">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-sm font-semibold text-[var(--text-primary)]">Vendas por Mês</h3>
           <span class="text-xs text-[var(--text-muted)]">{{ anoAtual }}</span>
@@ -139,7 +139,7 @@
       </div>
 
       <!-- Top Produtos -->
-      <div class="card p-5">
+      <div class="dashboard-top-products card p-5">
         <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">Top Produtos do Mês</h3>
         <div class="space-y-3">
           <template v-if="loading">
@@ -176,7 +176,7 @@
     </div>
 
     <!-- ── Linha 3: Canais + Últimos Pedidos ─────────────────── -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="dashboard-secondary-row grid grid-cols-1 lg:grid-cols-3 gap-4">
 
       <!-- Vendas por Canal -->
       <div class="card p-5">
@@ -304,7 +304,10 @@
         </div>
         </div>
 
-        <div class="dashboard-map-ranking">
+      </div>
+    </div>
+
+    <div class="dashboard-map-ranking">
           <div class="flex items-center justify-between mb-3">
             <div>
               <h4 class="text-xs font-semibold">Principais origens</h4>
@@ -361,12 +364,10 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <p class="text-[10px] text-[var(--text-muted)] mt-3">
+      <p class="dashboard-map-attribution text-[10px] text-[var(--text-muted)] mt-3">
         Mapa: OpenStreetMap. As coordenadas são obtidas a partir dos CEPs cadastrados dos clientes.
       </p>
-    </div>
 
   </div>
 </template>
@@ -695,8 +696,8 @@ onBeforeUnmount(() => destruirMapaVendas())
 <style scoped>
 .dashboard-map-grid {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(280px, .8fr);
-  grid-template-areas: "fixed ranking";
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "fixed";
   gap: 14px;
 }
 .dashboard-map-fixed-zone {
@@ -770,7 +771,11 @@ onBeforeUnmount(() => destruirMapaVendas())
 }
 .dashboard-map-ranking {
   grid-area: ranking;
-  min-height: 430px;
+  display: flex;
+  min-height: 0;
+  max-height: 430px;
+  flex-direction: column;
+  overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 13px;
@@ -843,7 +848,7 @@ onBeforeUnmount(() => destruirMapaVendas())
 @media (max-width: 1100px) {
   .dashboard-map-grid {
     grid-template-columns: 1fr;
-    grid-template-areas: "fixed" "ranking";
+    grid-template-areas: "fixed";
   }
   .dashboard-map-ranking {
     min-height: auto;
@@ -857,7 +862,7 @@ onBeforeUnmount(() => destruirMapaVendas())
     gap: 8px;
   }
   .dashboard-page > * {
-    order: 2;
+    order: 7;
     margin-top: 0 !important;
   }
   .dashboard-page > .dashboard-page-header {
@@ -908,6 +913,27 @@ onBeforeUnmount(() => destruirMapaVendas())
     padding: 8px;
     background: var(--bg-surface);
     box-shadow: 0 10px 24px rgba(0, 0, 0, .32);
+  }
+  .dashboard-page > .dashboard-kpi-row {
+    order: 2;
+  }
+  .dashboard-page > .dashboard-primary-chart-row {
+    display: contents;
+  }
+  .dashboard-sales-chart {
+    order: 3;
+  }
+  .dashboard-page > .dashboard-map-ranking {
+    order: 4;
+  }
+  .dashboard-top-products {
+    order: 5;
+  }
+  .dashboard-page > .dashboard-secondary-row {
+    order: 6;
+  }
+  .dashboard-page > .dashboard-map-attribution {
+    display: none;
   }
   .dashboard-page > .dashboard-kpi-row {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1066,10 +1092,9 @@ onBeforeUnmount(() => destruirMapaVendas())
   }
   .dashboard-map-ranking {
     display: flex;
-    order: 2;
     height: auto;
     min-height: 0;
-    max-height: clamp(124px, 20dvh, 180px);
+    max-height: min(62dvh, 520px);
     flex: 0 0 auto;
     flex-direction: column;
     overflow: hidden;
@@ -1081,7 +1106,7 @@ onBeforeUnmount(() => destruirMapaVendas())
   }
   .dashboard-ranking-list {
     min-height: 0;
-    max-height: clamp(78px, 15dvh, 138px);
+    max-height: min(52dvh, 440px);
     height: auto;
     flex: 0 1 auto;
     overflow-y: auto;
