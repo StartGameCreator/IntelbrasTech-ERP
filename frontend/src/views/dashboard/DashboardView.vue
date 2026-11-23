@@ -896,13 +896,18 @@ onBeforeUnmount(() => destruirMapaVendas())
   }
   .dashboard-page > .dashboard-map-section {
     display: flex;
+    position: sticky;
+    top: 52px;
+    z-index: 34;
     order: 1;
     height: auto;
     min-height: 0;
-    max-height: none;
+    max-height: calc(100dvh - 158px);
     flex-direction: column;
-    overflow: visible;
+    overflow: hidden;
     padding: 8px;
+    background: var(--bg-card);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .32);
   }
   .dashboard-page > .dashboard-kpi-row {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -946,9 +951,9 @@ onBeforeUnmount(() => destruirMapaVendas())
     display: none;
   }
   .dashboard-map-title {
-    position: sticky;
-    top: 44px;
-    z-index: 34;
+    position: static;
+    top: auto;
+    z-index: auto;
     flex: 0 0 auto;
     margin-bottom: 6px;
     padding: 3px 2px;
@@ -970,9 +975,9 @@ onBeforeUnmount(() => destruirMapaVendas())
     overflow: visible;
   }
   .dashboard-map-fixed-zone {
-    position: sticky;
-    top: 68px;
-    z-index: 33;
+    position: relative;
+    top: auto;
+    z-index: 1;
     order: 1;
     gap: 6px;
     padding-bottom: 1px;
@@ -1060,13 +1065,14 @@ onBeforeUnmount(() => destruirMapaVendas())
     padding: 4px 8px;
   }
   .dashboard-map-ranking {
-    display: block;
+    display: flex;
     order: 2;
     height: auto;
     min-height: 0;
-    max-height: none;
+    max-height: clamp(124px, 20dvh, 180px);
     flex: 0 0 auto;
-    overflow: visible;
+    flex-direction: column;
+    overflow: hidden;
     padding: 7px;
   }
   .dashboard-map-ranking > div:first-child {
@@ -1075,9 +1081,9 @@ onBeforeUnmount(() => destruirMapaVendas())
   }
   .dashboard-ranking-list {
     min-height: 0;
-    max-height: min(38dvh, 360px);
+    max-height: clamp(78px, 15dvh, 138px);
     height: auto;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
     overflow-y: auto;
     padding-right: 0;
     overscroll-behavior-y: contain;
