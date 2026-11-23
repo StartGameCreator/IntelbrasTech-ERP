@@ -57,7 +57,7 @@
       <div class="card overflow-hidden relative flex flex-col min-h-0 mapa-resultados">
         <div class="p-3 border-b border-[var(--border)] flex items-center justify-between">
           <div>
-            <p class="font-semibold text-sm">{{ registros.length }} resultados ANEEL</p>
+            <p class="font-semibold text-sm">{{ registros.length }} de {{ totalResultados }} resultados ANEEL</p>
             <p class="text-[11px] text-[var(--text-muted)]">Microgeração distribuída</p>
           </div>
           <button class="btn-secondary btn-sm" @click="carregar" :disabled="loading"><ArrowPathIcon class="w-4 h-4" :class="loading && 'animate-spin'" /></button>
@@ -85,7 +85,7 @@
             <button type="button" class="btn-primary btn-sm flex-1 justify-center" :disabled="importando" @click="enviarCrm(selecionado)">{{ importando ? 'Enviando...' : 'Enviar ao CRM' }}</button>
           </div>
         </div>
-        <div class="overflow-y-auto flex-1 divide-y divide-[var(--border)]">
+        <div class="overflow-y-auto flex-1 divide-y divide-[var(--border)]" @scroll.passive="rolarResultados">
           <div v-if="loading" class="p-8 text-center text-sm text-[var(--text-muted)]">Consultando ANEEL...</div>
           <div v-else-if="!registros.length" class="p-8 text-center">
             <MapIcon class="w-10 h-10 mx-auto mb-2 text-[var(--text-muted)]" />
@@ -105,6 +105,13 @@
               <span class="text-[11px] text-[var(--text-muted)]">{{ item.distribuidora || item.classe }}</span>
             </div>
           </button>
+          <div v-if="registros.length" class="p-3 text-center">
+            <button v-if="temMais" type="button" class="btn-secondary btn-sm justify-center w-full" :disabled="carregandoMais" @click="carregarMais">
+              <ArrowPathIcon v-if="carregandoMais" class="w-4 h-4 animate-spin" />
+              {{ carregandoMais ? 'Carregando mais resultados...' : `Carregar mais (${registros.length} de ${totalResultados})` }}
+            </button>
+            <p v-else class="text-[11px] text-[var(--text-muted)]">Todos os {{ totalResultados }} resultados foram carregados.</p>
+          </div>
         </div>
       </div>
 
@@ -135,6 +142,10 @@ import { ArrowsPointingInIcon, ArrowPathIcon, ExclamationTriangleIcon, Magnifyin
 
 const mapContainer = ref(null)
 const loading = ref(false)
+const carregandoMais = ref(false)
+const pagina = ref(1)
+const temMais = ref(false)
+const totalResultados = ref(0)
 const importando = ref(false)
 const localizando = ref(false)
 const localizacaoErro = ref('')
@@ -178,7 +189,7 @@ function destruirMapa() { resizeObserver?.disconnect(); resizeObserver = null; m
 function coordenadasValidas(item) { const lat=Number(item?.latitude), lng=Number(item?.longitude); return Number.isFinite(lat)&&Number.isFinite(lng)&&lat>=-34.5&&lat<=6&&lng>=-74&&lng<=-30 }
 function corMarcador(item) { if (String(item.fonte || '').toLowerCase().includes('solar')) return '#f59e0b'; return '#22c55e' }
 
-function desenharMarcadores() {
+function desenharMarcadores(ajustarEnquadramento = true) {
   if (!map || !markersLayer) return
   markersLayer.clearLayers(); markersById.clear(); const limites=[]
   for (const item of registros.value) {
@@ -188,7 +199,7 @@ function desenharMarcadores() {
     marker.bindTooltip(`<strong>${escapeHtml(item.nome||'')}</strong><br>${escapeHtml(item.municipio||'')} / ${escapeHtml(item.uf||'')}<br>${formatarNumero(item.potencia_mw)} MW · ANEEL`,{direction:'top',sticky:true,opacity:.95})
     marker.on('click',()=>selecionar(item)); marker.addTo(markersLayer); markersById.set(item.id,marker); limites.push([lat,lng])
   }
-  if (limites.length && !selecionado.value) map.fitBounds(L.latLngBounds(limites),{padding:[30,30],maxZoom:7,animate:false})
+  if (limites.length && !selecionado.value && ajustarEnquadramento) map.fitBounds(L.latLngBounds(limites),{padding:[30,30],maxZoom:7,animate:false})
   setTimeout(()=>map?.invalidateSize(false),50)
 }
 
@@ -223,24 +234,58 @@ async function carregarFiltros() {
   }
 }
 
-async function carregar() {
-  loading.value = true
+async function carregar(opcoesCarregamento = {}) {
+  const append = Boolean(opcoesCarregamento?.append)
+  if (append) {
+    if (loading.value || carregandoMais.value || !temMais.value) return
+    carregandoMais.value = true
+  } else {
+    loading.value = true
+  }
+
+  const paginaSolicitada = append ? pagina.value + 1 : 1
   try {
-    const { data } = await api.get('/mapa-aneel/microgeracao', { params: filtros })
-    registros.value = data.data || []
+    const { data } = await api.get('/mapa-aneel/microgeracao', {
+      params: { ...filtros, page: paginaSolicitada, per_page: 100 },
+    })
+    const novosRegistros = data.data || []
+    if (append) {
+      const idsExistentes = new Set(registros.value.map(item => String(item.id)))
+      registros.value = [
+        ...registros.value,
+        ...novosRegistros.filter(item => !idsExistentes.has(String(item.id))),
+      ]
+    } else {
+      registros.value = novosRegistros
+    }
+
+    pagina.value = Number(data.page || paginaSolicitada)
+    totalResultados.value = Number(data.total_remoto ?? data.total ?? registros.value.length)
+    temMais.value = Boolean(data.has_more ?? (registros.value.length < totalResultados.value))
     resumo.value = {
       ...resumo.value,
-      total: Number(data.total_remoto ?? data.total ?? registros.value.length),
+      total: totalResultados.value,
     }
     resourceId.value = data.resource_id || resourceId.value
     await nextTick()
     if (!map) inicializarMapa()
-    desenharMarcadores()
+    desenharMarcadores(!append)
   } catch (e) {
     alert(e.response?.data?.message || 'Não foi possível consultar a base da ANEEL.')
   } finally {
-    loading.value = false
+    if (append) carregandoMais.value = false
+    else loading.value = false
   }
+}
+
+async function carregarMais() {
+  await carregar({ append: true })
+}
+
+function rolarResultados(event) {
+  const lista = event.currentTarget
+  if (!lista || lista.scrollHeight - lista.scrollTop - lista.clientHeight > 180) return
+  carregarMais()
 }
 
 function limparTipo() {

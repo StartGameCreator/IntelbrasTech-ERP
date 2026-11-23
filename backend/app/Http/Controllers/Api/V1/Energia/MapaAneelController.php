@@ -428,7 +428,9 @@ class MapaAneelController extends Controller
 
     private function indexGeracaoDistribuida(Request $request): JsonResponse
     {
-        $limit = min(max((int) $request->get('limit', 100), 1), 500);
+        $perPage = min(max((int) $request->get('per_page', $request->get('limit', 100)), 1), 500);
+        $page = max((int) $request->get('page', 1), 1);
+        $offset = ($page - 1) * $perPage;
 
         if (! $request->filled('uf') && ! $request->filled('cidade') && ! $request->filled('busca')) {
             return response()->json([
@@ -444,7 +446,7 @@ class MapaAneelController extends Controller
             ]);
         }
 
-        $resultado = $this->varrerGeracaoDistribuida($request, $limit);
+        $resultado = $this->varrerGeracaoDistribuida($request, $perPage, false, $offset);
 
         if (($resultado['erro'] ?? null) && empty($resultado['data'])) {
             return response()->json([
@@ -457,12 +459,20 @@ class MapaAneelController extends Controller
             ], 502);
         }
 
+        $totalRemoto = (int) $resultado['total_remoto'];
+        $carregadosAteAqui = $offset + count($resultado['data']);
+        $hasMore = $carregadosAteAqui < $totalRemoto;
+
         return response()->json([
             'data' => $resultado['data'],
             'total' => count($resultado['data']),
-            'total_remoto' => $resultado['total_remoto'],
+            'total_remoto' => $totalRemoto,
             'varridos' => $resultado['varridos'],
             'parcial' => $resultado['parcial'],
+            'page' => $page,
+            'per_page' => $perPage,
+            'has_more' => $hasMore,
+            'next_page' => $hasMore ? $page + 1 : null,
             'message' => $resultado['erro'],
             'fonte' => 'ANEEL - Geração distribuída',
             'resource_id' => self::GD_RESOURCE_ID,
@@ -540,10 +550,10 @@ class MapaAneelController extends Controller
         ]);
     }
 
-    private function varrerGeracaoDistribuida(Request $request, int $limit = 100, bool $apenasCidades = false): array
+    private function varrerGeracaoDistribuida(Request $request, int $limit = 100, bool $apenasCidades = false, int $offset = 0): array
     {
         if (! $apenasCidades) {
-            $sqlite = $this->consultarGeracaoDistribuidaSqlite($request, $limit);
+            $sqlite = $this->consultarGeracaoDistribuidaSqlite($request, $limit, $offset);
             if ($sqlite !== null) {
                 return $sqlite;
             }
@@ -581,6 +591,10 @@ class MapaAneelController extends Controller
                     if (! empty($item['municipio'])) {
                         $cidades[$item['municipio']] = true;
                     }
+                    continue;
+                }
+
+                if ($totalFiltrado <= $offset) {
                     continue;
                 }
 
@@ -635,7 +649,7 @@ class MapaAneelController extends Controller
         ];
     }
 
-    private function consultarGeracaoDistribuidaSqlite(Request $request, int $limit): ?array
+    private function consultarGeracaoDistribuidaSqlite(Request $request, int $limit, int $offset = 0): ?array
     {
         $pdo = $this->abrirSqliteGeracaoDistribuida();
         if (! $pdo) {
@@ -648,12 +662,13 @@ class MapaAneelController extends Controller
         $countStmt->execute($params);
         $total = (int) $countStmt->fetchColumn();
 
-        $sql = "SELECT * FROM gd {$where} ORDER BY potencia_mw DESC, municipio COLLATE NOCASE LIMIT :limit";
+        $sql = "SELECT * FROM gd {$where} ORDER BY potencia_mw DESC, municipio COLLATE NOCASE LIMIT :limit OFFSET :offset";
         $stmt = $pdo->prepare($sql);
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);
         }
         $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
 
         $data = array_map(fn ($row) => $this->normalizarRegistroSqlite($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
