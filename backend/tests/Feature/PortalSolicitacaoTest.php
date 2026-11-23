@@ -2,13 +2,29 @@
 
 namespace Tests\Feature;
 
-use App\Models\{CrmAtividade, Lead, PortalSolicitacao};
+use App\Models\{CrmAtividade, Empresa, Lead, PortalSolicitacao};
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class PortalSolicitacaoTest extends TestCase
 {
     use DatabaseTransactions;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Empresa::query()->firstOrCreate(
+            ['cnpj' => '10540399000157'],
+            [
+                'uuid' => (string) Str::uuid(),
+                'razao_social' => 'IntelbrasTech Testes',
+                'nome_fantasia' => 'IntelbrasTech',
+                'ativo' => true,
+            ],
+        );
+    }
 
     public function test_simulacao_solar_so_confirma_depois_de_gravar_no_crm(): void
     {

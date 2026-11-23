@@ -598,6 +598,12 @@ const router = createRouter({
           meta: { title: 'Central de APIs', permissao: 'integracoes.view' },
         },
         {
+          path: 'configuracoes/logs',
+          name: 'configuracoes.logs',
+          component: () => import('@/views/configuracoes/SystemLogsView.vue'),
+          meta: { title: 'Logs do Sistema', adminOnly: true },
+        },
+        {
           path: 'configuracoes/site',
           name: 'configuracoes.site',
           component: () => import('@/views/configuracoes/MeuSiteView.vue'),
@@ -653,6 +659,10 @@ router.beforeEach(async (to) => {
 
   if (to.meta.tecnicoOnly && auth.usuario?.perfil_operacional !== 'tecnico') {
     return { name: 'gestao-equipe' }
+  }
+
+  if (to.meta.adminOnly && !auth.isAdmin) {
+    return { name: 'pdv' }
   }
 
   if (to.meta.permissao && !auth.pode(to.meta.permissao)) {

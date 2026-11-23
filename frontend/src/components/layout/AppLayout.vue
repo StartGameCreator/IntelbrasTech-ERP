@@ -345,6 +345,7 @@ import {
   UserCircleIcon,
   GlobeAltIcon,
   Bars3Icon,
+  CommandLineIcon,
 } from '@heroicons/vue/24/outline'
 
 const auth = useAuthStore()
@@ -620,6 +621,9 @@ const menuGrupos = computed(() => [
     label: 'Configurações',
     items: [
       { to: '/configuracoes/apis', label: 'APIs', icon: Cog6ToothIcon, name: 'configuracoes.apis' },
+      ...(auth.isAdmin
+        ? [{ to: '/configuracoes/logs', label: 'Logs', icon: CommandLineIcon, name: 'configuracoes.logs' }]
+        : []),
       {
         to: '/configuracoes/site', label: 'Meu Site', icon: GlobeAltIcon, name: 'configuracoes.site',
         children: [
