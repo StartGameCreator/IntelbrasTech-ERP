@@ -20,6 +20,8 @@ class DashboardMapaVendasController extends Controller
         $empresaId = auth()->user()->empresa_id;
         $inicio = $request->date('inicio')?->startOfDay() ?? now()->subMonths(12)->startOfDay();
         $fim = $request->date('fim')?->endOfDay() ?? now()->endOfDay();
+        $perPage = min(max((int) $request->get('per_page', 50), 1), 200);
+        $page = max((int) $request->get('page', 1), 1);
 
         if (!Schema::hasTable('clientes')) {
             return response()->json([
@@ -98,14 +100,24 @@ class DashboardMapaVendasController extends Controller
             ->sortByDesc('valor')
             ->values();
 
+        $total = $pontos->count();
+        $offset = ($page - 1) * $perPage;
+        $pontosPagina = $pontos->slice($offset, $perPage)->values();
+        $hasMore = $offset + $pontosPagina->count() < $total;
+
         return response()->json([
-            'pontos' => $pontos,
+            'pontos' => $pontosPagina,
             'resumo' => [
-                'clientes' => $pontos->count(),
+                'clientes' => $total,
                 'pedidos' => $pontos->sum('pedidos'),
                 'valor' => round((float) $pontos->sum('valor'), 2),
                 'estados' => $pontos->pluck('estado')->filter()->unique()->count(),
             ],
+            'page' => $page,
+            'per_page' => $perPage,
+            'total' => $total,
+            'has_more' => $hasMore,
+            'next_page' => $hasMore ? $page + 1 : null,
             'periodo' => [
                 'inicio' => $inicio->toDateString(),
                 'fim' => $fim->toDateString(),

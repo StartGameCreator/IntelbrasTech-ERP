@@ -299,7 +299,7 @@
           <div class="flex items-center justify-between mb-3">
             <div>
               <h4 class="text-xs font-semibold">Principais origens</h4>
-              <p class="text-[10px] text-[var(--text-muted)]">Clientes com maior faturamento</p>
+              <p class="text-[10px] text-[var(--text-muted)]">{{ mapaPontos.length }} de {{ mapaTotalResultados }} clientes carregados</p>
             </div>
             <span class="badge badge-brand">{{ mapaResumo.estados || 0 }} estados</span>
           </div>
@@ -308,9 +308,9 @@
             <div v-for="i in 6" :key="i" class="skeleton h-12 rounded-lg"></div>
           </div>
 
-          <div v-else class="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+          <div v-else class="space-y-2 max-h-[360px] overflow-y-auto pr-1" @scroll.passive="rolarRankingMapa">
             <button
-              v-for="(ponto,index) in mapaPontos.slice(0,20)"
+              v-for="(ponto,index) in mapaPontos"
               :key="ponto.id"
               class="map-ranking-item"
               @click="focarPonto(ponto)"
@@ -327,6 +327,21 @@
                 <span class="block text-[10px] text-[var(--text-muted)]">{{ ponto.pedidos }} pedidos</span>
               </div>
             </button>
+
+            <button
+              v-if="mapaTemMais"
+              type="button"
+              class="btn-secondary btn-sm w-full justify-center"
+              :disabled="carregandoMaisMapa"
+              @click="carregarMaisMapa"
+            >
+              <ArrowPathIcon class="w-4 h-4" :class="carregandoMaisMapa && 'animate-spin'" />
+              {{ carregandoMaisMapa ? 'Carregando...' : `Carregar mais (${mapaPontos.length} de ${mapaTotalResultados})` }}
+            </button>
+
+            <p v-else-if="mapaPontos.length" class="py-2 text-center text-[10px] text-[var(--text-muted)]">
+              Todos os {{ mapaTotalResultados }} resultados foram carregados.
+            </p>
 
             <div v-if="!mapaPontos.length" class="empty-state py-10">
               <MapPinIcon class="w-8 h-8 text-[var(--text-muted)]"/>
@@ -381,6 +396,10 @@ const mapError = ref('')
 const mapaMobileVisivel = ref(true)
 const mapaPontos = ref([])
 const mapaResumo = ref({ clientes: 0, pedidos: 0, valor: 0, estados: 0 })
+const mapaPagina = ref(1)
+const mapaTemMais = ref(false)
+const mapaTotalResultados = ref(0)
+const carregandoMaisMapa = ref(false)
 
 async function mostrarMapaMobile() {
   mapaMobileVisivel.value = true
@@ -512,7 +531,7 @@ function corPonto(ponto) {
   return '#a855f7'
 }
 
-function desenharMapaVendas() {
+function desenharMapaVendas(ajustarEnquadramento = true) {
   if (!salesMap || !salesLayer) return
 
   salesLayer.clearLayers()
@@ -550,7 +569,7 @@ function desenharMapaVendas() {
     limites.push([lat, lng])
   }
 
-  if (limites.length) {
+  if (limites.length && ajustarEnquadramento) {
     salesMap.fitBounds(L.latLngBounds(limites), {
       padding: [25, 25],
       maxZoom: 8,
@@ -581,22 +600,55 @@ function escapeHtmlMapa(value) {
     .replaceAll("'", '&#039;')
 }
 
-async function carregarMapaVendas() {
-  loadingMapa.value = true
+async function carregarMapaVendas(opcoesCarregamento = {}) {
+  const append = Boolean(opcoesCarregamento?.append)
+  if (append) {
+    if (loadingMapa.value || carregandoMaisMapa.value || !mapaTemMais.value) return
+    carregandoMaisMapa.value = true
+  } else {
+    loadingMapa.value = true
+  }
 
+  const paginaSolicitada = append ? mapaPagina.value + 1 : 1
   try {
-    const { data } = await api.get('/dashboard/mapa-vendas')
-    mapaPontos.value = data.pontos || []
+    const { data } = await api.get('/dashboard/mapa-vendas', {
+      params: { page: paginaSolicitada, per_page: 50 },
+    })
+    const novosPontos = data.pontos || []
+    if (append) {
+      const idsExistentes = new Set(mapaPontos.value.map(ponto => String(ponto.id)))
+      mapaPontos.value = [
+        ...mapaPontos.value,
+        ...novosPontos.filter(ponto => !idsExistentes.has(String(ponto.id))),
+      ]
+    } else {
+      mapaPontos.value = novosPontos
+    }
+
+    mapaPagina.value = Number(data.page || paginaSolicitada)
+    mapaTotalResultados.value = Number(data.total ?? data.resumo?.clientes ?? mapaPontos.value.length)
+    mapaTemMais.value = Boolean(data.has_more ?? (mapaPontos.value.length < mapaTotalResultados.value))
     mapaResumo.value = data.resumo || { clientes: 0, pedidos: 0, valor: 0, estados: 0 }
 
     await nextTick()
     if (!salesMap) inicializarMapaVendas()
-    desenharMapaVendas()
+    desenharMapaVendas(!append)
   } catch (error) {
     mapError.value = error.response?.data?.message || 'Não foi possível carregar a origem das vendas.'
   } finally {
-    loadingMapa.value = false
+    if (append) carregandoMaisMapa.value = false
+    else loadingMapa.value = false
   }
+}
+
+async function carregarMaisMapa() {
+  await carregarMapaVendas({ append: true })
+}
+
+function rolarRankingMapa(event) {
+  const lista = event.currentTarget
+  if (!lista || lista.scrollHeight - lista.scrollTop - lista.clientHeight > 160) return
+  carregarMaisMapa()
 }
 
 async function sincronizarCeps() {
@@ -828,9 +880,11 @@ onBeforeUnmount(() => destruirMapaVendas())
     min-height: 0;
   }
   .dashboard-map-ranking .max-h-\[360px\] {
-    max-height: none;
-    overflow: visible;
+    max-height: min(42dvh, 360px);
+    overflow-y: auto;
     padding-right: 0;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 }
 </style>
