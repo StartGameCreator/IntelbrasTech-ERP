@@ -9,7 +9,8 @@
         <button @click="centralizarBrasil" class="btn-secondary btn-sm"><ArrowsPointingInIcon class="w-4 h-4" /> Brasil</button>
         <button @click="carregar" class="btn-primary btn-sm" :disabled="loading">
           <ArrowPathIcon class="w-4 h-4" :class="loading && 'animate-spin'" />
-          {{ loading ? 'Consultando...' : 'Consultar ANEEL' }}
+          <span class="mapa-action-desktop">{{ loading ? 'Consultando...' : 'Consultar ANEEL' }}</span>
+          <span class="mapa-action-mobile">{{ loading ? 'Consultando...' : 'Consultar' }}</span>
         </button>
       </div>
     </div>
@@ -22,7 +23,7 @@
     </div>
 
     <div class="card p-3 mapa-filtros">
-      <div class="grid grid-cols-1 md:grid-cols-7 gap-2">
+      <div class="mapa-filtros-grid grid grid-cols-1 md:grid-cols-7 gap-2">
         <button v-if="!mapaVisivel" type="button" class="btn-secondary mapa-show" @click="mostrarMapa"><MapIcon class="w-4 h-4"/> Exibir mapa</button>
         <select v-model="filtros.perfil" class="select" @change="perfilAlterado">
           <option value="gd_residencial_comercial">GD resid. + comercial</option>
@@ -301,18 +302,36 @@ onBeforeUnmount(()=>destruirMapa())
 .leaflet-tooltip-top::before{border-top-color:#171724!important}
 @media(max-width:1279px){.mapa-aneel-grid{height:auto;overflow:visible}.mapa-aneel-grid>:first-child{height:420px}.mapa-aneel-grid>:last-child{height:min(620px,65dvh);min-height:440px}}
 @media(max-width:767px){
-  .mapa-aneel-page{display:flex;flex-direction:column;gap:12px}
+  .mapa-aneel-page{display:flex;height:100%;min-height:0;overflow:hidden;flex-direction:column;gap:8px}
   .mapa-aneel-page>*{margin-top:0!important}
-  .mapa-aneel-page .mapa-page-header{order:0}
+  .mapa-aneel-page .mapa-page-header{order:0;flex:0 0 auto;align-items:center;gap:8px;margin-bottom:0}
+  .mapa-aneel-page .mapa-page-header>div:first-child{min-width:0}
+  .mapa-aneel-page .mapa-page-header .page-title{font-size:1rem;line-height:1.15;white-space:nowrap}
+  .mapa-aneel-page .mapa-page-header>div:first-child>p{display:none}
+  .mapa-aneel-page .mapa-page-header>div:last-child{gap:4px;margin-left:auto}
+  .mapa-aneel-page .mapa-page-header .btn-sm{min-height:32px;padding:5px 8px;font-size:10px;white-space:nowrap}
+  .mapa-action-desktop{display:none}
+  .mapa-action-mobile{display:inline}
   .mapa-aneel-page .mapa-aneel-grid{display:contents}
-  .mapa-aneel-page .mapa-aneel-canvas{order:1;position:sticky;top:0;z-index:20;height:min(48dvh,380px);min-height:320px;box-shadow:0 10px 28px rgba(0,0,0,.35)}
-  .mapa-aneel-page .mapa-filtros{order:2}
-  .mapa-aneel-page .mapa-resultados{order:3;height:360px}
-  .mapa-aneel-page .mapa-kpis{order:4}
-  .mapa-aneel-page>p{order:5}
-  .mapa-aneel-container{min-height:320px}
-  .mapa-close{position:absolute;display:grid;place-items:center;right:8px;top:8px;z-index:1000;width:36px;height:36px;border:1px solid rgba(255,255,255,.28);border-radius:9px;background:rgba(12,14,24,.92);color:#fff}
-  .mapa-show{display:inline-flex}
-  .mapa-resultados .overflow-y-auto{overflow:visible}
+  .mapa-aneel-page .mapa-aneel-canvas{order:1;position:relative;z-index:1;flex:0 0 clamp(150px,22dvh,190px);height:clamp(150px,22dvh,190px);min-height:150px;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+  .mapa-aneel-page .mapa-filtros{order:2;flex:0 0 auto;padding:7px}
+  .mapa-aneel-page .mapa-filtros-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+  .mapa-aneel-page .mapa-filtros-grid>:nth-child(2),
+  .mapa-aneel-page .mapa-filtros-grid>:nth-child(7),
+  .mapa-aneel-page .mapa-filtros-grid>:nth-child(9){grid-column:span 2}
+  .mapa-aneel-page .mapa-filtros-grid .input,
+  .mapa-aneel-page .mapa-filtros-grid .select,
+  .mapa-aneel-page .mapa-filtros-grid .btn-primary,
+  .mapa-aneel-page .mapa-filtros-grid .btn-secondary{height:32px;min-width:0;padding:4px 7px;font-size:10px}
+  .mapa-aneel-page .mapa-filtros-grid .btn-primary{justify-content:center;gap:4px}
+  .mapa-aneel-page .mapa-filtros-grid>div{gap:4px}
+  .mapa-aneel-page .mapa-filtros>p{max-height:24px;margin-top:3px;overflow:hidden;font-size:9px;line-height:12px}
+  .mapa-aneel-page .mapa-resultados{order:3;flex:1 1 auto;height:auto;min-height:0;overflow:hidden}
+  .mapa-aneel-page .mapa-resultados>div:first-child{flex:0 0 auto;padding:7px 9px}
+  .mapa-aneel-page .mapa-resultados .overflow-y-auto{min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .mapa-aneel-page .mapa-kpis,.mapa-aneel-page>p{display:none}
+  .mapa-aneel-container{min-height:0}
+  .mapa-close,.mapa-show{display:none!important}
 }
+@media(min-width:768px){.mapa-action-mobile{display:none}}
 </style>
