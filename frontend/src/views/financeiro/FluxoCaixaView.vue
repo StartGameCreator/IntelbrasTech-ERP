@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-5 animate-fade-in">
+  <div class="cashflow-page animate-fade-in">
     <div class="page-header cashflow-header">
       <div>
         <h1 class="page-title">Fluxo de Caixa</h1>
@@ -37,7 +37,7 @@
         </div>
       </div>
 
-      <div class="table-wrapper results-scroll">
+      <div class="cashflow-table table-wrapper results-scroll">
         <table class="table">
           <thead><tr><th>Data</th><th class="text-right">Entradas</th><th class="text-right">Saídas</th><th class="text-right">Saldo do Dia</th><th class="text-right">Saldo Acumulado</th></tr></thead>
           <tbody>
@@ -87,54 +87,95 @@ onMounted(carregar)
 </script>
 
 <style scoped>
-@media (max-width: 639px) {
+.cashflow-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (max-width: 767px) {
+  .cashflow-page {
+    height: 100%;
+    min-height: 0;
+    gap: 0.5rem;
+    overflow: hidden;
+  }
+
   .cashflow-header {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .cashflow-header > div:first-child {
+    flex: 0 0 auto;
+  }
+
+  .cashflow-header .page-title {
+    font-size: 1rem;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .cashflow-header > div:first-child > p {
+    display: none;
   }
 
   .cashflow-period {
     display: grid;
+    flex: 1 1 auto;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 0.5rem;
-    width: 100%;
+    gap: 0.35rem;
+    min-width: 0;
   }
 
   .cashflow-period .input {
+    height: 2.15rem;
     min-width: 0;
     width: 100%;
-    padding-inline: 0.65rem;
-    font-size: 0.78rem;
+    padding: 0.3rem 0.4rem;
+    font-size: 0.68rem;
   }
 
   .cashflow-summary {
-    gap: 0.55rem;
+    flex: 0 0 auto;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.35rem;
   }
 
   .cashflow-card {
     display: flex;
-    min-height: 5rem;
+    grid-column: span 2;
+    min-height: 3.65rem;
+    align-items: center;
     flex-direction: column;
     justify-content: center;
-    padding: 0.75rem;
+    padding: 0.4rem 0.3rem;
+    text-align: center;
+  }
+
+  .cashflow-card:nth-child(n + 4) {
+    grid-column: span 3;
   }
 
   .cashflow-card > p:first-child {
-    font-size: 0.68rem;
-    line-height: 1.25;
+    font-size: 0.58rem;
+    line-height: 1.15;
   }
 
   .cashflow-value {
-    margin-top: 0.35rem;
-    font-size: 1rem;
-    line-height: 1.2;
+    margin-top: 0.2rem;
+    font-size: 0.88rem;
+    line-height: 1.1;
+    white-space: nowrap;
   }
 
-  .cashflow-summary .cashflow-card:last-child {
-    grid-column: 1 / -1;
-    min-height: 4.5rem;
+  .cashflow-table {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: auto;
   }
 }
 </style>
