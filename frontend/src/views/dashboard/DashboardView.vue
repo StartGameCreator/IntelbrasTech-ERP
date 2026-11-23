@@ -1,8 +1,8 @@
 <template>
-  <div class="space-y-6 animate-fade-in">
+  <div class="dashboard-page space-y-6 animate-fade-in">
 
     <!-- ── Header ──────────────────────────────────────────── -->
-    <div class="page-header">
+    <div class="page-header dashboard-page-header">
       <div>
         <h1 class="page-title">Dashboard Geral</h1>
         <p class="text-xs text-[var(--text-muted)] mt-0.5">
@@ -253,8 +253,8 @@
     </div>
 
     <!-- ── Mapa de origem das vendas ─────────────────────────── -->
-    <div class="card p-5">
-      <div class="mb-4">
+    <div class="card p-5 dashboard-map-section">
+      <div class="mb-4 dashboard-map-title">
         <div>
           <h3 class="text-sm font-semibold text-[var(--text-primary)]">Origem geográfica das vendas</h3>
           <p class="text-xs text-[var(--text-muted)] mt-1">
@@ -829,20 +829,90 @@ onBeforeUnmount(() => destruirMapaVendas())
   }
 }
 @media (max-width: 767px) {
-  .dashboard-map-grid {
-    gap: 10px;
+  .dashboard-page {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    gap: 8px;
   }
-  .dashboard-map-wrapper {
+  .dashboard-page > * {
+    order: 2;
+    margin-top: 0 !important;
+  }
+  .dashboard-page > .dashboard-page-header {
     position: sticky;
     top: 0;
+    z-index: 35;
+    order: 0;
+    min-height: 44px;
+    padding: 5px 0 7px;
+    background: var(--bg-primary);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .24);
+  }
+  .dashboard-page-header .page-title {
+    font-size: 1rem;
+    line-height: 1.15;
+  }
+  .dashboard-page-header > div:first-child p {
+    display: none;
+  }
+  .dashboard-page-header > div:last-child {
+    gap: 5px;
+  }
+  .dashboard-page-header .select {
+    width: 106px;
+    height: 32px;
+    min-height: 32px;
+    padding: 4px 8px;
+    font-size: .65rem;
+  }
+  .dashboard-page-header .btn-sm {
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    padding: 5px;
+  }
+  .dashboard-page > .dashboard-map-section {
+    display: flex;
+    order: 1;
+    height: calc(100dvh - 142px);
+    min-height: 510px;
+    max-height: 700px;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 8px;
+  }
+  .dashboard-map-title {
+    flex: 0 0 auto;
+    margin-bottom: 6px;
+  }
+  .dashboard-map-title h3 {
+    font-size: .75rem;
+  }
+  .dashboard-map-title p,
+  .dashboard-map-section > p {
+    display: none;
+  }
+  .dashboard-map-grid {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .dashboard-map-wrapper {
+    position: relative;
+    top: auto;
     z-index: 20;
-    min-height: 300px;
-    height: min(46svh, 360px);
+    width: 100%;
+    height: clamp(170px, 24dvh, 210px);
+    min-height: 170px;
+    flex: 0 0 clamp(170px, 24dvh, 210px);
     border-radius: 10px;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, .35);
+    box-shadow: 0 7px 20px rgba(0, 0, 0, .3);
   }
   .dashboard-sales-map {
-    min-height: 300px;
+    min-height: 170px;
   }
   .dashboard-map-close {
     position: absolute;
@@ -863,28 +933,55 @@ onBeforeUnmount(() => destruirMapaVendas())
     display: inline-flex;
   }
   .dashboard-map-filters {
+    display: grid;
+    flex: 0 0 auto;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: stretch;
+    gap: 5px;
+    padding: 6px;
   }
   .map-filter-heading {
-    flex-basis: 100%;
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+  .map-filter-heading span {
+    display: none;
   }
   .map-kpi {
-    flex: 1 1 28%;
     min-width: 0;
+    padding: 5px 6px;
   }
   .dashboard-map-filters > .btn-secondary {
-    flex: 1 1 auto;
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 30px;
     justify-content: center;
+    padding: 5px 8px;
   }
   .dashboard-map-ranking {
+    display: flex;
     min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 7px;
+  }
+  .dashboard-map-ranking > div:first-child {
+    flex: 0 0 auto;
+    margin-bottom: 5px;
   }
   .dashboard-map-ranking .max-h-\[360px\] {
-    max-height: min(42dvh, 360px);
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
     overflow-y: auto;
     padding-right: 0;
-    overscroll-behavior: contain;
+    overscroll-behavior-y: auto;
     -webkit-overflow-scrolling: touch;
+  }
+  .map-ranking-item {
+    gap: 7px;
+    padding: 7px;
   }
 }
 </style>
