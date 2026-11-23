@@ -47,7 +47,7 @@
       </aside>
 
       <main class="hub-content">
-        <div class="card p-4">
+        <div class="card p-4 results-toolbar">
           <div class="search-box">
             <MagnifyingGlassIcon class="w-5 h-5"/>
             <input v-model="busca" placeholder="Pesquisar integração..." @input="aplicarFiltros"/>
@@ -76,7 +76,7 @@
           Nenhum conector encontrado.
         </div>
 
-        <div v-else class="connectors-grid">
+        <div v-else class="connectors-grid results-scroll">
           <article v-for="connector in filtrados" :key="connector.slug" class="connector-card">
             <div class="connector-head">
               <div class="connector-logo">{ iniciais(connector.nome) }</div>

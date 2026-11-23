@@ -19,7 +19,7 @@
       </div>
     </div>
 
-    <div class="card p-4">
+    <div class="card p-4 results-toolbar">
       <div class="flex flex-wrap gap-3">
         <div class="flex-1 min-w-[220px] relative">
           <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
@@ -39,7 +39,7 @@
       </div>
     </div>
 
-    <div class="table-wrapper">
+    <div class="table-wrapper results-scroll">
       <table class="table">
         <thead>
           <tr>
@@ -68,12 +68,12 @@
           </tr>
         </tbody>
       </table>
-    </div>
-    <div ref="listSentinel" class="product-load-more">
-      <button v-if="pagina < ultimaPagina" class="btn-secondary btn-sm" :disabled="loadingMore" @click="carregarMais">
-        {{ loadingMore ? 'Carregando...' : 'Carregar mais produtos' }}
-      </button>
-      <span v-else-if="items.length">Todos os {{ total }} produtos foram carregados.</span>
+      <div ref="listSentinel" class="product-load-more">
+        <button v-if="pagina < ultimaPagina" class="btn-secondary btn-sm" :disabled="loadingMore" @click="carregarMais">
+          {{ loadingMore ? 'Carregando...' : 'Carregar mais produtos' }}
+        </button>
+        <span v-else-if="items.length">Todos os {{ total }} produtos foram carregados.</span>
+      </div>
     </div>
 
     <div v-if="modalImportacao" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">

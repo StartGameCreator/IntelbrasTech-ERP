@@ -359,6 +359,42 @@ body {
   .table-wrapper {
     @apply overflow-x-auto rounded-xl border border-[var(--border)];
   }
+.results-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  flex: 0 0 auto;
+  background: var(--bg-card);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--bg-base) 72%, transparent);
+}
+.results-scroll {
+  position: relative;
+  min-height: 16rem;
+  max-height: clamp(20rem, 62dvh, 48rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+.results-scroll .table thead {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+}
+.results-scroll .table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  background: var(--bg-elevated);
+  box-shadow: inset 0 -1px 0 var(--border);
+}
+.results-scroll-card {
+  overflow: hidden;
+}
+.results-scroll-card > .results-scroll {
+  border: 0;
+  border-radius: 0;
+}
 .table {
     @apply w-full text-sm text-left;
   }
@@ -378,6 +414,15 @@ body {
 .table tbody td {
     @apply px-4 py-3 text-[var(--text-primary)];
   }
+@media (max-width: 767px) {
+  .results-toolbar {
+    top: 0;
+  }
+  .results-scroll {
+    min-height: 15rem;
+    max-height: 58dvh;
+  }
+}
 /* Page header */
   .page-header {
     @apply flex items-center justify-between mb-6;

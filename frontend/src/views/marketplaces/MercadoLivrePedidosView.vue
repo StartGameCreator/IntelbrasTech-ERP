@@ -21,7 +21,7 @@
       </div>
     </div>
 
-    <div class="card p-4">
+    <div class="card p-4 results-toolbar">
       <div class="grid gap-3 md:grid-cols-6">
         <input
           v-model="filtros.busca"
@@ -40,7 +40,7 @@
       </div>
     </div>
 
-    <div class="card overflow-hidden">
+    <div class="card overflow-hidden results-scroll-card">
       <div v-if="loading" class="p-10 text-center text-sm text-[var(--text-muted)]">
         Carregando pedidos...
       </div>
@@ -49,7 +49,7 @@
         Nenhum pedido importado.
       </div>
 
-      <div v-else class="overflow-auto">
+      <div v-else class="results-scroll">
         <table class="table">
           <thead>
             <tr>

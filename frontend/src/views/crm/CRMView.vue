@@ -70,7 +70,7 @@
         <button class="crm-tab muted" @click="modalView = true"><PlusIcon class="w-4 h-4" /></button>
       </div>
 
-      <div class="crm-tools">
+      <div class="crm-tools results-toolbar">
         <CrmMeetingLauncher />
         <button class="btn-primary btn-sm" @click="abrirNovo"><PlusIcon class="w-4 h-4" /> Criar lead</button>
         <div class="crm-search">
@@ -88,7 +88,7 @@
 
       <div v-if="loading" class="skeleton h-72 rounded-xl" />
 
-      <div v-else-if="abaAtiva === 'quadro'" class="crm-table-board">
+      <div v-else-if="abaAtiva === 'quadro'" class="crm-table-board results-scroll">
         <div v-if="!gruposTabela.length" class="crm-empty-state">
           <UserGroupIcon class="w-10 h-10" />
           <h3>Nenhum lead no pipeline</h3>
@@ -646,7 +646,7 @@ onMounted(carregar)
   .crm-kanban-list { min-height: 280px; }
   .crm-card-lead { padding: 1rem; min-height: 104px; }
   .crm-kanban-add { min-height: 46px; }
-  .crm-table-board { overflow: visible; }
+  .crm-table-board { overflow: auto; overscroll-behavior: contain; }
   .crm-group { min-width: 0; width: 100%; }
   .crm-grid-head { display: none; }
   .crm-grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: .7rem; border: 1px solid var(--border); border-radius: .85rem; overflow: hidden; }

@@ -18,7 +18,7 @@
       <Summary label="Entregues" :value="resumo.entregues"/>
     </div>
 
-    <div class="tabs">
+    <div class="tabs results-toolbar">
       <button :class="{active:tab==='cotacao'}" @click="tab='cotacao'">Cotação</button>
       <button :class="{active:tab==='contas'}" @click="tab='contas'; carregarContas()">Contas</button>
       <button :class="{active:tab==='envios'}" @click="tab='envios'; carregarEnvios()">Envios</button>
@@ -66,9 +66,9 @@
       </article>
     </section>
 
-    <section v-if="tab==='envios'" class="card overflow-hidden">
+    <section v-if="tab==='envios'" class="card overflow-hidden results-scroll-card">
       <div v-if="!envios.length" class="empty">Nenhum envio criado.</div>
-      <div v-else class="overflow-auto">
+      <div v-else class="results-scroll">
         <table class="table">
           <thead><tr><th>Pedido</th><th>Transportadora</th><th>Serviço</th><th>Rastreio</th><th>Status</th><th class="text-right">Frete</th><th class="text-right">Ações</th></tr></thead>
           <tbody>

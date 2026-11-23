@@ -21,12 +21,12 @@
     </section>
 
     <section class="card p-4">
-      <div class="filters">
+      <div class="filters results-toolbar">
         <input v-model="busca" class="input" placeholder="Pesquisar nome, e-mail, cidade...">
         <select v-model="tipo" class="select"><option value="">Todos os pilares</option><option value="tecnico">Técnicos</option><option value="cliente">Clientes</option><option value="colaborador">Colaboradores</option></select>
         <select v-model="status" class="select"><option value="">Todos os status</option><option value="pendente">Pendente</option><option value="aprovado">Aprovado</option><option value="rejeitado">Rejeitado</option><option value="suspenso">Suspenso</option></select>
       </div>
-      <div class="overflow-auto">
+      <div class="results-scroll">
         <table class="table">
           <thead><tr><th>Perfil</th><th>Nome</th><th>Contato</th><th>Localização</th><th>Solicitado em</th><th>Status</th><th>Ações</th></tr></thead>
           <tbody>

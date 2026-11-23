@@ -16,7 +16,7 @@
       <article :class="{ attention: resumo.vendedores_pendentes }"><span>Vendedores aguardando aceite</span><strong>{{ resumo.vendedores_pendentes || 0 }}</strong></article>
     </section>
 
-    <section class="toolbar card">
+    <section class="toolbar card results-toolbar">
       <div class="tabs" role="tablist" aria-label="Gestão de equipe">
         <button :class="{ active: aba === 'demandas' }" role="tab" @click="aba = 'demandas'">Demandas técnicas <span>{{ demandasFiltradas.length }}</span></button>
         <button :class="{ active: aba === 'tecnicos' }" role="tab" @click="aba = 'tecnicos'">Técnicos <span>{{ equipeFiltrada.length }}</span></button>
@@ -32,7 +32,7 @@
       </div>
       <div v-if="carregando" class="empty">Carregando dados da operação…</div>
       <div v-else-if="!demandasFiltradas.length" class="empty">Nenhuma demanda técnica encontrada.</div>
-      <div v-else class="demandas-grid">
+      <div v-else class="demandas-grid results-scroll">
         <article v-for="demanda in demandasFiltradas" :key="`${demanda.origem}-${demanda.id}`" class="demanda-card">
           <div class="demand-card-head"><span class="tipo">{{ demanda.origem === 'os' ? 'Ordem de serviço' : 'Visita técnica' }}</span><span :class="['prioridade', demanda.prioridade]">{{ demanda.prioridade || 'normal' }}</span></div>
           <h3>{{ demanda.titulo }}</h3>
@@ -48,7 +48,7 @@
       <div class="section-head"><div><h2>Equipe técnica</h2><p>A disponibilidade e a localização são atualizadas pelo próprio técnico no aplicativo de campo.</p></div></div>
       <div v-if="carregando" class="empty">Carregando técnicos…</div>
       <div v-else-if="!equipeFiltrada.length" class="empty">Nenhum técnico ou colaborador de campo encontrado.</div>
-      <div v-else class="equipe-grid">
+      <div v-else class="equipe-grid results-scroll">
         <article v-for="membro in equipeFiltrada" :key="membro.usuario_id" class="membro-card">
           <div class="avatar">{{ iniciais(membro.nome) }}</div>
           <div class="membro-info"><h3>{{ membro.nome }}</h3><p>{{ rotuloPerfil(membro.tipo_perfil) }}</p></div>
@@ -65,7 +65,7 @@
       <div class="section-head"><div><h2>Aprovação de vendedores</h2><p>Depois do aceite, o vendedor passa a trabalhar exclusivamente no CRM e deixa esta fila.</p></div></div>
       <div v-if="carregando" class="empty">Carregando solicitações…</div>
       <div v-else-if="!vendedoresFiltrados.length" class="empty">Nenhum vendedor aguardando aprovação.</div>
-      <div v-else class="vendedores-grid">
+      <div v-else class="vendedores-grid results-scroll">
         <article v-for="vendedor in vendedoresFiltrados" :key="vendedor.id" class="vendedor-card">
           <div class="avatar">{{ iniciais(vendedor.nome) }}</div>
           <div><h3>{{ vendedor.nome }}</h3><p>{{ vendedor.empresa || vendedor.cargo || 'Vendedor parceiro' }}</p><small>{{ vendedor.cidade ? `${vendedor.cidade}/${vendedor.estado || ''}` : 'Localização não informada' }} · {{ vendedor.email }}</small></div>

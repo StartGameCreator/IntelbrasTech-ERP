@@ -13,7 +13,7 @@
       </button>
     </div>
 
-    <div class="card p-4">
+    <div class="card p-4 results-toolbar">
       <div class="flex flex-wrap gap-3">
         <select v-model="filtroTipo" class="input w-44" @change="carregar">
           <option value="">Todos os tipos</option>
@@ -25,7 +25,7 @@
       </div>
     </div>
 
-    <div class="table-wrapper">
+    <div class="table-wrapper results-scroll">
       <table class="table">
         <thead><tr>
           <th>Data</th><th>Produto</th><th>Tipo</th><th>Motivo</th>

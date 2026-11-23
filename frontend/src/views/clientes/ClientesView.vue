@@ -18,7 +18,7 @@
     </div>
 
     <!-- Filtros -->
-    <div class="card p-4">
+    <div class="card p-4 results-toolbar">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div class="md:col-span-2 relative">
           <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
@@ -51,7 +51,7 @@
     </div>
 
     <!-- Tabela -->
-    <div class="table-wrapper">
+    <div class="table-wrapper results-scroll">
       <table class="table">
         <thead>
           <tr>

@@ -85,7 +85,7 @@
     </section>
 
     <section class="card p-4">
-      <div class="filters">
+      <div class="filters results-toolbar">
         <input v-model="busca" class="input" placeholder="Pesquisar...">
         <select v-model="tipo" class="select">
           <option value="">Todos os perfis</option>
@@ -102,7 +102,7 @@
         </select>
       </div>
 
-      <div class="overflow-auto">
+      <div class="results-scroll">
         <table class="table">
           <thead>
             <tr><th>Perfil</th><th>Nome</th><th>Contato</th><th>Localizacao</th><th>Status</th><th>Acoes</th></tr>

@@ -60,7 +60,7 @@
       </div>
     </div>
 
-    <div class="card overflow-hidden">
+    <div class="card overflow-hidden results-scroll-card">
       <div class="section-title">
         <div>
           <h2>Emissões fiscais</h2>
@@ -73,7 +73,7 @@
         Nenhuma emissão criada.
       </div>
 
-      <div v-else class="overflow-auto">
+      <div v-else class="results-scroll">
         <table class="table">
           <thead>
             <tr>

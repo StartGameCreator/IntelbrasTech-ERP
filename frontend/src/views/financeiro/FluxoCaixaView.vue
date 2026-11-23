@@ -37,7 +37,7 @@
         </div>
       </div>
 
-      <div class="table-wrapper">
+      <div class="table-wrapper results-scroll">
         <table class="table">
           <thead><tr><th>Data</th><th class="text-right">Entradas</th><th class="text-right">Saídas</th><th class="text-right">Saldo do Dia</th><th class="text-right">Saldo Acumulado</th></tr></thead>
           <tbody>

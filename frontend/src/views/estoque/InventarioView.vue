@@ -13,7 +13,7 @@
       </button>
     </div>
 
-    <div class="table-wrapper">
+    <div class="table-wrapper results-scroll">
       <table class="table">
         <thead><tr><th>Número</th><th>Depósito</th><th>Responsável</th><th>Status</th><th>Início</th><th class="text-right">Ações</th></tr></thead>
         <tbody>

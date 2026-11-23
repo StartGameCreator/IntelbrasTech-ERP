@@ -16,7 +16,7 @@
       <div class="hero-stats"><div><strong>{{ conectores.length }}</strong><span>conectores</span></div><div><strong>{{ totalConectados }}</strong><span>conectados</span></div><div><strong>{{ categorias.length }}</strong><span>categorias</span></div></div>
     </section>
 
-    <section class="toolbar card">
+    <section class="toolbar card results-toolbar">
       <div class="search"><MagnifyingGlassIcon class="w-5 h-5"/><input v-model="busca" placeholder="Pesquisar Mercado Livre, Shopee, Amazon, Nuvemshop..."/><button v-if="busca" @click="busca=''"><XMarkIcon class="w-4 h-4"/></button></div>
       <select v-model="ordenacao" class="select"><option value="destaque">Mais relevantes</option><option value="nome">Nome A–Z</option><option value="status">Conectados primeiro</option></select>
     </section>
@@ -28,7 +28,7 @@
 
     <div v-if="loading" class="grid-connectors"><div v-for="n in 12" :key="n" class="connector-card skeleton-card"></div></div>
     <div v-else-if="!filtrados.length" class="card empty-state"><MagnifyingGlassIcon class="w-8 h-8"/><strong>Nenhum conector encontrado</strong><span>Altere a busca ou a categoria selecionada.</span></div>
-    <div v-else class="grid-connectors">
+    <div v-else class="grid-connectors results-scroll">
       <article v-for="item in filtrados" :key="item.tipo" class="connector-card" :class="{connected:item.status==='ativo'}">
         <div class="connector-top">
           <div class="brand-icon" :style="{'--brand':item.cor}"><img :src="item.icone" :alt="item.nome" @error="imagemFalhou($event)"/><span>{{ iniciais(item.nome) }}</span></div>

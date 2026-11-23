@@ -40,7 +40,7 @@
     </div>
 
     <div class="grid gap-4 xl:grid-cols-2">
-      <section class="card overflow-hidden">
+      <section class="card overflow-hidden results-scroll-card">
         <div class="section-title">
           <div>
             <h2>Conciliação financeira</h2>
@@ -52,7 +52,7 @@
           Nenhum lançamento preparado.
         </div>
 
-        <div v-else class="overflow-auto">
+        <div v-else class="results-scroll">
           <table class="table">
             <thead>
               <tr>
@@ -90,7 +90,7 @@
         </div>
       </section>
 
-      <section class="card overflow-hidden">
+      <section class="card overflow-hidden results-scroll-card">
         <div class="section-title">
           <div>
             <h2>Fila fiscal</h2>
@@ -102,7 +102,7 @@
           Nenhum pedido na fila fiscal.
         </div>
 
-        <div v-else class="overflow-auto">
+        <div v-else class="results-scroll">
           <table class="table">
             <thead>
               <tr>

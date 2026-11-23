@@ -15,20 +15,20 @@
       </div>
     </div>
 
-    <div class="card p-4">
+    <div class="card p-4 results-toolbar">
       <div class="flex gap-3">
         <input v-model="busca" class="input flex-1" placeholder="Produto, SKU, anúncio ou ID externo"/>
         <button class="btn-secondary" @click="carregar(1)">Pesquisar</button>
       </div>
     </div>
 
-    <div class="card overflow-hidden">
+    <div class="card overflow-hidden results-scroll-card">
       <div v-if="loading" class="p-10 text-center text-sm text-[var(--text-muted)]">Carregando...</div>
       <div v-else-if="!items.length" class="p-10 text-center text-sm text-[var(--text-muted)]">
         Nenhum produto vinculado. Importe os anúncios ou crie um vínculo manual.
       </div>
 
-      <div v-else class="overflow-auto">
+      <div v-else class="results-scroll">
         <table class="table">
           <thead>
             <tr>

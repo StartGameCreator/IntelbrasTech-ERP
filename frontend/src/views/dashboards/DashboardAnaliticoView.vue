@@ -120,7 +120,7 @@
         <button class="btn-secondary btn-sm">Ver relatório completo</button>
       </header>
 
-      <div class="overflow-auto">
+      <div class="results-scroll">
         <table class="table">
           <thead>
             <tr>

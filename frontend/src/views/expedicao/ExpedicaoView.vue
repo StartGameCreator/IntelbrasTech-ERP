@@ -20,7 +20,7 @@
       <Summary label="Expedidas hoje" :value="resumo.expedidas_hoje"/>
     </div>
 
-    <div class="card p-4">
+    <div class="card p-4 results-toolbar">
       <div class="grid gap-3 md:grid-cols-4">
         <input v-model="filtros.busca" class="input md:col-span-2" placeholder="Código da expedição ou pedido"/>
         <select v-model="filtros.status" class="select">
@@ -37,10 +37,10 @@
       </div>
     </div>
 
-    <div class="card overflow-hidden">
+    <div class="card overflow-hidden results-scroll-card">
       <div v-if="loading" class="p-10 text-center text-sm text-[var(--text-muted)]">Carregando...</div>
       <div v-else-if="!expedicoes.length" class="p-10 text-center text-sm text-[var(--text-muted)]">Nenhuma expedição encontrada.</div>
-      <div v-else class="overflow-auto">
+      <div v-else class="results-scroll">
         <table class="table">
           <thead>
             <tr>

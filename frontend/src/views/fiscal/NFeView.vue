@@ -16,7 +16,7 @@
         </div>
       </div>
 
-      <div class="card p-3 mb-3">
+      <div class="card p-3 mb-3 results-toolbar">
         <div class="flex flex-wrap items-center gap-2">
           <button class="btn-secondary btn-icon" @click="mostrarFiltros = !mostrarFiltros" title="Filtros">
             <FunnelIcon class="w-4 h-4" />
@@ -63,7 +63,7 @@
         <button class="text-brand-400 hover:underline" @click="selecionados=[]">Limpar seleção</button>
       </div>
 
-      <div class="table-wrapper min-h-[500px]">
+      <div class="table-wrapper results-scroll">
         <table class="table">
           <thead>
             <tr>
