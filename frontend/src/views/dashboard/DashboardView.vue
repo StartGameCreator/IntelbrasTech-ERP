@@ -852,6 +852,7 @@ onBeforeUnmount(() => destruirMapaVendas())
     z-index: 35;
     order: 0;
     min-height: 44px;
+    margin-bottom: 0 !important;
     padding: 5px 0 7px;
     background: var(--bg-primary);
     box-shadow: 0 8px 18px rgba(0, 0, 0, .24);
@@ -882,11 +883,11 @@ onBeforeUnmount(() => destruirMapaVendas())
   .dashboard-page > .dashboard-map-section {
     display: flex;
     order: 1;
-    height: calc(100dvh - 142px);
-    min-height: 510px;
-    max-height: 700px;
+    height: auto;
+    min-height: 0;
+    max-height: none;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
     padding: 8px;
   }
   .dashboard-page > .dashboard-kpi-row {
@@ -931,8 +932,13 @@ onBeforeUnmount(() => destruirMapaVendas())
     display: none;
   }
   .dashboard-map-title {
+    position: sticky;
+    top: 44px;
+    z-index: 34;
     flex: 0 0 auto;
     margin-bottom: 6px;
+    padding: 3px 2px;
+    background: var(--bg-card);
   }
   .dashboard-map-title h3 {
     font-size: .75rem;
@@ -944,23 +950,25 @@ onBeforeUnmount(() => destruirMapaVendas())
   .dashboard-map-grid {
     display: flex;
     min-height: 0;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     flex-direction: column;
     gap: 6px;
+    overflow: visible;
   }
   .dashboard-map-wrapper {
-    position: relative;
-    top: auto;
-    z-index: 20;
+    position: sticky;
+    top: 68px;
+    z-index: 33;
+    order: 1;
     width: 100%;
-    height: clamp(170px, 24dvh, 210px);
-    min-height: 170px;
-    flex: 0 0 clamp(170px, 24dvh, 210px);
+    height: clamp(160px, 22dvh, 190px);
+    min-height: 160px;
+    flex: 0 0 clamp(160px, 22dvh, 190px);
     border-radius: 10px;
     box-shadow: 0 7px 20px rgba(0, 0, 0, .3);
   }
   .dashboard-sales-map {
-    min-height: 170px;
+    min-height: 160px;
   }
   .dashboard-map-close {
     position: absolute;
@@ -981,7 +989,11 @@ onBeforeUnmount(() => destruirMapaVendas())
     display: inline-flex;
   }
   .dashboard-map-filters {
+    position: sticky;
+    top: calc(74px + clamp(160px, 22dvh, 190px));
+    z-index: 32;
     display: grid;
+    order: 2;
     flex: 0 0 auto;
     grid-template-columns: repeat(3, minmax(0, 1fr)) 30px;
     align-items: stretch;
@@ -1025,11 +1037,13 @@ onBeforeUnmount(() => destruirMapaVendas())
     padding: 4px 8px;
   }
   .dashboard-map-ranking {
-    display: flex;
+    display: block;
+    order: 3;
+    height: auto;
     min-height: 0;
-    flex: 1 1 auto;
-    flex-direction: column;
-    overflow: hidden;
+    max-height: none;
+    flex: 0 0 auto;
+    overflow: visible;
     padding: 7px;
   }
   .dashboard-map-ranking > div:first-child {
@@ -1038,8 +1052,9 @@ onBeforeUnmount(() => destruirMapaVendas())
   }
   .dashboard-map-ranking .max-h-\[360px\] {
     min-height: 0;
-    max-height: none;
-    flex: 1 1 auto;
+    max-height: min(34dvh, 320px);
+    height: auto;
+    flex: 0 0 auto;
     overflow-y: auto;
     padding-right: 0;
     overscroll-behavior-y: auto;
