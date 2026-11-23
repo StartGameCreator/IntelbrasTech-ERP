@@ -765,7 +765,7 @@ onBeforeUnmount(() => destruirMapaVendas())
   gap: 8px;
   padding: 20px;
   text-align: center;
-  background: var(--bg-card);
+  background: var(--bg-surface);
   color: var(--text-muted);
 }
 .dashboard-map-ranking {
@@ -862,13 +862,13 @@ onBeforeUnmount(() => destruirMapaVendas())
   }
   .dashboard-page > .dashboard-page-header {
     position: sticky;
-    top: 0;
+    top: -14px;
     z-index: 35;
     order: 0;
     min-height: 44px;
     margin-bottom: 0 !important;
     padding: 5px 0 7px;
-    background: var(--bg-primary);
+    background: var(--bg-base);
     box-shadow: 0 8px 18px rgba(0, 0, 0, .24);
   }
   .dashboard-page-header .page-title {
@@ -897,7 +897,7 @@ onBeforeUnmount(() => destruirMapaVendas())
   .dashboard-page > .dashboard-map-section {
     display: flex;
     position: sticky;
-    top: 52px;
+    top: 30px;
     z-index: 34;
     order: 1;
     height: auto;
@@ -906,7 +906,7 @@ onBeforeUnmount(() => destruirMapaVendas())
     flex-direction: column;
     overflow: hidden;
     padding: 8px;
-    background: var(--bg-card);
+    background: var(--bg-surface);
     box-shadow: 0 10px 24px rgba(0, 0, 0, .32);
   }
   .dashboard-page > .dashboard-kpi-row {
@@ -957,7 +957,7 @@ onBeforeUnmount(() => destruirMapaVendas())
     flex: 0 0 auto;
     margin-bottom: 6px;
     padding: 3px 2px;
-    background: var(--bg-card);
+    background: var(--bg-surface);
   }
   .dashboard-map-title h3 {
     font-size: .75rem;
@@ -981,7 +981,7 @@ onBeforeUnmount(() => destruirMapaVendas())
     order: 1;
     gap: 6px;
     padding-bottom: 1px;
-    background: var(--bg-card);
+    background: var(--bg-surface);
   }
   .dashboard-map-wrapper {
     position: relative;
