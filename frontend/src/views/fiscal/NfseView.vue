@@ -7,7 +7,7 @@
       </div>
 
       <div class="nfse-mode-switch" role="group" aria-label="Selecionar o tipo de operação do PDV">
-        <RouterLink to="/pdv">
+        <RouterLink to="/pdv" @click="selecionarPdvProdutos">
           <span>Produtos<small>NF-e / NFC-e</small></span>
         </RouterLink>
         <span class="active" aria-current="page">
@@ -60,10 +60,19 @@ import { useToast } from 'vue-toastification'
 import api from '@/services/api'
 
 const toast = useToast()
+const PDV_OPERATION_MODE_KEY = 'intelbrastech:pdv:operation-mode'
 const loading = ref(false)
 const salvando = ref(false)
 const notas = ref([])
 const form = ref({ destinatario_nome:'', destinatario_cpf_cnpj:'', destinatario_email:'', codigo_servico:'', descricao_servico:'', valor:null, observacoes:'' })
+
+function salvarModoOperacao(modo){
+  try { window.localStorage.setItem(PDV_OPERATION_MODE_KEY, modo) } catch {}
+}
+
+function selecionarPdvProdutos(){
+  salvarModoOperacao('produtos')
+}
 const moeda = value => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(value || 0))
 const formatarData = value => value ? new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(value)) : '—'
 
@@ -83,7 +92,10 @@ async function criarRascunho(){
   } catch (error) { toast.error(error.response?.data?.message || 'Não foi possível criar a NFS-e.') }
   finally { salvando.value = false }
 }
-onMounted(carregar)
+onMounted(()=>{
+  salvarModoOperacao('servicos')
+  carregar()
+})
 </script>
 
 <style scoped>

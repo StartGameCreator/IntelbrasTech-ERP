@@ -448,6 +448,7 @@ import {
 
 const toast = useToast()
 const router = useRouter()
+const PDV_OPERATION_MODE_KEY = 'intelbrastech:pdv:operation-mode'
 const loading = ref(true)
 const caixa = ref(null)
 const empresaUf = ref('')
@@ -518,12 +519,21 @@ function moeda(v){ return new Intl.NumberFormat('pt-BR',{style:'currency',curren
 function numero(v,c=2){ return new Intl.NumberFormat('pt-BR',{minimumFractionDigits:c,maximumFractionDigits:c}).format(Number(v||0)) }
 function totalItem(item){ return Math.max(0, Number(item.quantidade||0)*Number(item.preco_unitario||0)-Number(item.desconto||0)) }
 
-function abrirPdvServicos(){
+function salvarModoOperacao(modo){
+  try { window.localStorage.setItem(PDV_OPERATION_MODE_KEY, modo) } catch {}
+}
+
+function modoOperacaoSalvo(){
+  try { return window.localStorage.getItem(PDV_OPERATION_MODE_KEY) } catch { return null }
+}
+
+async function abrirPdvServicos(){
   if(carrinho.value.length){
     toast.warning('Finalize ou exclua a venda atual antes de mudar para o PDV de serviços.')
     return
   }
-  router.push({name:'fiscal.nfse'})
+  salvarModoOperacao('servicos')
+  await router.push({name:'fiscal.nfse'})
 }
 
 async function carregar(){
@@ -1018,7 +1028,12 @@ function onKey(e){
   if(e.key==='Escape'){modalCliente.value=false;modalPagamento.value=false;modalMovimento.value=false;modalResumo.value=false;modalFechamento.value=false}
 }
 let pdvProductsObserver
-onMounted(()=>{
+onMounted(async()=>{
+  if(modoOperacaoSalvo()==='servicos'){
+    await router.replace({name:'fiscal.nfse'})
+    return
+  }
+  salvarModoOperacao('produtos')
   pdvProductsObserver=new IntersectionObserver(entries=>{if(entries[0]?.isIntersecting)carregarMaisProdutos()},{rootMargin:'240px'})
   carregar();window.addEventListener('keydown',onKey)
 })
