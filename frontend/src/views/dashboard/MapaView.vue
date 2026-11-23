@@ -34,10 +34,33 @@
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-[330px_minmax(0,1fr)] gap-3 mapa-ons-grid">
-      <div class="card overflow-hidden flex flex-col min-h-0 mapa-resultados">
+      <div class="card overflow-hidden relative flex flex-col min-h-0 mapa-resultados">
         <div class="p-3 border-b border-[var(--border)] flex items-center justify-between">
           <div><p class="font-semibold text-sm">{{ usinas.length }} resultados</p><p class="text-[11px] text-[var(--text-muted)]">Clique para localizar e prospectar</p></div>
           <button class="btn-secondary btn-sm" @click="carregar" :disabled="loading"><ArrowPathIcon class="w-4 h-4" :class="loading && 'animate-spin'" /></button>
+        </div>
+        <div v-if="selecionada" class="mapa-selection-mobile">
+          <button type="button" @click="fecharSelecao" class="absolute right-3 top-3 text-[var(--text-muted)]" aria-label="Fechar detalhes"><XMarkIcon class="w-5 h-5" /></button>
+          <p class="font-bold pr-8">{{ selecionada.nome }}</p>
+          <p class="text-xs text-[var(--text-muted)] mt-1">{{ selecionada.codigo_ceg }}</p>
+          <div v-if="selecionada.cnpjs_proprietarios?.length" class="mt-3">
+            <label class="text-xs text-[var(--text-muted)]">CNPJ do proprietário</label>
+            <select v-model="cnpjSelecionado" class="select mt-1 w-full">
+              <option v-for="cnpj in selecionada.cnpjs_proprietarios" :key="cnpj" :value="cnpj">{{ formatarCnpj(cnpj) }}</option>
+            </select>
+          </div>
+          <div v-else class="mt-3 text-xs text-amber-400">CNPJ não identificado na base pública. O Lead será criado para enriquecimento posterior.</div>
+          <div class="grid grid-cols-2 gap-2 mt-3 text-xs">
+            <div><span class="text-[var(--text-muted)]">Município</span><p>{{ selecionada.municipio }}</p></div>
+            <div><span class="text-[var(--text-muted)]">UF</span><p>{{ selecionada.uf }}</p></div>
+            <div><span class="text-[var(--text-muted)]">Potência</span><p>{{ formatarNumero(selecionada.potencia_mw) }} MW</p></div>
+            <div><span class="text-[var(--text-muted)]">Fase</span><p>{{ selecionada.fase }}</p></div>
+          </div>
+          <div v-if="selecionada.proprietarios" class="mt-3"><span class="text-xs text-[var(--text-muted)]">Proprietários / participação</span><p class="text-xs mt-1 line-clamp-4">{{ selecionada.proprietarios }}</p></div>
+          <div class="flex gap-2 mt-4">
+            <button type="button" class="btn-secondary btn-sm flex-1 justify-center" @click="verNoMapa(selecionada)">Ver no mapa</button>
+            <button @click="importar(selecionada)" class="btn-primary btn-sm flex-1 justify-center" :disabled="selecionada.lead_id || importando">{{ selecionada.lead_id ? 'No CRM' : importando ? 'Salvando...' : 'Levar ao CRM' }}</button>
+          </div>
         </div>
         <div class="overflow-y-auto flex-1 divide-y divide-[var(--border)]">
           <div v-if="loading" class="p-8 text-center text-sm text-[var(--text-muted)]">Carregando usinas...</div>
@@ -70,8 +93,8 @@
             <button class="btn-primary mt-4" @click="reinicializarMapa">Tentar novamente</button>
           </div>
         </div>
-        <div v-if="selecionada" class="absolute z-[650] right-3 top-3 w-[340px] max-w-[calc(100%-24px)] card p-4 shadow-2xl">
-          <button @click="selecionada = null" class="absolute right-3 top-3 text-[var(--text-muted)]"><XMarkIcon class="w-5 h-5" /></button>
+        <div v-if="selecionada" class="mapa-selection-desktop absolute z-[650] right-3 top-3 w-[340px] max-w-[calc(100%-24px)] card p-4 shadow-2xl">
+          <button @click="fecharSelecao" class="absolute right-3 top-3 text-[var(--text-muted)]"><XMarkIcon class="w-5 h-5" /></button>
           <p class="font-bold pr-8">{{ selecionada.nome }}</p>
           <p class="text-xs text-[var(--text-muted)] mt-1">{{ selecionada.codigo_ceg }}</p>
           <div v-if="selecionada.cnpjs_proprietarios?.length" class="mt-3">
@@ -168,11 +191,12 @@ function desenharMarcadores() {
 async function carregarResumo(){const {data}=await api.get('/mapa-ons/resumo'); resumo.value=data}
 async function carregar(){loading.value=true; try{const {data}=await api.get('/mapa-ons/usinas',{params:filtros}); usinas.value=data.data||[]; await nextTick(); if(!map) inicializarMapa(); desenharMarcadores()}catch(e){alert(e.response?.data?.message||'Não foi possível carregar as usinas.')}finally{loading.value=false}}
 async function sincronizar(){sincronizando.value=true; try{const {data}=await api.post('/mapa-ons/sincronizar'); alert(`${data.message} ${data.total||0} usinas disponíveis.`); await Promise.all([carregarResumo(),carregar()])}catch(e){alert(e.response?.data?.message||'Falha na sincronização.')}finally{sincronizando.value=false}}
-function selecionar(usina){selecionada.value=usina
-  cnpjSelecionado.value = usina.cnpj_principal || usina.cnpjs_proprietarios?.[0] || ''; verNoMapa(usina); desenharMarcadores()}
+async function selecionar(usina){selecionada.value=usina
+  cnpjSelecionado.value = usina.cnpj_principal || usina.cnpjs_proprietarios?.[0] || ''; desenharMarcadores(); await nextTick(); setTimeout(()=>verNoMapa(usina),80)}
+function fecharSelecao(){selecionada.value=null; desenharMarcadores()}
 function verNoMapa(usina){if(!map||!coordenadasValidas(usina))return; const lat=Number(usina.latitude),lng=Number(usina.longitude); map.invalidateSize(true); map.flyTo([lat,lng],15,{animate:true,duration:1.1}); const marker=markersById.get(usina.id); if(marker)setTimeout(()=>marker.openTooltip(),500)}
 function centralizarBrasil(){selecionada.value=null; if(!map){inicializarMapa();return} map.invalidateSize(true); map.flyTo([-15.78,-47.93],5,{animate:true,duration:.9}); desenharMarcadores()}
-async function importar(usina){importando.value=true; try{const {data}=await api.post(`/mapa-ons/usinas/${usina.id}/importar-lead`, { cnpj: cnpjSelecionado.value || usina.cnpj_principal || null }); usina.lead_id=data.lead.id; alert('Oportunidade adicionada ao funil do CRM.'); desenharMarcadores()}catch(e){alert(e.response?.data?.message||'Não foi possível importar para o CRM.')}finally{importando.value=false}}
+async function importar(usina){importando.value=true; fecharSelecao(); try{const {data}=await api.post(`/mapa-ons/usinas/${usina.id}/importar-lead`, { cnpj: cnpjSelecionado.value || usina.cnpj_principal || null }); usina.lead_id=data.lead.id; alert('Oportunidade adicionada ao funil do CRM.')}catch(e){alert(e.response?.data?.message||'Não foi possível importar para o CRM.')}finally{importando.value=false}}
 
 function formatarCnpj(value) {
   const digits = String(value || '').replace(/\D/g, '').slice(0, 14)
@@ -191,6 +215,7 @@ onBeforeUnmount(()=>destruirMapa())
 .mapa-close,.mapa-show{display:none}
 .mapa-ons-container{position:absolute;inset:0;width:100%;height:100%;min-height:540px;background:#0b0b12;z-index:0}
 .mapa-ons-canvas .leaflet-container{z-index:0}
+.mapa-selection-mobile{display:none}
 .leaflet-control-zoom a{background:#171724!important;color:#f8fafc!important;border-color:#2b2b45!important}
 .leaflet-control-attribution{background:rgba(9,9,16,.82)!important;color:#94a3b8!important}
 .leaflet-control-attribution a{color:#a5b4fc!important}
@@ -220,6 +245,8 @@ onBeforeUnmount(()=>destruirMapa())
   .mapa-ons-page .mapa-resultados{order:3;flex:1 1 auto;height:auto;min-height:0;overflow:hidden}
   .mapa-ons-page .mapa-resultados>div:first-child{flex:0 0 auto;padding:7px 9px}
   .mapa-ons-page .mapa-resultados .overflow-y-auto{min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .mapa-ons-page .mapa-selection-desktop{display:none!important}
+  .mapa-ons-page .mapa-selection-mobile{display:block;position:absolute;inset:49px 0 0;z-index:50;overflow-y:auto;padding:12px;background:var(--bg-card);box-shadow:0 -8px 24px rgba(0,0,0,.3);overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   .mapa-ons-page .mapa-kpis,.mapa-ons-page>p{display:none}
   .mapa-ons-container{min-height:0}
   .mapa-close,.mapa-show{display:none!important}

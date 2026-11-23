@@ -54,13 +54,33 @@
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-[360px_minmax(0,1fr)] gap-3 mapa-aneel-grid">
-      <div class="card overflow-hidden flex flex-col min-h-0 mapa-resultados">
+      <div class="card overflow-hidden relative flex flex-col min-h-0 mapa-resultados">
         <div class="p-3 border-b border-[var(--border)] flex items-center justify-between">
           <div>
             <p class="font-semibold text-sm">{{ registros.length }} resultados ANEEL</p>
             <p class="text-[11px] text-[var(--text-muted)]">Microgeração distribuída</p>
           </div>
           <button class="btn-secondary btn-sm" @click="carregar" :disabled="loading"><ArrowPathIcon class="w-4 h-4" :class="loading && 'animate-spin'" /></button>
+        </div>
+        <div v-if="selecionado" class="mapa-selection-mobile">
+          <button type="button" @click="fecharSelecao" class="absolute right-3 top-3 text-[var(--text-muted)]" aria-label="Fechar detalhes"><XMarkIcon class="w-5 h-5" /></button>
+          <p class="font-bold pr-8">{{ selecionado.nome }}</p>
+          <p class="text-xs text-[var(--text-muted)] mt-1">Fonte: ANEEL · {{ selecionado.codigo || 'sem código' }}</p>
+          <div class="grid grid-cols-2 gap-2 mt-3 text-xs">
+            <div><span class="text-[var(--text-muted)]">Município</span><p>{{ selecionado.municipio || '-' }}</p></div>
+            <div><span class="text-[var(--text-muted)]">UF</span><p>{{ selecionado.uf || '-' }}</p></div>
+            <div><span class="text-[var(--text-muted)]">Potência</span><p>{{ formatarNumero(selecionado.potencia_mw) }} MW</p></div>
+            <div><span class="text-[var(--text-muted)]">Classe/Fonte</span><p>{{ selecionado.classe || selecionado.fonte || '-' }}</p></div>
+            <div><span class="text-[var(--text-muted)]">CNPJ</span><p>{{ formatarCnpj(selecionado.cnpj_principal) || '-' }}</p></div>
+            <div><span class="text-[var(--text-muted)]">Contato</span><p>Enriquecer pelo CRM</p></div>
+          </div>
+          <div v-if="selecionado.titular" class="mt-3"><span class="text-xs text-[var(--text-muted)]">Titular</span><p class="text-xs mt-1 line-clamp-3">{{ selecionado.titular }}</p></div>
+          <div v-if="selecionado.distribuidora" class="mt-3"><span class="text-xs text-[var(--text-muted)]">Distribuidora</span><p class="text-xs mt-1">{{ selecionado.distribuidora }}</p></div>
+          <p class="mt-3 text-xs text-amber-400">{{ selecionado.contato?.observacao || 'Contato direto não informado pela ANEEL.' }}</p>
+          <div class="flex gap-2 mt-4">
+            <button type="button" class="btn-secondary btn-sm flex-1 justify-center" @click="verNoMapa(selecionado)">Ver no mapa</button>
+            <button type="button" class="btn-primary btn-sm flex-1 justify-center" :disabled="importando" @click="enviarCrm(selecionado)">{{ importando ? 'Enviando...' : 'Enviar ao CRM' }}</button>
+          </div>
         </div>
         <div class="overflow-y-auto flex-1 divide-y divide-[var(--border)]">
           <div v-if="loading" class="p-8 text-center text-sm text-[var(--text-muted)]">Consultando ANEEL...</div>
@@ -96,8 +116,8 @@
             <button class="btn-primary mt-4" @click="reinicializarMapa">Tentar novamente</button>
           </div>
         </div>
-        <div v-if="selecionado" class="absolute z-[650] right-3 top-3 w-[360px] max-w-[calc(100%-24px)] card p-4 shadow-2xl">
-          <button @click="selecionado = null" class="absolute right-3 top-3 text-[var(--text-muted)]"><XMarkIcon class="w-5 h-5" /></button>
+        <div v-if="selecionado" class="mapa-selection-desktop absolute z-[650] right-3 top-3 w-[360px] max-w-[calc(100%-24px)] card p-4 shadow-2xl">
+          <button @click="fecharSelecao" class="absolute right-3 top-3 text-[var(--text-muted)]"><XMarkIcon class="w-5 h-5" /></button>
           <p class="font-bold pr-8">{{ selecionado.nome }}</p>
           <p class="text-xs text-[var(--text-muted)] mt-1">Fonte: ANEEL · {{ selecionado.codigo || 'sem código' }}</p>
           <div class="grid grid-cols-2 gap-2 mt-3 text-xs">
@@ -247,6 +267,7 @@ function limparTipo() {
 
 async function enviarCrm(item) {
   importando.value = true
+  fecharSelecao()
   try {
     const { data } = await api.post('/mapa-aneel/importar-lead', item)
     alert(data.message || 'Registro enviado ao CRM.')
@@ -277,7 +298,8 @@ function preencherCidades(cidades) {
     .sort((a, b) => String(a).localeCompare(String(b), 'pt-BR'))
 }
 
-function selecionar(item){selecionado.value=item; verNoMapa(item); desenharMarcadores()}
+async function selecionar(item){selecionado.value=item; desenharMarcadores(); await nextTick(); setTimeout(()=>verNoMapa(item),80)}
+function fecharSelecao(){selecionado.value=null; desenharMarcadores()}
 function verNoMapa(item){if(!map||!coordenadasValidas(item))return; const lat=Number(item.latitude),lng=Number(item.longitude); map.invalidateSize(true); map.flyTo([lat,lng],15,{animate:true,duration:1.1}); const marker=markersById.get(item.id); if(marker)setTimeout(()=>marker.openTooltip(),500)}
 function centralizarBrasil(){selecionado.value=null; if(!map){inicializarMapa();return} map.invalidateSize(true); map.flyTo([-15.78,-47.93],5,{animate:true,duration:.9}); desenharMarcadores()}
 function formatarNumero(v){return Number(v||0).toLocaleString('pt-BR',{maximumFractionDigits:2})}
@@ -295,6 +317,7 @@ onBeforeUnmount(()=>destruirMapa())
 .mapa-aneel-container{position:absolute;inset:0;width:100%;height:100%;min-height:540px;background:#0b0b12;z-index:0}
 .mapa-aneel-canvas .leaflet-container{z-index:0}
 .mapa-aneel-grid .overflow-y-auto{overscroll-behavior:contain}
+.mapa-selection-mobile{display:none}
 .leaflet-control-zoom a{background:#171724!important;color:#f8fafc!important;border-color:#2b2b45!important}
 .leaflet-control-attribution{background:rgba(9,9,16,.82)!important;color:#94a3b8!important}
 .leaflet-control-attribution a{color:#a5b4fc!important}
@@ -329,6 +352,8 @@ onBeforeUnmount(()=>destruirMapa())
   .mapa-aneel-page .mapa-resultados{order:3;flex:1 1 auto;height:auto;min-height:0;overflow:hidden}
   .mapa-aneel-page .mapa-resultados>div:first-child{flex:0 0 auto;padding:7px 9px}
   .mapa-aneel-page .mapa-resultados .overflow-y-auto{min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .mapa-aneel-page .mapa-selection-desktop{display:none!important}
+  .mapa-aneel-page .mapa-selection-mobile{display:block;position:absolute;inset:49px 0 0;z-index:50;overflow-y:auto;padding:12px;background:var(--bg-card);box-shadow:0 -8px 24px rgba(0,0,0,.3);overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   .mapa-aneel-page .mapa-kpis,.mapa-aneel-page>p{display:none}
   .mapa-aneel-container{min-height:0}
   .mapa-close,.mapa-show{display:none!important}
