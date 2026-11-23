@@ -21,7 +21,7 @@
           class="erp-home-link flex items-center gap-3 overflow-hidden w-full"
           aria-label="Ir para o início do ERP"
           title="Início do ERP"
-          @click="topMenuAberto = null"
+          @click="irParaInicio"
         >
           <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center flex-shrink-0 shadow-glow-sm">
             <span class="text-white font-bold text-sm">IT</span>
@@ -375,6 +375,18 @@ function alternarTema() {
 function alternarMenuSuperior(id) {
   topMenuAberto.value = topMenuAberto.value === id ? null : id
   notifAberta.value = false
+}
+
+function irParaInicio() {
+  topMenuAberto.value = null
+  menuLateralAberto.value = null
+  notifAberta.value = false
+
+  if (window.innerWidth < 768) {
+    sidebarAberta.value = false
+  }
+
+  window.dispatchEvent(new CustomEvent('erp:home'))
 }
 
 const topMenus = computed(() => [

@@ -450,6 +450,14 @@ async function selecionarAbaMobile(aba) {
   window.dispatchEvent(new Event('resize'))
 }
 
+async function voltarAoInicioDashboard() {
+  abaMobile.value = 'mapa'
+  mapaMobileVisivel.value = true
+  document.querySelector('.app-content')?.scrollTo({ top: 0, behavior: 'smooth' })
+  await nextTick()
+  salesMap?.invalidateSize(true)
+}
+
 async function mostrarMapaMobile() {
   mapaMobileVisivel.value = true
   await nextTick()
@@ -722,13 +730,17 @@ async function recarregar() {
 }
 
 onMounted(async () => {
+  window.addEventListener('erp:home', voltarAoInicioDashboard)
   await recarregar()
   await nextTick()
   inicializarMapaVendas()
   await carregarMapaVendas()
 })
 
-onBeforeUnmount(() => destruirMapaVendas())
+onBeforeUnmount(() => {
+  window.removeEventListener('erp:home', voltarAoInicioDashboard)
+  destruirMapaVendas()
+})
 </script>
 
 
