@@ -293,7 +293,7 @@
       <main
         :class="[
           'app-content flex-1 overflow-y-auto bg-[var(--bg-base)] p-6',
-          rotaFrenteCaixa && 'app-content-pdv',
+          rotaPdvOperacional && 'app-content-pdv',
         ]"
       >
         <RouterView v-slot="{ Component, route }">
@@ -358,8 +358,8 @@ const menuLateralAberto = ref(null)
 const tema = ref(auth.usuario?.tema || 'dark')
 const emTelaCheia = ref(false)
 
-const rotaFrenteCaixa = computed(() => route.path === '/pdv')
-const modoPdvDedicado = computed(() => rotaFrenteCaixa.value && emTelaCheia.value && window.innerWidth >= 768)
+const rotaPdvOperacional = computed(() => route.path === '/pdv' || route.name === 'fiscal.nfse')
+const modoPdvDedicado = computed(() => rotaPdvOperacional.value && emTelaCheia.value && window.innerWidth >= 768)
 
 function atualizarEstadoTelaCheia() {
   const telaCheiaDaApi = Boolean(document.fullscreenElement)
@@ -728,6 +728,12 @@ onUnmounted(() => {
   border: 0;
   border-radius: 0;
   box-shadow: none;
+}
+
+.pdv-kiosk :deep(.nfse-page) {
+  height: 100dvh;
+  overflow-y: auto;
+  padding: 20px;
 }
 
 .app-header {
