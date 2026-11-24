@@ -121,6 +121,7 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('sistema')->group(function () {
             Route::get('diagnostico', [SystemLogController::class, 'diagnostics']);
+            Route::get('infraestrutura', [SystemLogController::class, 'infrastructure']);
             Route::get('logs', [SystemLogController::class, 'index']);
         });
 

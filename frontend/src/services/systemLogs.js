@@ -6,6 +6,11 @@ export const systemLogsService = {
     return data
   },
 
+  async infrastructure() {
+    const { data } = await api.get('/sistema/infraestrutura')
+    return data
+  },
+
   async logs(params = {}) {
     const { data } = await api.get('/sistema/logs', { params })
     return data

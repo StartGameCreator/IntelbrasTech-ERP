@@ -9,6 +9,10 @@ x-app: &app
     - app_storage:/var/www/html/storage
   networks:
     - intelbrastech_net
+  environment:
+    DOCKER_MONITOR_URL: http://docker-proxy:2375
+    NODE_EXPORTER_URL: http://node-exporter:9100
+    INFRA_MONITOR_TIMEOUT: 3
 
 services:
   app:
@@ -114,6 +118,50 @@ services:
   mailpit:
     image: ghcr.io/axllent/mailpit:v1.33.1
     restart: unless-stopped
+    networks:
+      - intelbrastech_net
+
+  # Expõe ao ERP somente consultas GET previamente autorizadas da API Docker.
+  # O socket nunca é montado no container da aplicação.
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy:3.4
+    restart: unless-stopped
+    environment:
+      CONTAINERS: 1
+      INFO: 1
+      PING: 1
+      VERSION: 1
+      POST: 0
+      LOG_LEVEL: warning
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64m
+    cpus: 0.10
+    networks:
+      - intelbrastech_net
+
+  # Métricas somente-leitura do host Linux/KVM. Não publica portas na internet.
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:v1.12.1
+    restart: unless-stopped
+    command:
+      - --path.rootfs=/host
+      - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/containers/storage/.+)($|/)
+    pid: host
+    uts: host
+    volumes:
+      - /:/host:ro,rslave
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    cpus: 0.20
     networks:
       - intelbrastech_net
 

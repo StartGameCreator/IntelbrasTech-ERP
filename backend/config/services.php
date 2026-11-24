@@ -52,4 +52,10 @@ return [
         'user_agent' => env('NUVEMSHOP_USER_AGENT', 'IntelbrasTech ERP (suporte@intelbrastech.com.br)'),
     ],
 
+    'infrastructure_monitor' => [
+        'docker_url' => env('DOCKER_MONITOR_URL', ''),
+        'node_exporter_url' => env('NODE_EXPORTER_URL', ''),
+        'timeout' => (float) env('INFRA_MONITOR_TIMEOUT', 3),
+    ],
+
 ];

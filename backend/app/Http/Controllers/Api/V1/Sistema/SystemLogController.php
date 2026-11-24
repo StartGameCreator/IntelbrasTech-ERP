@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Sistema;
 
 use App\Http\Controllers\Controller;
+use App\Services\Sistema\InfrastructureMonitor;
 use App\Services\Sistema\SystemLogReader;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,8 +13,10 @@ use Illuminate\Support\Facades\Schema;
 
 class SystemLogController extends Controller
 {
-    public function __construct(private readonly SystemLogReader $reader)
-    {
+    public function __construct(
+        private readonly SystemLogReader $reader,
+        private readonly InfrastructureMonitor $infrastructureMonitor,
+    ) {
     }
 
     public function index(Request $request): JsonResponse
@@ -111,6 +114,13 @@ class SystemLogController extends Controller
             'recent' => $recent,
             'checks' => $checks,
         ]);
+    }
+
+    public function infrastructure(Request $request): JsonResponse
+    {
+        $this->authorizeAdministrator($request);
+
+        return response()->json($this->infrastructureMonitor->snapshot());
     }
 
     private function authorizeAdministrator(Request $request): void
