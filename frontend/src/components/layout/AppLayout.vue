@@ -420,7 +420,7 @@ const topMenus = computed(() => [
     id: 'principal',
     label: 'Início',
     items: [
-      { to: '/dashboard', label: 'Dashboards', description: 'Visão geral e análises do ERP', icon: ChartBarIcon },
+      { to: '/dashboard', label: 'Dashboard Executivo', description: 'Todos os indicadores do ERP em uma única tela', icon: ChartBarIcon },
       { to: '/comercial', label: 'Central Comercial', description: 'Pedidos e desempenho comercial', icon: ShoppingBagIcon },
       { to: '/mapa', label: 'Mapa ONS', description: 'Mapa operacional', icon: MapIcon },
       { to: '/mapa-aneel', label: 'Mapa ANEEL', description: 'Microgeração distribuída', icon: MapIcon },
@@ -539,28 +539,11 @@ const menuGrupos = computed(() => [
   {
     label: 'Principal',
     items: [
-            {
-        to: '/dashboards',
-        label: 'Dashboards',
+      {
+        to: '/dashboard',
+        label: 'Dashboard Executivo',
         icon: ChartBarIcon,
-        name: 'dashboards',
-        children: [
-          { to: '/dashboard', label: 'Dashboard Geral', name: 'dashboards.geral' },
-          { to: '/dashboards/mensal', label: 'Mensal', name: 'dashboards.mensal' },
-          { to: '/dashboards/diario', label: 'Diário', name: 'dashboards.diario' },
-          { to: '/dashboards/vendas', label: 'Vendas', name: 'dashboards.vendas' },
-          { to: '/dashboards/pedidos-venda', label: 'Pedidos de Venda', name: 'dashboards.pedidos' },
-          { to: '/dashboards/venda-vendedor', label: 'Venda por Vendedor', name: 'dashboards.vendedor' },
-          { to: '/dashboards/venda-canal-24-meses', label: 'Vendas por canal (24 meses)', name: 'dashboards.canal' },
-          { to: '/dashboards/previsao-estoque', label: 'Previsão de Estoque', name: 'dashboards.previsao' },
-          { to: '/dashboards/produtos', label: 'Produtos', name: 'dashboards.produtos' },
-          { to: '/dashboards/estoque-produtos', label: 'Estoque de Produtos', name: 'dashboards.estoque' },
-          { to: '/dashboards/sugestao-compras', label: 'Sugestão de Compras', name: 'dashboards.compras' },
-          { to: '/dashboards/sem-movimentacao', label: 'Sem Movimentação', name: 'dashboards.sem-movimento' },
-          { to: '/dashboards/clientes', label: 'Clientes', name: 'dashboards.clientes' },
-          { to: '/dashboards/novos-recorrentes', label: 'Novos x Recorrentes', name: 'dashboards.recorrentes' },
-          { to: '/dashboards/atividade-carteira', label: 'Atividade da Carteira', name: 'dashboards.carteira' },
-        ],
+        name: 'dashboard',
       },
       { to: '/mapa', label: 'Mapa ONS', icon: MapIcon, name: 'mapa' },
       { to: '/mapa-aneel', label: 'Mapa ANEEL', icon: MapIcon, name: 'mapa.aneel' },

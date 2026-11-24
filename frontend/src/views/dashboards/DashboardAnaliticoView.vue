@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboards-page" :class="{'sales-dashboard': ehVendas}">
+  <div class="dashboards-page" :class="{'sales-dashboard': ehVendas, 'is-embedded': embedded}">
     <header class="page-header">
       <div>
         <div class="dashboard-breadcrumb">
@@ -150,12 +150,20 @@ import {
   PresentationChartLineIcon, TruckIcon, BanknotesIcon
 } from '@heroicons/vue/24/outline'
 
+const props = defineProps({
+  dashboardKey: { type: String, default: '' },
+  dashboardPeriodo: { type: String, default: '' },
+  embedded: { type: Boolean, default: false },
+})
+
 const route = useRoute()
 const toast = useToast()
-const periodo = ref(route.meta.dashboardPeriodo || '30d')
+const chaveAtiva = computed(() => props.dashboardKey || route.meta.dashboardKey || 'geral')
+const periodoPadrao = computed(() => props.dashboardPeriodo || route.meta.dashboardPeriodo || '30d')
+const periodo = ref(periodoPadrao.value)
 const carregando = ref(false)
 const dadosApi = ref(null)
-const ehVendas = computed(() => route.meta.dashboardKey === 'vendas')
+const ehVendas = computed(() => chaveAtiva.value === 'vendas')
 
 const icons = {
   vendas: markRaw(CurrencyDollarIcon),
@@ -172,206 +180,40 @@ const icons = {
 }
 
 const paineis = {
-  geral: {
-    titulo:'Dashboard', descricao:'Visão consolidada dos principais indicadores do ERP.',
-    cards:[
-      {label:'Faturamento',valor:'R$ 248.930,00',variacao:'+12,4%',icon:icons.vendas},
-      {label:'Pedidos',valor:'1.284',variacao:'+8,1%',icon:icons.pedidos},
-      {label:'Ticket médio',valor:'R$ 193,87',variacao:'+3,6%',icon:icons.financeiro},
-      {label:'Clientes ativos',valor:'842',variacao:'+5,2%',icon:icons.clientes},
-    ],
-    graficoTitulo:'Evolução do faturamento',graficoDescricao:'Comparativo dos últimos períodos.',
-    rankingTitulo:'Canais de venda',rankingDescricao:'Participação no faturamento.',
-    tabelaTitulo:'Resumo operacional',tabelaDescricao:'Indicadores recentes por área.',
-  },
-  mensal: {
-    titulo:'Dashboard Mensal',descricao:'Consolidação mensal de vendas, margens e operações.',
-    cards:[
-      {label:'Faturamento do mês',valor:'R$ 248.930,00',variacao:'+12,4%',icon:icons.vendas},
-      {label:'Margem estimada',valor:'31,8%',variacao:'+2,1%',icon:icons.grafico},
-      {label:'Pedidos no mês',valor:'1.284',variacao:'+8,1%',icon:icons.pedidos},
-      {label:'Despesas',valor:'R$ 74.320,00',variacao:'-4,3%',icon:icons.financeiro},
-    ],
-    graficoTitulo:'Fechamento mensal',graficoDescricao:'Receita acumulada por semana.',
-    rankingTitulo:'Categorias no mês',rankingDescricao:'Produtos com maior participação.',
-    tabelaTitulo:'Resultados mensais',tabelaDescricao:'Resumo por centro de resultado.',
-  },
-  diario: {
-    titulo:'Dashboard Diário',descricao:'Acompanhamento em tempo real da operação do dia.',
-    cards:[
-      {label:'Vendas hoje',valor:'R$ 18.430,00',variacao:'+9,8%',icon:icons.vendas},
-      {label:'Pedidos hoje',valor:'96',variacao:'+7,2%',icon:icons.pedidos},
-      {label:'Separações pendentes',valor:'14',variacao:'-3',icon:icons.estoque},
-      {label:'Entregas postadas',valor:'38',variacao:'+11',icon:icons.entrega},
-    ],
-    graficoTitulo:'Vendas por hora',graficoDescricao:'Movimento comercial ao longo do dia.',
-    rankingTitulo:'Produtos do dia',rankingDescricao:'Itens mais vendidos hoje.',
-    tabelaTitulo:'Atividade do dia',tabelaDescricao:'Últimos eventos registrados.',
-  },
-  vendas: {
-    titulo:'Dashboard de Vendas',descricao:'Análise comercial completa por período, canal e carteira.',
-    cards:[
-      {label:'Receita de vendas',valor:'R$ 248.930,00',variacao:'+12,4%',icon:icons.vendas},
-      {label:'Pedidos aprovados',valor:'1.216',variacao:'+8,1%',icon:icons.pedidos},
-      {label:'Conversão',valor:'26,4%',variacao:'+1,9%',icon:icons.grafico},
-      {label:'Ticket médio',valor:'R$ 204,71',variacao:'+3,6%',icon:icons.financeiro},
-    ],
-    graficoTitulo:'Curva de vendas',graficoDescricao:'Evolução da receita no período.',
-    rankingTitulo:'Ranking comercial',rankingDescricao:'Canais e vendedores com melhor resultado.',
-    tabelaTitulo:'Vendas recentes',tabelaDescricao:'Pedidos mais recentes do período.',
-  },
-  pedidos: {
-    titulo:'Pedidos de Venda',descricao:'Indicadores de volume, status e atendimento dos pedidos.',
-    cards:[
-      {label:'Pedidos abertos',valor:'184',variacao:'+14',icon:icons.pedidos},
-      {label:'Aprovados',valor:'1.216',variacao:'+8,1%',icon:icons.grafico},
-      {label:'Cancelados',valor:'31',variacao:'-2,4%',icon:icons.tempo},
-      {label:'Prazo médio',valor:'1,8 dias',variacao:'-0,3 dia',icon:icons.entrega},
-    ],
-    graficoTitulo:'Pedidos por status',graficoDescricao:'Distribuição ao longo do período.',
-    rankingTitulo:'Origem dos pedidos',rankingDescricao:'Canais com maior volume.',
-    tabelaTitulo:'Pedidos em atenção',tabelaDescricao:'Pedidos com atraso ou pendências.',
-  },
-  vendedor: {
-    titulo:'Venda por Vendedor',descricao:'Desempenho individual e metas da equipe comercial.',
-    cards:[
-      {label:'Vendedores ativos',valor:'12',variacao:'+1',icon:icons.vendedor},
-      {label:'Meta atingida',valor:'78,6%',variacao:'+5,2%',icon:icons.grafico},
-      {label:'Comissões',valor:'R$ 18.420,00',variacao:'+9,1%',icon:icons.financeiro},
-      {label:'Novos clientes',valor:'96',variacao:'+14,3%',icon:icons.clientes},
-    ],
-    graficoTitulo:'Vendas da equipe',graficoDescricao:'Resultado por vendedor.',
-    rankingTitulo:'Ranking de vendedores',rankingDescricao:'Receita e conversão individual.',
-    tabelaTitulo:'Detalhamento por vendedor',tabelaDescricao:'Metas, vendas e carteira.',
-  },
-  canal: {
-    titulo:'Venda Canal (24 meses)',descricao:'Histórico de vendas por canal nos últimos 24 meses.',
-    cards:[
-      {label:'Receita 24 meses',valor:'R$ 5,82 mi',variacao:'+21,6%',icon:icons.vendas},
-      {label:'Marketplaces',valor:'46,8%',variacao:'+7,2%',icon:icons.grafico},
-      {label:'Loja própria',valor:'31,5%',variacao:'+3,1%',icon:icons.pedidos},
-      {label:'PDV',valor:'21,7%',variacao:'-1,8%',icon:icons.financeiro},
-    ],
-    graficoTitulo:'Histórico por canal',graficoDescricao:'Comparativo dos últimos 24 meses.',
-    rankingTitulo:'Canais com maior crescimento',rankingDescricao:'Variação acumulada.',
-    tabelaTitulo:'Desempenho dos canais',tabelaDescricao:'Receita, pedidos e ticket médio.',
-  },
-  previsao: {
-    titulo:'Previsão de Estoque',descricao:'Projeção de ruptura e cobertura baseada no consumo.',
-    cards:[
-      {label:'Risco de ruptura',valor:'27 itens',variacao:'-6',icon:icons.estoque},
-      {label:'Cobertura média',valor:'42 dias',variacao:'+4 dias',icon:icons.grafico},
-      {label:'Estoque projetado',valor:'R$ 812 mil',variacao:'+2,8%',icon:icons.financeiro},
-      {label:'Compras sugeridas',valor:'R$ 96.430',variacao:'18 pedidos',icon:icons.compras},
-    ],
-    graficoTitulo:'Cobertura projetada',graficoDescricao:'Dias de cobertura por período.',
-    rankingTitulo:'Produtos críticos',rankingDescricao:'Maior risco de ruptura.',
-    tabelaTitulo:'Projeção de reposição',tabelaDescricao:'Itens com necessidade de compra.',
-  },
-  produtos: {
-    titulo:'Dashboard de Produtos',descricao:'Desempenho comercial e operacional do catálogo.',
-    cards:[
-      {label:'Produtos ativos',valor:'8.426',variacao:'+126',icon:icons.produtos},
-      {label:'Com vendas',valor:'4.812',variacao:'+8,4%',icon:icons.grafico},
-      {label:'Margem média',valor:'29,7%',variacao:'+1,3%',icon:icons.financeiro},
-      {label:'Sem cadastro fiscal',valor:'84',variacao:'-21',icon:icons.tempo},
-    ],
-    graficoTitulo:'Performance do catálogo',graficoDescricao:'Produtos vendidos por período.',
-    rankingTitulo:'Produtos líderes',rankingDescricao:'Receita e quantidade vendida.',
-    tabelaTitulo:'Saúde do catálogo',tabelaDescricao:'Produtos com cadastro incompleto ou pendências.',
-  },
-  estoque: {
-    titulo:'Estoque de Produtos',descricao:'Posição de estoque, valor e disponibilidade por depósito.',
-    cards:[
-      {label:'Valor em estoque',valor:'R$ 812.450',variacao:'+2,8%',icon:icons.financeiro},
-      {label:'Itens disponíveis',valor:'38.214',variacao:'+1.420',icon:icons.estoque},
-      {label:'Abaixo do mínimo',valor:'146',variacao:'-18',icon:icons.tempo},
-      {label:'Depósitos',valor:'5',variacao:'Atualizado',icon:icons.produtos},
-    ],
-    graficoTitulo:'Valor do estoque',graficoDescricao:'Evolução do capital armazenado.',
-    rankingTitulo:'Maior valor em estoque',rankingDescricao:'Produtos com maior capital imobilizado.',
-    tabelaTitulo:'Posição por produto',tabelaDescricao:'Saldo, reserva e disponibilidade.',
-  },
-  compras: {
-    titulo:'Sugestão de Compras',descricao:'Reposição sugerida com base em giro, estoque e previsão.',
-    cards:[
-      {label:'Itens sugeridos',valor:'128',variacao:'+23',icon:icons.compras},
-      {label:'Valor previsto',valor:'R$ 96.430',variacao:'+7,1%',icon:icons.financeiro},
-      {label:'Fornecedores',valor:'34',variacao:'+4',icon:icons.entrega},
-      {label:'Urgentes',valor:'19',variacao:'-3',icon:icons.tempo},
-    ],
-    graficoTitulo:'Necessidade de compra',graficoDescricao:'Valor sugerido por semana.',
-    rankingTitulo:'Fornecedores prioritários',rankingDescricao:'Maior volume sugerido.',
-    tabelaTitulo:'Lista de compra sugerida',tabelaDescricao:'Produtos e quantidades recomendadas.',
-  },
-  semMovimento: {
-    titulo:'Produtos sem Movimentação',descricao:'Itens parados e capital sem giro.',
-    cards:[
-      {label:'Sem movimento 90 dias',valor:'326',variacao:'-18',icon:icons.tempo},
-      {label:'Capital parado',valor:'R$ 184.200',variacao:'-3,6%',icon:icons.financeiro},
-      {label:'Acima de 180 dias',valor:'104',variacao:'-9',icon:icons.estoque},
-      {label:'Sugestão de liquidação',valor:'72',variacao:'+12',icon:icons.grafico},
-    ],
-    graficoTitulo:'Tempo sem movimento',graficoDescricao:'Distribuição por faixa de dias.',
-    rankingTitulo:'Maior capital parado',rankingDescricao:'Itens sem giro com maior valor.',
-    tabelaTitulo:'Produtos sem movimentação',tabelaDescricao:'Saldo, custo e última saída.',
-  },
-  clientes: {
-    titulo:'Dashboard de Clientes',descricao:'Base ativa, comportamento e valor da carteira.',
-    cards:[
-      {label:'Clientes ativos',valor:'842',variacao:'+5,2%',icon:icons.clientes},
-      {label:'Novos no período',valor:'96',variacao:'+14,3%',icon:icons.vendedor},
-      {label:'Ticket médio',valor:'R$ 284,20',variacao:'+6,4%',icon:icons.financeiro},
-      {label:'Inativos',valor:'138',variacao:'-12',icon:icons.tempo},
-    ],
-    graficoTitulo:'Evolução da carteira',graficoDescricao:'Novos clientes e recorrência.',
-    rankingTitulo:'Clientes por faturamento',rankingDescricao:'Maiores compradores do período.',
-    tabelaTitulo:'Carteira de clientes',tabelaDescricao:'Atividade e potencial comercial.',
-  },
-  recorrentes: {
-    titulo:'Clientes Novos x Recorrentes',descricao:'Comparativo de aquisição e retenção da carteira.',
-    cards:[
-      {label:'Novos clientes',valor:'96',variacao:'+14,3%',icon:icons.vendedor},
-      {label:'Recorrentes',valor:'746',variacao:'+4,1%',icon:icons.clientes},
-      {label:'Taxa de recompra',valor:'58,7%',variacao:'+3,8%',icon:icons.grafico},
-      {label:'Receita recorrente',valor:'R$ 162.430',variacao:'+9,6%',icon:icons.financeiro},
-    ],
-    graficoTitulo:'Aquisição x recorrência',graficoDescricao:'Composição mensal da carteira.',
-    rankingTitulo:'Segmentos recorrentes',rankingDescricao:'Perfis com maior recompra.',
-    tabelaTitulo:'Comportamento da carteira',tabelaDescricao:'Clientes e frequência de compra.',
-  },
-  carteira: {
-    titulo:'Atividade da Carteira',descricao:'Interações, oportunidades e clientes sem contato.',
-    cards:[
-      {label:'Contatos no período',valor:'428',variacao:'+18,2%',icon:icons.vendedor},
-      {label:'Oportunidades abertas',valor:'86',variacao:'+11',icon:icons.grafico},
-      {label:'Sem contato 30 dias',valor:'174',variacao:'-22',icon:icons.tempo},
-      {label:'Potencial estimado',valor:'R$ 384 mil',variacao:'+7,4%',icon:icons.financeiro},
-    ],
-    graficoTitulo:'Atividade comercial',graficoDescricao:'Contatos e oportunidades por período.',
-    rankingTitulo:'Carteiras mais ativas',rankingDescricao:'Vendedores e clientes movimentados.',
-    tabelaTitulo:'Clientes para abordagem',tabelaDescricao:'Carteira com prioridade de contato.',
-  },
+  geral: {titulo:'Dashboard', descricao:'Visão consolidada dos principais indicadores do ERP.', graficoTitulo:'Evolução do faturamento', graficoDescricao:'Comparativo dos últimos períodos.', rankingTitulo:'Canais de venda', rankingDescricao:'Participação no faturamento.', tabelaTitulo:'Resumo operacional', tabelaDescricao:'Indicadores recentes por área.'},
+  mensal: {titulo:'Dashboard Mensal', descricao:'Consolidação mensal de vendas e operações.', graficoTitulo:'Fechamento mensal', graficoDescricao:'Receita acumulada por semana.', rankingTitulo:'Canais no mês', rankingDescricao:'Participação no faturamento.', tabelaTitulo:'Resultados mensais', tabelaDescricao:'Pedidos registrados no período.'},
+  diario: {titulo:'Dashboard Diário', descricao:'Acompanhamento em tempo real da operação do dia.', graficoTitulo:'Vendas por hora', graficoDescricao:'Movimento comercial ao longo do dia.', rankingTitulo:'Canais do dia', rankingDescricao:'Origem das vendas de hoje.', tabelaTitulo:'Atividade do dia', tabelaDescricao:'Últimos pedidos registrados.'},
+  vendas: {titulo:'Dashboard de Vendas', descricao:'Análise comercial completa por período, canal e carteira.', graficoTitulo:'Curva de vendas', graficoDescricao:'Evolução da receita no período.', rankingTitulo:'Ranking comercial', rankingDescricao:'Canais com melhor resultado.', tabelaTitulo:'Vendas recentes', tabelaDescricao:'Pedidos mais recentes do período.'},
+  pedidos: {titulo:'Pedidos de Venda', descricao:'Indicadores de volume, status e atendimento dos pedidos.', graficoTitulo:'Evolução dos pedidos', graficoDescricao:'Movimento ao longo do período.', rankingTitulo:'Origem dos pedidos', rankingDescricao:'Canais com maior volume.', tabelaTitulo:'Pedidos recentes', tabelaDescricao:'Últimos pedidos do período.'},
+  vendedor: {titulo:'Venda por Vendedor', descricao:'Desempenho individual da equipe comercial.', graficoTitulo:'Vendas da equipe', graficoDescricao:'Evolução das vendas no período.', rankingTitulo:'Ranking de vendedores', rankingDescricao:'Receita e pedidos por vendedor.', tabelaTitulo:'Detalhamento por vendedor', tabelaDescricao:'Pedidos, faturamento e ticket médio.'},
+  canal: {titulo:'Venda por Canal', descricao:'Histórico de vendas por canal nos últimos 24 meses.', graficoTitulo:'Histórico por canal', graficoDescricao:'Comparativo dos últimos 24 meses.', rankingTitulo:'Canais por faturamento', rankingDescricao:'Receita acumulada por origem.', tabelaTitulo:'Desempenho dos canais', tabelaDescricao:'Pedidos recentes por canal.'},
+  previsao: {titulo:'Previsão de Estoque', descricao:'Posição real para apoiar o planejamento de reposição.', graficoTitulo:'Movimento comercial', graficoDescricao:'Vendas do período selecionado.', rankingTitulo:'Produtos em estoque', rankingDescricao:'Disponibilidade atual por produto.', tabelaTitulo:'Projeção de reposição', tabelaDescricao:'Produtos e saldos atuais.'},
+  produtos: {titulo:'Dashboard de Produtos', descricao:'Desempenho comercial e operacional do catálogo.', graficoTitulo:'Performance do catálogo', graficoDescricao:'Vendas por período.', rankingTitulo:'Produtos líderes', rankingDescricao:'Receita e quantidade vendida.', tabelaTitulo:'Posição dos produtos', tabelaDescricao:'Disponibilidade e valor em estoque.'},
+  estoque: {titulo:'Estoque de Produtos', descricao:'Posição de estoque, valor e disponibilidade.', graficoTitulo:'Movimento comercial', graficoDescricao:'Vendas no período selecionado.', rankingTitulo:'Maior valor em estoque', rankingDescricao:'Produtos com maior capital armazenado.', tabelaTitulo:'Posição por produto', tabelaDescricao:'Saldo disponível e valor em estoque.'},
+  compras: {titulo:'Sugestão de Compras', descricao:'Apoio à reposição com base na posição real de estoque.', graficoTitulo:'Movimento comercial', graficoDescricao:'Vendas no período selecionado.', rankingTitulo:'Produtos para análise', rankingDescricao:'Disponibilidade atual por produto.', tabelaTitulo:'Lista para análise de compra', tabelaDescricao:'Produtos, saldos e valores atuais.'},
+  semMovimento: {titulo:'Produtos sem Movimentação', descricao:'Visão do capital armazenado para análise de giro.', graficoTitulo:'Movimento comercial', graficoDescricao:'Vendas no período selecionado.', rankingTitulo:'Maior capital armazenado', rankingDescricao:'Produtos por valor atual em estoque.', tabelaTitulo:'Produtos para análise', tabelaDescricao:'Saldo e valor atual em estoque.'},
+  clientes: {titulo:'Dashboard de Clientes', descricao:'Base ativa, comportamento e valor da carteira.', graficoTitulo:'Evolução da carteira', graficoDescricao:'Vendas ao longo do período.', rankingTitulo:'Clientes por faturamento', rankingDescricao:'Maiores compradores do período.', tabelaTitulo:'Carteira de clientes', tabelaDescricao:'Pedidos e faturamento por cliente.'},
+  recorrentes: {titulo:'Clientes Novos x Recorrentes', descricao:'Comparativo da atividade real da carteira.', graficoTitulo:'Evolução comercial', graficoDescricao:'Receita ao longo do período.', rankingTitulo:'Clientes recorrentes', rankingDescricao:'Clientes por pedidos e faturamento.', tabelaTitulo:'Comportamento da carteira', tabelaDescricao:'Frequência e valor de compra.'},
+  carteira: {titulo:'Atividade da Carteira', descricao:'Movimentação comercial dos clientes cadastrados.', graficoTitulo:'Atividade comercial', graficoDescricao:'Receita ao longo do período.', rankingTitulo:'Carteiras mais ativas', rankingDescricao:'Clientes com maior movimentação.', tabelaTitulo:'Clientes para acompanhamento', tabelaDescricao:'Pedidos e faturamento no período.'},
 }
 
-const baseSerie = [
-  {label:'Jan',percentual:42,valorLabel:'42k'}, {label:'Fev',percentual:55,valorLabel:'55k'},
-  {label:'Mar',percentual:48,valorLabel:'48k'}, {label:'Abr',percentual:66,valorLabel:'66k'},
-  {label:'Mai',percentual:71,valorLabel:'71k'}, {label:'Jun',percentual:84,valorLabel:'84k'},
-  {label:'Jul',percentual:76,valorLabel:'76k'}, {label:'Ago',percentual:92,valorLabel:'92k'},
-]
-const baseRanking = [
-  {nome:'Mercado Livre',detalhe:'Marketplace',valor:'R$ 86.420',percentual:88},
-  {nome:'Loja própria',detalhe:'E-commerce',valor:'R$ 62.180',percentual:68},
-  {nome:'PDV',detalhe:'Loja física',valor:'R$ 48.930',percentual:54},
-  {nome:'Shopee',detalhe:'Marketplace',valor:'R$ 31.400',percentual:38},
-]
-const baseIndicadores = [
-  {label:'Conversão',valor:'26,4%',detalhe:'Meta: 25%'},
-  {label:'Prazo médio',valor:'1,8 dia',detalhe:'Pedido até expedição'},
-  {label:'Ruptura',valor:'2,7%',detalhe:'27 itens críticos'},
-  {label:'Margem',valor:'31,8%',detalhe:'Estimativa gerencial'},
-]
+const cardIcons = {
+  geral: [icons.vendas, icons.pedidos, icons.financeiro, icons.clientes],
+  mensal: [icons.vendas, icons.pedidos, icons.financeiro, icons.clientes],
+  diario: [icons.vendas, icons.pedidos, icons.financeiro, icons.clientes],
+  vendas: [icons.vendas, icons.pedidos, icons.financeiro, icons.clientes],
+  pedidos: [icons.vendas, icons.pedidos, icons.financeiro, icons.clientes],
+  vendedor: [icons.vendas, icons.pedidos, icons.financeiro, icons.vendedor],
+  canal: [icons.vendas, icons.pedidos, icons.financeiro, icons.grafico],
+  previsao: [icons.estoque, icons.produtos, icons.financeiro, icons.compras],
+  produtos: [icons.produtos, icons.estoque, icons.financeiro, icons.compras],
+  estoque: [icons.estoque, icons.produtos, icons.financeiro, icons.compras],
+  compras: [icons.compras, icons.estoque, icons.financeiro, icons.produtos],
+  semMovimento: [icons.tempo, icons.estoque, icons.financeiro, icons.produtos],
+  clientes: [icons.clientes, icons.pedidos, icons.financeiro, icons.vendedor],
+  recorrentes: [icons.clientes, icons.pedidos, icons.financeiro, icons.vendedor],
+  carteira: [icons.clientes, icons.pedidos, icons.financeiro, icons.vendedor],
+}
 const baseAcoes = [
   {to:'/pedidos',label:'Revisar pedidos',descricao:'Pedidos com pendências',icon:icons.pedidos},
   {to:'/estoque',label:'Conferir estoque',descricao:'Itens abaixo do mínimo',icon:icons.estoque},
@@ -387,7 +229,7 @@ const baseLinhas = [
 ]
 
 const painel = computed(()=>{
-  const key = route.meta.dashboardKey || 'geral'
+  const key = chaveAtiva.value
   const selected = paineis[key] || paineis.geral
   const remoto = dadosApi.value || {}
 
@@ -395,7 +237,7 @@ const painel = computed(()=>{
     ...selected,
     cards: (remoto.cards || []).map((card,index)=>({
       ...card,
-      icon: selected.cards?.[index]?.icon || icons.grafico,
+      icon: cardIcons[key]?.[index] || icons.grafico,
     })),
     serie: remoto.serie || [],
     ranking: remoto.ranking || [],
@@ -411,7 +253,7 @@ async function atualizar(mostrarMensagem=true){
   dadosApi.value=null
 
   try {
-    const key = route.meta.dashboardKey || 'geral'
+    const key = chaveAtiva.value
     const {data} = await api.get(`/dashboard/analytics/${key}`, {
       params: {periodo: periodo.value},
     })
@@ -429,11 +271,10 @@ function exportar(){
 }
 
 watch(
-  () => route.meta.dashboardKey,
+  chaveAtiva,
   () => {
-    const periodoPadrao = route.meta.dashboardPeriodo || '30d'
-    if (periodo.value !== periodoPadrao) {
-      periodo.value = periodoPadrao
+    if (periodo.value !== periodoPadrao.value) {
+      periodo.value = periodoPadrao.value
       return
     }
     atualizar(false)
@@ -455,6 +296,7 @@ onMounted(() => atualizar(false))
     radial-gradient(circle at 88% 35%,rgba(255,31,139,.11),transparent 26%),
     linear-gradient(145deg,#0b0016 0%,#160025 48%,#090010 100%);
 }
+.dashboards-page.is-embedded{min-height:auto;margin:0;border-radius:14px;padding:18px}
 .dashboards-page:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.18;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:32px 32px}
 .page-header{padding:18px 20px;border:1px solid rgba(186,115,255,.18);border-radius:16px;background:linear-gradient(100deg,rgba(44,2,72,.92),rgba(19,1,35,.86));box-shadow:0 18px 45px rgba(0,0,0,.28)}
 .dashboard-breadcrumb{display:flex;align-items:center;gap:6px;font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:#b89bc9;margin-bottom:6px}.dashboard-breadcrumb strong{color:var(--dash-cyan)}
@@ -469,7 +311,7 @@ onMounted(() => atualizar(false))
 .action-list{display:flex;flex-direction:column;gap:8px;margin-top:13px}.action-list a{display:flex;align-items:center;gap:10px;border:1px solid rgba(180,102,255,.17);border-radius:10px;padding:10px;color:#d9cae3;background:rgba(44,8,65,.45);transition:.2s}.action-list a:hover{transform:translateX(3px);border-color:rgba(37,244,208,.38);background:rgba(50,13,75,.75);color:var(--dash-cyan)}.action-list a div{flex:1}.action-list strong,.action-list span{display:block}.action-list strong{font-size:.62rem}.action-list span{font-size:.53rem;color:#8e779b}.dashboard-table-card{overflow:hidden}.dashboard-table-card>header{padding:16px;border-bottom:1px solid rgba(183,105,255,.15)}.dashboard-table-card :deep(.table){--table-border:rgba(181,102,255,.12)}.dashboard-table-card :deep(th){background:rgba(55,9,79,.7);color:#bda7ca}.dashboard-table-card :deep(td){border-color:rgba(181,102,255,.1);color:#dfd3e7}.dashboard-table-card :deep(tr:hover td){background:rgba(111,39,154,.14)}
 @keyframes pulse{50%{opacity:.45;transform:scale(.75)}}
 @media(max-width:1150px){.summary-grid{grid-template-columns:repeat(2,1fr)}.dashboard-grid{grid-template-columns:1fr}}
-@media(max-width:700px){.dashboards-page{margin:-12px;padding:14px}.page-header{align-items:flex-start}.summary-grid{grid-template-columns:1fr}.header-actions{width:100%;flex-wrap:wrap}.header-actions>*{flex:1}.bar-chart{gap:5px}.summary-card{min-height:96px}}
+@media(max-width:700px){.dashboards-page{margin:-12px;padding:14px}.dashboards-page.is-embedded{margin:0;padding:10px;border-radius:10px}.page-header{align-items:flex-start}.summary-grid{grid-template-columns:1fr}.header-actions{width:100%;flex-wrap:wrap}.header-actions>*{flex:1}.bar-chart{gap:5px}.summary-card{min-height:96px}}
 
 /* Identidade exclusiva do Dashboard de Vendas: grafite + vermelho/coral */
 .sales-dashboard{

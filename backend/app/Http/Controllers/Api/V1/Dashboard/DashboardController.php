@@ -103,7 +103,7 @@ class DashboardController extends Controller
 
         $query = DB::table('pedidos')
             ->where('empresa_id', $empresaId)
-            ->whereNotIn('status', ['cancelado'])
+            ->whereNotIn('status', ['cancelado', 'cancelada'])
             ->whereYear('data_pedido', $ano);
 
         $dados = match ($periodo) {
@@ -129,7 +129,7 @@ class DashboardController extends Controller
 
             'anual'   => DB::table('pedidos')
                 ->where('empresa_id', $empresaId)
-                ->whereNotIn('status', ['cancelado'])
+                ->whereNotIn('status', ['cancelado', 'cancelada'])
                 ->select('data_pedido', 'total')->get()
                 ->groupBy(fn ($p) => \Carbon\Carbon::parse($p->data_pedido)->year)
                 ->map(fn ($grupo, $ano) => [
@@ -154,19 +154,19 @@ class DashboardController extends Controller
         $hoje = DB::table('pedidos')
             ->where('empresa_id', $empresaId)
             ->whereDate('data_pedido', today())
-            ->whereNotIn('status', ['cancelado']);
+            ->whereNotIn('status', ['cancelado', 'cancelada']);
 
         $mes = DB::table('pedidos')
             ->where('empresa_id', $empresaId)
             ->whereMonth('data_pedido', now()->month)
             ->whereYear('data_pedido', now()->year)
-            ->whereNotIn('status', ['cancelado']);
+            ->whereNotIn('status', ['cancelado', 'cancelada']);
 
         $mesAnterior = DB::table('pedidos')
             ->where('empresa_id', $empresaId)
             ->whereMonth('data_pedido', now()->subMonth()->month)
             ->whereYear('data_pedido', now()->subMonth()->year)
-            ->whereNotIn('status', ['cancelado'])
+            ->whereNotIn('status', ['cancelado', 'cancelada'])
             ->sum('total');
 
         $valorMes = (clone $mes)->sum('total');
@@ -184,7 +184,8 @@ class DashboardController extends Controller
             'por_canal'        => DB::table('pedidos')
                 ->where('empresa_id', $empresaId)
                 ->whereMonth('data_pedido', now()->month)
-                ->whereNotIn('status', ['cancelado'])
+                ->whereYear('data_pedido', now()->year)
+                ->whereNotIn('status', ['cancelado', 'cancelada'])
                 ->select('canal', DB::raw('count(*) as qtde'), DB::raw('sum(total) as valor'))
                 ->groupBy('canal')
                 ->get(),
@@ -234,7 +235,7 @@ class DashboardController extends Controller
                 ->join('produtos as p', 'p.id', '=', 'e.produto_id')
                 ->where('p.empresa_id', $empresaId)
                 ->whereNull('p.deleted_at')
-                ->sum(DB::raw('e.quantidade * e.custo_medio')),
+                ->sum(DB::raw('e.quantidade_disponivel * e.custo_medio')),
             'sem_estoque'     => DB::table('estoque as e')
                 ->join('produtos as p', 'p.id', '=', 'e.produto_id')
                 ->where('p.empresa_id', $empresaId)
@@ -298,7 +299,7 @@ class DashboardController extends Controller
         DB::table('pedidos')
             ->where('empresa_id', $empresaId)
             ->whereYear('data_pedido', now()->year)
-            ->whereNotIn('status', ['cancelado'])
+            ->whereNotIn('status', ['cancelado', 'cancelada'])
             ->select('data_pedido', 'total')
             ->get()
             ->groupBy(fn ($p) => \Carbon\Carbon::parse($p->data_pedido)->month)
@@ -318,7 +319,7 @@ class DashboardController extends Controller
             ->where('p.empresa_id', $empresaId)
             ->whereMonth('p.data_pedido', now()->month)
             ->whereYear('p.data_pedido', now()->year)
-            ->whereNotIn('p.status', ['cancelado'])
+            ->whereNotIn('p.status', ['cancelado', 'cancelada'])
             ->select(
                 'pr.id', 'pr.nome', 'pr.codigo',
                 DB::raw('sum(pi.quantidade) as qtde_vendida'),
